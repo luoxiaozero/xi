@@ -1,0 +1,10 @@
+.art-hide{
+    display: inline-block;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    vertical-align: middle;
+}
+.art-show{
+    color: #ccc;
+}
