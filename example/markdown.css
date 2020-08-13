@@ -145,13 +145,10 @@ input::-moz-focus-inner {
   list-style: circle;
 }
 
-.markdown-body ins, a {
-    text-decoration: none;
-}
-
 .markdown-body a {
-    color: #1abc9c;
-    border-bottom: 1px solid #1abc9c;
+  text-decoration: none;
+  color: #1abc9c;
+  border-bottom: 1px solid #1abc9c;
 }
   
 .markdown-body a:hover {
@@ -231,7 +228,6 @@ input::-moz-focus-inner {
 
 .markdown-body pre {
   background-color: rgb(246, 248, 250);
-  border: 1px solid #ddd;
   padding: 1em 1.5em;
   display: block;
 }

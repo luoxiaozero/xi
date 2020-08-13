@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server --config ./example/webpack.config.js --open",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --env=jsdom",
+    "build": "cross-env NODE_ENV=production webpack --config ./scripts/webpack.config.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,18 +15,24 @@
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/preset-env": "^7.10.4",
     "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^26.1.0",
     "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "cross-env": "^7.0.2",
     "css-loader": "^3.6.0",
     "eslint": "^7.5.0",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^4.0.2",
     "html-webpack-plugin": "^4.3.0",
+    "jest": "^26.1.0",
     "mini-css-extract-plugin": "^0.9.0",
     "postcss-loader": "^3.0.0",
     "postcss-preset-env": "^6.7.0",
+    "regenerator-runtime": "^0.13.7",
     "style-loader": "^1.2.1",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.0",
+    "webpack-encoding-plugin": "^0.3.1"
   }
 }
