@@ -89,8 +89,9 @@ class bb:\n\
     </html>\n\
 ```\n\
 \n"
+window.onload = function() {
+    const container = document.querySelector('#art');
+    const art = new ArtText(container, {'md': md});
 
-const container = document.querySelector('#art');
-const art = new ArtText(container, {'md': md});
-
-art.init();
+    art.init();
+}
