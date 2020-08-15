@@ -1,5 +1,9 @@
 import ArtText from '../lib'
 import "./markdown.css"
+import katexCss from"../external/css/katex.min.css"
+import katex from "../external/js/katex.min.js"
+import hljs from "../external/js/highlight.min.js"
+
 let md = "\
 1234567890 0807\n\
 [百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
@@ -43,9 +47,9 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 * 无序列表\n\
     * 给岁月以文明，而不是给文明以岁月。\n\
 内嵌代码 : `alert('Hello World');`\n\
-| ads    |dadsad  |dadasd|\n\
+| ads1    |dadsad2  |dadasd3|\n\
 | ---    |---  |---|\n\
-| asdasd | dsadsad ||\n\
+| asdasd4 | dsadsad5 |6|\n\
 | asdasd | dsadsad |ads|\n\
 画水平线 (HR) :***\n\
 ***\n\
@@ -96,6 +100,6 @@ function uploadImg(img){
 }
 ArtText.use(uploadImg)
 const container = document.querySelector('#art');
-const art = new ArtText(container, {'md': md});
+const art = new ArtText(container, {'md': md, 'hljs':{jsFun: hljs}, 'katex': {jsFun:katex, cssFun: katexCss}});
 
 art.init();
