@@ -5,9 +5,8 @@ import katex from "../external/js/katex.min.js"
 import hljs from "../external/js/highlight.min.js"
 
 let md = "\
-1234567890 0807\n\
-[百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
-## markdown 编辑\n\
+2020 0818\n\
+## markdown 编辑  [百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
 Markdown是一种可以使用普通文本编辑器编写的标记语言，通过简单的标记语法，它可以使普通文本内容具有一定的格式。\n\
 Markdown具有一系列衍生版本，用于扩展Markdown的功能（如表格、脚注、内嵌HTML等等），这些功能原初的Markdown尚不具备，它们能让Markdown转换成更多的格式，例如LaTeX，Docbook。Markdown增强版中比较有名的有Markdown Extra、MultiMarkdown、 Maruku等。这些衍生版本要么基于工具，如Pandoc；要么基于网站，如GitHub和Wikipedia，在语法上基本兼容，但在一些语法和渲染效果上有改动。\n\
 ## markdown \n\
@@ -21,43 +20,51 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 #### H4 :#### Header 4\n\
 ##### H5 :##### Header 5\n\
 ###### H6 :###### Header 6\n\
-#### 代码块\n\
-`print(\"123\")`\n\
+#### 字符效果和横线等\n\
+----\n\
+~~删除线~~\n\
+__下划线__\n\
+*斜体字* \n\
+**粗体**\n\
+***粗斜体***\n\
+上标：X^2^  下标：O~2~\n\
+数学公式：$x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$\n\
+==高亮==245==123==\n\
+#### 链接 \n\
+[Title](URL)\n\
 #### 图片\n\
 ![ad](https://dss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=1089874897,1268118658&fm=26&gp=0.jpg)\n\
-## mark\n\
-链接 :[Title](URL)\n\
-加粗 : **Bold**\n\
-斜体字 :*Italics*\n\
-高亮 :==text==\n\
-删除线 :~~text~~\n\
-下划线 :__text__\n\
-上标 :文本^text^\n\
-下标 :文本~text~\n\
-* [x] 已完成\n\
+#### 无序列表\n\
+* [x] 已完成**a**\n\
 * [ ] 未完成\n\
-段落 : 段落之间空一行\n\
-列表 :* 添加星号成为一个新的列表项。\n\
-引用 :> 引用内容\n\
-> 引用\n\
-> 引用\n\
+\n\
+* 无序列表\n\
+* 无序列表\n\
+* * 给岁月以文明，而不是给文明以岁月。\n\
+* * 无序列表\n\
+* * * 无序列表\n\
+* * * 无序列表\n\
+#### 有序列表\n\
 1. 有序列表\n\
 2. 有序列表\n\
-* 无序列表\n\
-* 无序列表\n\
-    * 给岁月以文明，而不是给文明以岁月。\n\
-内嵌代码 : `alert('Hello World');`\n\
+#### 引用\n\
+> 引用\n\
+> 引用**粗体**\n\
+> > - 引用\n\
+> > - 引用\n\
+> > > * 引用3\n\
+> > > * 引用4\n\
+> * 引用\n\
+#### 表格\n\
 | ads1    |dadsad2  |dadasd3|\n\
 | ---    |---  |---|\n\
-| asdasd4 | dsadsad5 |6|\n\
-| asdasd | dsadsad |ads|\n\
-画水平线 (HR) :***\n\
-***\n\
-math：$x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$\n\
-|[th]ads    |[th]dadsad  |[th]dadasd|\n\
-| asdasd | dsadsad ||\n\
+| *as*dasd4 | dsadsad5 |6|\n\
 | asdasd | dsadsad |ads|\n\
 \n\
+| 123 | 456 | abc |\n\
+#### 代码\n\
+`print(\"123\")`\n\
+`alert('Hello World');`\n\
 ``` flow\n\
 st=>start: 用户登陆\n\
 op=>operation: 登陆操作\n\
@@ -76,23 +83,6 @@ class bb:\n\
         self.x = x\n\
         self.y = y\n\
         dir(self)\n\
-```\n\
-``` html\n\
-    <!DOCTYPE html>\n\
-    <!-- KaTeX requires the use of the HTML5 doctype. Without it, KaTeX may not render properly -->\n\
-    <html>\n\
-      <head>\n\
-        <link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css\" integrity=\"sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X\" crossorigin=\"anonymous\">\n\
-        \n\
-        <!-- The loading of KaTeX is deferred to speed up page rendering -->\n\
-        <script defer src=\"https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js\" integrity=\"sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4\" crossorigin=\"anonymous\"></script>\n\
-        \n\
-        <!-- To automatically render math in text elements, include the auto-render extension: -->\n\
-        <script defer src=\"https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js\" integrity=\"sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa\" crossorigin=\"anonymous\"\n\
-            onload=\"renderMathInElement(document.body);\"></script>\n\
-      </head>\n\
-      ...\n\
-    </html>\n\
 ```\n\
 \n"
 function uploadImg(img){

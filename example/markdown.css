@@ -162,37 +162,38 @@ input::-moz-focus-inner {
   font-weight: bold;
   color: #000;
 }
-
-/* 去掉各Table cell 的边距并让其边重合 */
-.markdown-body table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
-/* 一致化 horizontal rule */
 .markdown-body hr {
   border: none;
   border-bottom: 1px solid #cfcfcf;
   margin-bottom: 0.8em;
   height: 10px;
 }
-
+/* 去掉各Table cell 的边距并让其边重合 */
+.markdown-body table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
 
 .markdown-body table caption {
   border-bottom: none;
 }
-.markdown-body table th {
-  background: #fbfbfb;
-}
-
-.markdown-body table thead th {
-  background: #f1f1f1;
-}
 
 .markdown-body table th, .markdown-body table td {
   border: 1px solid #ddd;
-  padding: 0.5em 1em;
+  padding: 0.4em 0.8em;
   color: #666;
+}
+
+.markdown-body table thead th {
+  background: #f5f5f5;
+  color: #5b5b5b;
+}
+
+.markdown-body table tbody tr {
+  background: #fff; 
+}
+.markdown-body table tbody tr:nth-child(2n){ 
+  background: #f5f5f5;
 }
 
 .markdown-body acronym, .markdown-body abbr {
