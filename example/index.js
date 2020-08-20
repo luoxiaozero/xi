@@ -65,6 +65,16 @@ __下划线__\n\
 #### 代码\n\
 `print(\"123\")`\n\
 `alert('Hello World');`\n\
+``` python\n\
+import sys\n\
+def aa(x):\n\
+    return x\n\
+class bb:\n\
+    def __init__(self, x, y):\n\
+        self.x = x\n\
+        self.y = y\n\
+        dir(self)\n\
+```\n\
 ``` flow\n\
 st=>start: 用户登陆\n\
 op=>operation: 登陆操作\n\
