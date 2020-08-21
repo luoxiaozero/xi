@@ -1,17 +1,19 @@
 import tableTool from "../tool/tableTool"
 import imgTool from "../tool/imgTool"
 import codeTool from "../tool/codeTool"
-import {textToNode} from "../interpreter/toNode"
-import inline from "../interpreter/inline"
-import TextNode from "./text";
+import {textToNode} from "../editor/toNode/index"
+import inline from "../editor/inline/index"
+import VTextNode from "./text";
+import Editor from "../editor"
 
-class Node{
-    constructor(nodeName, attr={}, childNodes=[]){
+class  VNode{
+    nodeName: string;
+    attr: {};
+    childNodes:  any[];
+    constructor(nodeName: string, attr: {}={}, childNodes: any=null){
         this.nodeName = nodeName;
         this.attr = attr;
         if(childNodes instanceof Array){
-            this.childNodes = childNodes;
-        }else if(typeof childNodes == "string"){
             this.childNodes = childNodes;
         }else if(childNodes == null){
             this.childNodes = []
@@ -20,15 +22,12 @@ class Node{
         }
     }
 
-    getDom(){
-        if(this.nodeName === "#text"){
-            return document.createTextNode(this.childNodes);
-        }
+    getDom(): any{
         let dom = document.createElement(this.nodeName);
         for (let key in this.attr){
             if(key === "__dom__"){
-                if(this.attr[key] === "math" && window.artText.interpreter.katex){
-                    let html = window.artText.interpreter.katex.renderToString(this.attr["art-math"], {throwOnError: false});
+                if(this.attr[key] === "math" && Editor.katex){
+                    let html = Editor.katex.renderToString(this.attr["art-math"], {throwOnError: false});
                     dom.innerHTML = html;
                 }else if(this.attr[key] === "tableTool"){
                     dom.appendChild(tableTool())
@@ -64,8 +63,8 @@ class Node{
                 return null 
             }else if(this.hasClass(dom, "art-shield") ){
                 let math = dom.getAttribute("art-math")
-                if(math && this.attr["art-math"] !== math && window.artText.interpreter.katex){
-                    let html = window.artText.interpreter.katex.renderToString(this.attr["art-math"], {throwOnError: false});
+                if(math && this.attr["art-math"] !== math && Editor.katex){
+                    let html = Editor.katex.renderToString(this.attr["art-math"], {throwOnError: false});
                     dom.innerHTML = html;
                 }
                 for (let key in this.attr){
@@ -108,20 +107,11 @@ class Node{
         return null;
     }
 
-    getText(){
-        if('class' in this.attr && (this.attr['class'] == "art-shield" || this.attr['class']['art-hide']))
-            return ''
-        let text = "";
-        for(let i = 0; i < this.childNodes.lenght; i++){
-            text += this.childNodes[i].getText();
-        }
-    }
-
     newNode(dom){
         if(dom.nodeName == "#text")
-            return new TextNode(dom.nodeValue)
+            return new VTextNode(dom.nodeValue)
         let name = dom.nodeName.toLowerCase();
-        let node = new Node(name, {}, []);
+        let node = new VNode(name, {}, []);
         for(let i = 0;i < dom.attributes.length;i++){
             let it = dom.attributes[i];
             node.attr[it.localName] = it.value;
@@ -236,7 +226,7 @@ class Node{
         }else if(model == 'read' && this.nodeName == 'pre'){
             md += '```'
             
-            let className = this.childNodes[0].attr.class;
+            let className = this.childNodes[0].attr['class'];
             if(className){
                 md += ' ' + className.substring(5).split(' ')[0];
             }
@@ -273,11 +263,11 @@ class Node{
                 if(this.childNodes[i].nodeName == "blockquote" || this.childNodes[i].nodeName == "ul" || this.childNodes[i].nodeName == "ol"){
                     this.childNodes[i].dispose();
                 }else if(/^>\s/.test(this.childNodes[i].getMd())){
-                    this.childNodes[i] = new Node("blockquote", {}, new Node('p', {}, new Node('br')));
+                    this.childNodes[i] = new  VNode("blockquote", {}, new VNode('p', {}, new VNode('br')));
                 }else if(/^\*\s/.test(this.childNodes[i].getMd())){
-                    this.childNodes[i] = new Node("ul", {}, new Node('li', {}, new Node('br')));
+                    this.childNodes[i] = new  VNode("ul", {}, new VNode('li', {}, new VNode('br')));
                 }else if(/^\d\.\s/.test(this.childNodes[i].getMd())){
-                    this.childNodes[i] = new Node("ol", {}, new Node('li', {}, new Node('br')));
+                    this.childNodes[i] = new  VNode("ol", {}, new VNode('li', {}, new VNode('br')));
                 }else{
                     this.childNodes[i].childNodes = inline(this.childNodes[i].getMd());
                 }
@@ -293,18 +283,18 @@ class Node{
                         }
                     }
                 }else if(/^>\s/.test(this.childNodes[i].getMd())){
-                    this.childNodes[i].childNodes = [new Node("blockquote", {}, new Node('p', {}, new Node('br')))];
+                    this.childNodes[i].childNodes = [new VNode("blockquote", {}, new VNode('p', {}, new VNode('br')))];
                 }else if(/^\*\s/.test(this.childNodes[i].getMd())){
-                    this.childNodes[i].childNodes = [new Node("ul", {}, new Node("li", {}, new Node('br')))];
+                    this.childNodes[i].childNodes = [new VNode("ul", {}, new VNode("li", {}, new VNode('br')))];
                 }else if(/^\d\.\s/.test(this.childNodes[i].getMd())){
-                    this.childNodes[i].childNodes = [new Node("ol", {}, new Node("li", {}, new Node('br')))];
+                    this.childNodes[i].childNodes = [new VNode("ol", {}, new VNode("li", {}, new VNode('br')))];
                 }else{
                     if(this.childNodes[i].childNodes[0].nodeName == 'input'){
                         this.childNodes[i].childNodes = [this.childNodes[i].childNodes[0], ...inline(this.childNodes[i].getMd())];
                     }else if(/^\[x\]\s/.test(this.childNodes[i].getMd())){
-                        this.childNodes[i].childNodes = [new Node('input', {type: "checkbox", checked:"checked"}), ...inline(this.childNodes[i].getMd().substring(4))];
+                        this.childNodes[i].childNodes = [new VNode('input', {type: "checkbox", checked:"checked"}), ...inline(this.childNodes[i].getMd().substring(4))];
                     }else if(/^\[\s\]\s/.test(this.childNodes[i].getMd())){
-                        this.childNodes[i].childNodes = [new Node('input', {type: "checkbox"}), ...inline(this.childNodes[i].getMd().substring(4))];
+                        this.childNodes[i].childNodes = [new VNode('input', {type: "checkbox"}), ...inline(this.childNodes[i].getMd().substring(4))];
                     }else{
                         this.childNodes[i].childNodes = inline(this.childNodes[i].getMd());
                     }
@@ -333,4 +323,4 @@ class Node{
         return null
     }
 }
-export default Node
+export default  VNode

@@ -1,7 +1,6 @@
-import TextNode from "../node/text"
-import Node from "../node"
-import inline from "./inline"
-import { textToNode } from "./toNode"
+import TextNode from "../../vNode/text"
+import Node from "../../vNode"
+import inline from "../inline"
 
 const bold = {tag: 'b', "left": "**", "right": "**", "re": /(\*{2})([^\*].*?)(\*{2})/g, "fun": blodFun}
 const italic = {tag: 'i', "left": "*", "right": "*", "re": /(\*)([^\*].*?)(\*)/g, "fun":italicFun}
@@ -99,12 +98,9 @@ const h3 = {"first": "###", "last" : "", "re": /^###\s/, "fun": h3Fun}
 const h4 = {"first": "####", "last" : "", "re": /^####\s/, "fun": h4Fun}
 const h5 = {"first": "#####", "last" : "", "re": /^#####\s/, "fun": h5Fun}
 const h6 = {"first": "######", "last" : "", "re": /^######\s/, "fun": h6Fun}
-const hr = {"re": /^(\*{3,}$|^\-{3,}$|^\_{3,}$)/, "fun": hrFun}
+// const hr = {"re": /^(\*{3,}$|^\-{3,}$|^\_{3,}$)/, "fun": hrFun}
 export const alineRule = [h1, h2, h3, h4, h5, h6]
 
-function hrFun(text){
-  return [new Node("hr")]
-}
 function h1Fun(text){
   let child = [new Node("span", {"class": "art-hide"}, new TextNode("# ")), ...inline(text.substring(2))];
   return [new Node("h1", {}, child)]
@@ -130,7 +126,7 @@ function h6Fun(text){
   return [new Node("h6", {}, child)]
 }
 
-/* eslint-disable no-useless-escape */
+/* 
 const beginRules = {
   code_fense: /^(`{3,})([^`]*)$/,
   header: /(^ {0,3}#{1,6}(\s{1,}|$))/,
@@ -176,4 +172,4 @@ const inlineExtensionRules = {
   superscript: /^(\^)((?:[^\^\s]|(?<=\\)\1|(?<=\\) )+?)(?<!\\)\1(?!\1)/,
   subscript: /^(~)((?:[^~\s]|(?<=\\)\1|(?<=\\) )+?)(?<!\\)\1(?!\1)/,
   footnote_identifier: /^(\[\^)([^\^\[\]\s]+?)(?<!\\)\]/
-}
+}*/

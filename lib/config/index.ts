@@ -1,4 +1,16 @@
+enum RunModel{
+    editor='editor', 
+    read= 'read'
+}
 class Config{
+    static RunModel = RunModel;
+    
+    renderFlag: boolean;
+    md: string;
+    runModel: RunModel;
+    katex: any;
+    hljs: any;
+    theme: Map<any, any>
     constructor(config) {
         this.renderFlag = true;
         this.md = '';
@@ -6,9 +18,9 @@ class Config{
             this.md = config.md;
         }
         
-        this.model = 'editor';// read
-        if(config.model){
-            this.model = config.model;
+        this.runModel = RunModel.editor;// read
+        if(config.runModel){
+            this.runModel = config.runModel;
         }
 
         if(config.katex){
@@ -22,6 +34,7 @@ class Config{
         }else{
             this.hljs = {js: 'https://libs.cdnjs.net/highlight.js/10.1.2/highlight.min.js', css: null}
         }
-        this.theme ={backgroundColor: '#fff', color: '#1abc9c'}
+        this.theme = new Map([['backgroundColor', '#fff'], ['color', '#1abc9c']]);
     }
-}export default Config
+}
+export default Config

@@ -1,8 +1,8 @@
-import inline from "../inline"
-import aline from "../aline"
-import Node from "../../node"
-import TextNode from "../../node/text"
-import {inlineRule} from '../rules'
+import inline from "../inline/index"
+import aline from "../aline/index"
+import Node from "../../vNode"
+import TextNode from "../../vNode/text"
+import {inlineRule} from '../rules/index'
 function uoDispose(text, nodeName){
     // 处理
     let num = 2;

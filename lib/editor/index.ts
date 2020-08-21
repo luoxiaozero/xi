@@ -1,93 +1,119 @@
-import {textToNode} from "./toNode"
+import {textToNode} from "./toNode/index"
 import codeTool from "../tool/codeTool"
 import tableTool from "../tool/tableTool"
-import {loadScript, loadCss, addCss} from "../tool"
-import Node from '../node'
-import {css} from "./css"
-
-class Interpreter{
-    constructor(container, artText) {
+import VNode from '../vNode/index'
+import ArtText from "../../lib"
+import Config from "../config"
+import Tool from "../tool"
+let win = window;
+class Editor{
+    static hljs = null;
+    static katex = null;
+    artText: ArtText;
+    container: HTMLHtmlElement;
+    editorHtmlNode: VNode;
+    editorHtmlDom: HTMLDivElement;
+    editorMdDom: HTMLTextAreaElement;
+    editorDom: HTMLDivElement;
+    sel:Selection;
+    location: any;
+    
+    constructor(artText: ArtText, container: HTMLHtmlElement) {
         this.artText = artText;   
         this.container = container;   
-        this.location = null;
-        this.rootNode = this.createRootNode();
-        this.rootDom = this.container.childNodes[0].childNodes[0];
+        
         this.sel = window.getSelection();
-        this.hljs = null;
-        this.katex = null;
-        this.rootTextarea = this.container.childNodes[0].childNodes[1];
-        this.editor = this.container.childNodes[0];
-        this.textarea = null;
+        this.editorHtmlNode = this.createRootNode();
+
+        this.location = null;
+        
     } 
     createRootNode(){
-        let br = new Node("br")
-        let p = new Node("p", {}, br)
-        let root = new Node('div', {"__root__": true, contenteditable:"true", 'class': 'art-editor-html'}, p);
-        this.container.innerHTML =  '<div class="art-editor"><div class="art-editor-html"><p><br/></p></div><div class="art-editor-md"></div></div>'
-        this.rootDom = this.container.childNodes[0].childNodes[0];
-        this.rootTextarea = this.container.childNodes[0].childNodes[1];
-        this.editor = this.container.childNodes[0];
+        let p = new VNode("p", {}, new VNode("br"))
+        let text;
+        if(this.artText.config.runModel == Config.RunModel.read){
+            text = 'false';
+        }else{
+            text = 'true';
+        }
+        let root = new VNode('div', {"__root__": true, contenteditable: text, 'class': 'art-editor-html'}, p);
 
-        this.rootDom.style.outline = "none";
-        this.rootDom.style.whiteSpace = "pre-wrap";
+        this.editorDom = document.createElement('div');
+        this.editorDom.setAttribute('class', 'art-editor')
+
+        this.editorHtmlDom = document.createElement('div');
+        this.editorDom.setAttribute('class', 'art-editor-html')
+
+        this.editorMdDom = document.createElement('textarea');
+        this.editorDom.setAttribute('class', 'art-editor-md')
+        this.editorDom.appendChild(this.editorHtmlDom)
+        this.editorDom.appendChild(this.editorMdDom)
+        this.container.appendChild(this.editorDom);
+
+        this.editorHtmlDom.style.outline = "none";
+        this.editorHtmlDom.style.whiteSpace = "pre-wrap";
+        this.editorHtmlDom.style.wordBreak = 'break-all';
         //this.container.style.wordBreak = "break-word";
-        this.rootDom.style.wordBreak = 'break-all';
 
-        this.editor.style.boxShadow = '0 2px 12px 0 rgba(0, 0, 0, 0.1)';
-        this.editor.style.padding = '30px 25px';
-        this.editor.style.backgroundColor = this.artText.config.theme.backgroundColor;;
-        this.editor.style.borderRadius = '4px';
+        this.editorMdDom.style.width = '100%';
+        this.editorMdDom.style.minHeight = '200px';
+        this.editorMdDom.style.border = 'none';
+        this.editorMdDom.style.outline = 'none';
+        this.editorMdDom.style.resize = 'none'; 
+        this.editorMdDom.style.display = 'none'; 
+        this.editorMdDom.addEventListener('input', function(e) {
+            let target = e.target as HTMLHtmlElement;
+            target.style.height = 'auto';
+            target.style.height = this.scrollHeight + 'px';
+            
+        })
+
+        this.editorDom.style.boxShadow = '0 2px 12px 0 rgba(0, 0, 0, 0.1)';
+        this.editorDom.style.padding = '30px 25px';
+        this.editorDom.style.backgroundColor = this.artText.config.theme.get('backgroundColor');;
+        this.editorDom.style.borderRadius = '4px';
         return root
     }
-    init(model){
-        if(model == 'read'){
-            this.rootNode.attr['contenteditable'] = 'false';
-            this.rootDom.setAttribute('contenteditable', false);
-        }else{
-            this.textarea = document.createElement('textarea');
-            this.textarea.style.width = '100%';
-            this.textarea.style.minHeight = '200px';
-            this.textarea.style.border = 'none';
-            this.textarea.style.outline = 'none';
-            this.textarea.style.resize = 'none'; 
-            this.textarea.style.display = 'none'; 
-            this.textarea.addEventListener('input', function(e) {
-                e.target.style.height = 'auto';
-                e.target.style.height = this.scrollHeight + 'px';
-                // this.style.height = 'auto';
-                // this.style.height = this.scrollHeight + 'px';
-              })
-            this.rootTextarea.appendChild(this.textarea);
+   
+    closure(fun: Function): Function{
+        // 实现闭包
+        let _this = this;
+        function c(e){
+            fun(e, _this);
         }
-        addCss(css);
+        return c;
+    }
+    init(){
+        Tool.addCss(defauleCss);
         if(this.artText.config.hljs.jsFun){
-            this.hljs = this.artText.config.hljs.jsFun;
+            Editor.hljs = this.artText.config.hljs.jsFun;
         }else if(this.artText.config.hljs.js){
-            loadScript(this.artText.config.hljs.js, 
-                ()=>{ window.artText.interpreter.hljs = hljs;hljs.initHighlighting.called = false;hljs.initHighlighting();})
+            Tool.loadScript(this.artText.config.hljs.js, () => { Editor.hljs = win['hljs'];Editor.hljs.initHighlighting.called = false;Editor.hljs.initHighlighting();})
         }
+
         if(this.artText.config.katex.jsFun){
-            this.katex = this.artText.config.katex.jsFun;
+            Editor.katex = this.artText.config.katex.jsFun;
         }else if(this.artText.config.katex.js){
-            loadScript(this.artText.config.katex.js, ()=>{ window.artText.interpreter.katex = katex;})
+            Tool.loadScript(this.artText.config.katex.js, ()=>{Editor.katex = win['katex']})
         }
+
         if(this.artText.config.katex.cssFun){
 
         }else if(this.artText.config.katex.css){
-            loadCss(this.artText.config.katex.css)
+            Tool.loadCss(this.artText.config.katex.css)
         }
-        this.setMd(window.artText.config.md)
+        this.setMd(this.artText.config.md)
     }
     hasClass(element, cls) {
         return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
     }
-    onclick(key='left'){
+    click(key='left'){
         this.location = this.getSelection();
         if(key == 'right'){
-            this.artText.tool.setFloatAuxiliaryTool(this.sel);
+            this.artText.tool.setFloatAuxiliaryTool('bu');
         }else{
             if(this.location[0] != this.location[1] && this.location[2] == this.location[3]){
-                this.artText.tool.setFloatToolbar(this.sel);
+                this.artText.tool.setFloatToolbar('bu');
             }else{
                 this.artText.tool.setFloatToolbar();
             }
@@ -98,13 +124,13 @@ class Interpreter{
     enterRender(){
         let location = this.getSelection();
         if(location){
-            let md = this.rootNode.childNodes[location[2]].getMd();
-            let node = this.rootNode.childNodes[location[2]];
+            let md = this.editorHtmlNode.childNodes[location[2]].getMd();
+            let node = this.editorHtmlNode.childNodes[location[2]];
             console.log(location, node)
             if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(md)){
                 let p = document.createElement('p');
                 p.innerHTML = '<br/>';
-                this.rootDom.replaceChild(document.createElement('hr'), this.rootDom.childNodes[location[2]]); 
+                this.editorHtmlDom.replaceChild(document.createElement('hr'), this.editorHtmlDom.childNodes[location[2]]); 
                 let range =  this.sel.getRangeAt(0).cloneRange();
                 range.setStart(p, 0);
                 range.collapse(true);
@@ -131,7 +157,7 @@ class Interpreter{
                 }
                 thead.appendChild(tr1);
                 tbody.appendChild(tr2);
-                this.rootDom.replaceChild(table, this.rootDom.childNodes[location[2]]); 
+                this.editorHtmlDom.replaceChild(table, this.editorHtmlDom.childNodes[location[2]]); 
                 let range =  this.sel.getRangeAt(0).cloneRange();
                 range.setStart(tr2.childNodes[0], 0);
                 range.collapse(true);
@@ -149,7 +175,7 @@ class Interpreter{
                 }
                 pre.appendChild(code);
 
-                this.rootDom.replaceChild(pre, this.rootDom.childNodes[location[2]]); 
+                this.editorHtmlDom.replaceChild(pre, this.editorHtmlDom.childNodes[location[2]]); 
                 let range =  this.sel.getRangeAt(0).cloneRange();
                 range.setStart(code.childNodes[0], 0);
                 range.collapse(true);
@@ -272,28 +298,28 @@ class Interpreter{
     render(){
         let location = this.getSelection();
         this.location = location;
-        this.rootNode.domToNode(this.rootDom);
-        this.rootNode.dispose();
+        this.editorHtmlNode.domToNode(this.editorHtmlDom);
+        this.editorHtmlNode.dispose();
 
         // this.container.blur();
         if(this.artText.config.renderFlag){
-            this.rootNode.render(this.rootDom)
-            if(this.hljs && this.location && this.rootDom.childNodes[this.location[2]].nodeName == 'PRE'){
-                this.hljs.initHighlighting.called = false;
-                this.hljs.initHighlighting(); 
+            this.editorHtmlNode.render(this.editorHtmlDom)
+            if(Editor.hljs && this.location && this.editorHtmlDom.childNodes[this.location[2]].nodeName == 'PRE'){
+                Editor.hljs.initHighlighting.called = false;
+                Editor.hljs.initHighlighting(); 
             }
         }
         this.setSelection();
         
     }
-    getSelection(){
+    getSelection(): [number, number, number, number, [number, any]]{
         let {anchorNode, anchorOffset, focusNode, focusOffset} = this.sel;
         if(anchorNode && focusNode){
             let node = anchorNode;
             let len = anchorOffset;
-            if(node == this.rootDom)
+            if(node == this.editorHtmlDom)
                 return null;
-            while(node.parentNode != this.rootDom){ 
+            while(node.parentNode != this.editorHtmlDom){ 
                 while(node.previousSibling){
                     node = node.previousSibling;
                     len += node.textContent.length;
@@ -304,7 +330,7 @@ class Interpreter{
             let nodeF = focusNode;
             let lenF = focusOffset;
 
-            while(nodeF.parentNode !== this.rootDom){
+            while(nodeF.parentNode !== this.editorHtmlDom){
                 while(nodeF.previousSibling){
                     nodeF = nodeF.previousSibling;
                     lenF += nodeF.textContent.length;
@@ -313,16 +339,16 @@ class Interpreter{
             }
 
             let rootNodeSub = -1;
-            for(let i = 0; i < this.rootDom.childNodes.length; i++){
-                if(this.rootDom.childNodes[i] === node){
+            for(let i = 0; i < this.editorHtmlDom.childNodes.length; i++){
+                if(this.editorHtmlDom.childNodes[i] === node){
                     rootNodeSub = i;
                     break;
                 }
             }
 
             let rootNodeSubF = -1;
-            for(let i = 0; i < this.rootDom.childNodes.length; i++){
-                if(this.rootDom.childNodes[i] === nodeF){
+            for(let i = 0; i < this.editorHtmlDom.childNodes.length; i++){
+                if(this.editorHtmlDom.childNodes[i] === nodeF){
                     rootNodeSubF = i;
                     break;
                 }
@@ -377,7 +403,7 @@ class Interpreter{
         }
         if(this.location && this.location[2] >= 0 && this.location[0] == this.location[1] && this.location[2] == this.location[3]){
             let info = null;
-            var pNode = this.rootDom.childNodes[this.location[2]];
+            var pNode = this.editorHtmlDom.childNodes[this.location[2]];
             var pLen = this.location[0];
             this.setTool(pNode)
             if(!this.location[4]){
@@ -430,10 +456,10 @@ class Interpreter{
         }
     }
     
-    mdCollect(rootNodeSub){
+    /*mdCollect(rootNodeSub){
         let md = "";
         let n = "\n";
-        let pDom = this.rootDom.childNodes[rootNodeSub];
+        let pDom = this.editorHtmlDom.childNodes[rootNodeSub];
         let pNode = pDom;
         console.log(pDom);
         if(this.hasClass(pNode, "art-tool"))
@@ -517,35 +543,39 @@ class Interpreter{
             text += this.mdNOShieldTextCollect(dom.childNodes[i]);
         }
         return text;
-    }
+    }*/
     getMd(){
         let md = '';
-        for(let i = 0; i < this.rootNode.childNodes.length; i++){
-            md += this.rootNode.childNodes[i].getMd('read');
+        for(let i = 0; i < this.editorHtmlNode.childNodes.length; i++){
+            md += this.editorHtmlNode.childNodes[i].getMd('read');
         }
         return md;
     }
     setMd(md){
         let childNodes = textToNode(md);
         if(childNodes){
-            this.rootNode.childNodes = childNodes;
+            this.editorHtmlNode.childNodes = childNodes;
         }
-        this.rootNode.render(this.rootDom);
-        if(this.hljs){
-            this.hljs.initHighlighting.called = false;
-            this.hljs.initHighlighting(); 
+        this.editorHtmlNode.render(this.editorHtmlDom);
+        if(Editor.hljs){
+            Editor.hljs.initHighlighting.called = false;
+            Editor.hljs.initHighlighting(); 
         }
     }
     openTextarea(){
-        this.rootDom.style.display = 'none';
-        this.textarea.style.display = 'inline';
-        this.textarea.value = this.getMd();
-        this.textarea.style.height = this.textarea.scrollHeight + 'px';
+        this.editorHtmlDom.style.display = 'none';
+        this.editorMdDom.style.display = 'inline';
+        this.editorMdDom.value = this.getMd();
+        this.editorMdDom.style.height = this.editorMdDom.scrollHeight + 'px';
     }
     closeTextarea(){
-        this.rootDom.style.display = 'inline';
-        this.setMd(this.textarea.value)
-        this.textarea.style.display = 'none';
+        this.editorHtmlDom.style.display = 'inline';
+        this.setMd(this.editorMdDom.value)
+        this.editorMdDom.style.display = 'none';
     }
 }
-export default Interpreter
+const defauleCss = '\n\
+.art-hide{display: inline-block;width: 0;height: 0;overflow: hidden;vertical-align: middle;}\n\
+.art-show{color: #ccc;}\n\
+.art-editor-html pre code{white-space: pre-wrap;}'
+export default Editor
