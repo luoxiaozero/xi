@@ -18,7 +18,6 @@ class ArtText {
     tool: Tool;
 
     constructor(container: HTMLHtmlElement, config: Map<any, any>= new Map()) {
-        win.artText = this;
         this.container = container;
         this.config = new Config(config);
         this.editor = new Editor(this, container);

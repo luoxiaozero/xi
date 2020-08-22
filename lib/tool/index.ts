@@ -13,7 +13,7 @@ class Tool{
     artText: ArtText;
     container: HTMLHtmlElement;
     toolbar: HTMLDivElement;
-    floatAuxiliaryTool: HTMLHtmlElement;
+    floatAuxiliaryTool: HTMLDivElement;
     floatToolbar: HTMLDivElement;
     dialog: HTMLDivElement;
     mdHtml: HTMLSpanElement;
@@ -92,13 +92,13 @@ class Tool{
         });
         
         this.addTool('保存本地', 
-        ()=>{localStorage.md = this.artText.editor.getMd();message('md保存成功', 'success');});
+        ()=>{localStorage.md = this.artText.editor.getMd();message(this.artText, 'md保存成功', 'success');});
 
         this.addTool('本地载入', 
-        ()=>{this.artText.editor.setMd(localStorage.md); message('md载入成功', 'success');});
+        ()=>{this.artText.editor.setMd(localStorage.md); message(this.artText, 'md载入成功', 'success');});
         this.addTool('清空', 
-        ()=>{this.artText.editor.setMd(''); message('清空成功', 'success');});
-        this.addTool('<span style="position: absolute;right: 12px;color:#1abc9c" >ATTB</span>', () => {message('点击了一下');})
+        ()=>{this.artText.editor.setMd(''); message(this.artText, '清空成功', 'success');});
+        this.addTool('<span style="position: absolute;right: 12px;color:#1abc9c" >ATTB</span>', () => {message(this.artText, '点击了一下');})
     }
     setDialog(header, body, footer=''){
         footer;

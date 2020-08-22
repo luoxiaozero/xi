@@ -1,5 +1,6 @@
+import ArtText from "lib";
 
-export function message(message, type='null'){
+export function message(artText: ArtText, message: string, type: string='null'){
     let root = document.createElement('div');
     root.style.position = 'fixed';
     
@@ -43,11 +44,11 @@ export function message(message, type='null'){
         root.style.borderColor = '#e1f3d8';
         root.style.color = '#F56C6C';
     }else{
-        root.style.backgroundColor = window.artText.config.theme.backgroundColor;
+        root.style.backgroundColor = artText.config.theme.get('backgroundColor');
         root.style.color = '#676767';
     }
 
-    var timer = setTimeout(()=>{window.artText.container.removeChild(root);},3000);
-    window.artText.container.appendChild(root);
+    setTimeout(()=>{artText.container.removeChild(root);},3000);
+    artText.container.appendChild(root);
     return root;
 }

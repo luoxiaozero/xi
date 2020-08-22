@@ -101,5 +101,5 @@ function uploadImg(img){
 ArtText.use(uploadImg, {main: 'uploadImg'})
 const container = document.querySelector('#art');
 const art = new ArtText(container, {'md': md, 'hljs':{jsFun: hljs}, 'katex': {jsFun:katex, cssFun: katexCss}});
-
+window.art = art;
 art.init();

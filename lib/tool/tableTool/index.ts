@@ -1,4 +1,4 @@
-export default function tableTool(){
+export default function tableTool(): HTMLDivElement{
     let root = document.createElement("div"); 
     root.style.width = "100%"
     // root.style.height = "40px"
@@ -48,7 +48,7 @@ export default function tableTool(){
     //root.parentNode.nextSibling
     return root;
 }
-function getTableSize(table){
+function getTableSize(table: HTMLTableElement){
     if(!table)
         return [0, 0]
     var rows = table.rows.length ;
@@ -56,9 +56,7 @@ function getTableSize(table){
     var cells = table.rows.item(0).cells.length;
     return [rows, cells];
 }
-function setTableSize(table, newValues){
-    newValues[0] = parseInt(newValues[0]);
-    newValues[1] = parseInt(newValues[1]);
+function setTableSize(table: HTMLTableElement, newValues: [number, number]){
     if(newValues[0] == -1 || newValues[1] == -1){
         return null;
     }
@@ -108,7 +106,7 @@ function sizeBoxAdjust(e){
             e.target.nextSibling.childNodes[0].value = values[0];
             e.target.nextSibling.childNodes[1].value = values[1];
         }else{
-            setTableSize(div.nextSibling, [e.target.nextSibling.childNodes[0].value, e.target.nextSibling.childNodes[1].value]);
+            setTableSize(div.nextSibling, [parseInt(e.target.nextSibling.childNodes[0].value), parseInt(e.target.nextSibling.childNodes[1].value)]);
             e.target.nextSibling.style.display = "none";
         }
     }

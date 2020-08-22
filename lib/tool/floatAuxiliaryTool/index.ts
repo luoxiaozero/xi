@@ -1,4 +1,4 @@
-export default function floatAuxiliary(){
+export default function floatAuxiliary(): HTMLDivElement{
     //dom.getBoundingClientRect()
 
     let box = document.createElement('div');

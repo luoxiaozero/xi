@@ -1,4 +1,4 @@
-export default function codeTool(){
+export default function codeTool(): HTMLDivElement{
     let root = document.createElement("div"); 
     root.style.width = "100%"
     // root.style.height = "40px"

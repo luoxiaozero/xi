@@ -1,4 +1,4 @@
-export default function floatToolbar(){
+export default function floatToolbar(): HTMLDivElement{
     //dom.getBoundingClientRect()
 
     let box = document.createElement('div');

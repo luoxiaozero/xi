@@ -1,4 +1,4 @@
-export default function imgTool(){
+export default function imgTool(): HTMLSpanElement{
     let root = document.createElement("span"); 
     // root.style.height = "40px"
     root.style.fontSize = "14px"

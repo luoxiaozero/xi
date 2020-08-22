@@ -1,5 +1,5 @@
-import {alineRule} from "../rules/index"
-import inline from "../inline/index"
+import {alineRule} from "../rules"
+import inline from "../inline"
 import VNode from "../../vNode"
 function aline(text: string): any[]{ 
     // str = str.replace(/\s/g, '&nbsp;'); 
