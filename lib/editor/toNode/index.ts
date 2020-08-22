@@ -1,8 +1,8 @@
 import inline from "../inline/index"
 import aline from "../aline/index"
-import Node from "../../vNode"
-import TextNode from "../../vNode/text"
-import {inlineRule} from '../rules/index'
+import VNode from "../../vNode"
+import VTextNode from "../../vNode/text"
+import {inlineRules} from '../rules/index'
 function uoDispose(text, nodeName){
     // 处理
     let num = 2;
@@ -10,34 +10,34 @@ function uoDispose(text, nodeName){
         num = 3;
     }
     if(text.substring(num) == ""){
-        return new Node("li", {}, new Node("br"));
+        return new VNode("li", {}, new VNode("br"));
     }else if(nodeName == 'ul' && /^\[x\]\s/.test(text.substring(2))){
-        return new Node("li", {}, [new Node('input', {type: "checkbox", checked:"checked"}), ...inline(text.substring(6))]);
+        return new VNode("li", {}, [new VNode('input', {type: "checkbox", checked:"checked"}), ...inline(text.substring(6))]);
     }else if(nodeName == 'ul' && /^\[\s\]\s/.test(text.substring(2))){
-        return new Node("li", {}, [new Node('input', {type: "checkbox"}), ...inline(text.substring(6))]);   
+        return new VNode("li", {}, [new VNode('input', {type: "checkbox"}), ...inline(text.substring(6))]);   
     }else if(/^\*\s/.test(text.substring(num))){
-        return new Node("li", {}, new Node(nodeName, {}, uoDispose(text.substring(num), nodeName)));
+        return new VNode("li", {}, new VNode(nodeName, {}, uoDispose(text.substring(num), nodeName)));
     }else if(/^\d\.\s/.test(text.substring(num))){
-        return new Node("li", {}, new Node(nodeName, {}, uoDispose(text.substring(num), nodeName)));
+        return new VNode("li", {}, new VNode(nodeName, {}, uoDispose(text.substring(num), nodeName)));
     }else if(/^>\s/.test(text.substring(2))){
-        return new Node("li", {}, new Node('blockquote', {}, bDispose(text.substring(2))));
+        return new VNode("li", {}, new VNode('blockquote', {}, bDispose(text.substring(2))));
     }else{
-        return new Node("li", {}, inline(text.substring(num)));
+        return new VNode("li", {}, inline(text.substring(num)));
     }
 }
 
 function bDispose(text){
     // 处理
     if(text.substring(2) == ""){
-        return new Node("p", {}, new Node("br"));
+        return new VNode("p", {}, new VNode("br"));
     }else if(/^>\s/.test(text.substring(2))){
-        return new Node('blockquote', {}, bDispose(text.substring(2)));
+        return new VNode('blockquote', {}, bDispose(text.substring(2)));
     }else if(/^\*\s/.test(text.substring(2))){
-        return new Node('ul', {}, uoDispose(text.substring(2), 'ul'));
+        return new VNode('ul', {}, uoDispose(text.substring(2), 'ul'));
     }else if(/^\d\.\s/.test(text.substring(2))){
-        return new Node('ol', {}, uoDispose(text.substring(3), 'ol'));
+        return new VNode('ol', {}, uoDispose(text.substring(3), 'ol'));
     }else{
-        return new Node("p", {}, inline(text.substring(2)));
+        return new VNode("p", {}, inline(text.substring(2)));
     } 
 }
 function buo(node){
@@ -82,7 +82,7 @@ function buo(node){
 }
 
 
-function textToNode(text){
+function textToNode(text: string){
     if(text == null)
         return null
     let rows = text.split("\n");
@@ -96,7 +96,7 @@ function textToNode(text){
                 i++;
             }
             i--;
-            nodes.push(buo(new Node("blockquote", {}, child)))
+            nodes.push(buo(new VNode("blockquote", {}, child)))
         }else if(/^\*\s/.test(rows[i])){
             child = [];
             while (i < len && /^\*\s/.test(rows[i])) {
@@ -104,7 +104,7 @@ function textToNode(text){
                 i++;
             } 
             i--;
-            nodes.push(buo(new Node("ul", {}, child)));
+            nodes.push(buo(new VNode("ul", {}, child)));
         }else if(/^\d\.\s/.test(rows[i])){
             child = [];
             while (i < len && /^\d\.\s/.test(rows[i])) {
@@ -112,7 +112,7 @@ function textToNode(text){
                 i++;
             } 
             i--;
-            nodes.push(buo(new Node("ol", {}, child)));
+            nodes.push(buo(new VNode("ol", {}, child)));
         }else if(/^```\s/.test(rows[i])){
             let lang = rows[i].substring(4);
             let j, _is = false, temp='';
@@ -124,22 +124,22 @@ function textToNode(text){
                 }
                 temp += rows[j] + '\n';
                 if(lang){
-                    child.push(new Node("code", {"class": "lang-" + lang}, new TextNode(rows[j])));
+                    child.push(new VNode("code", {"class": "lang-" + lang}, new VTextNode(rows[j])));
                 }else{
-                    child.push(new Node("code", {}, new TextNode(rows[j])));
+                    child.push(new VNode("code", {}, new VTextNode(rows[j])));
                 }
             }
             if(_is){
                 i = j;
                 let code;
                 if(lang){
-                    code = new Node("code", {"class": "lang-" + lang}, new TextNode(temp));
+                    code = new VNode("code", {"class": "lang-" + lang}, new VTextNode(temp));
                 }else{
-                    code = new Node("code", {}, new TextNode(temp));
+                    code = new VNode("code", {}, new VTextNode(temp));
                 }
-                nodes.push(new Node("pre", {'style': ' margin-top:35px'}, code));
+                nodes.push(new VNode("pre", {'style': ' margin-top:35px'}, code));
             }else{
-                nodes.push(new Node("p", {}, new TextNode(rows[i])));
+                nodes.push(new VNode("p", {}, new VTextNode(rows[i])));
             }       
         }else if(/^\|.*\|/.test(rows[i])){
             let arry, j, jlen;
@@ -148,28 +148,28 @@ function textToNode(text){
                 child = []
                 arry = rows[i].split('|');
                 for (j = 1, jlen = arry.length - 1; j < jlen; j++) {
-                    _val.push(new Node("th", {}, inline(arry[j])));
+                    _val.push(new VNode("th", {}, inline(arry[j])));
                 }
-                child.push(new Node('thead', {}, new Node("tr",{}, _val)));
+                child.push(new VNode('thead', {}, new VNode("tr",{}, _val)));
                 i += 2;
                 tbodyChild = []
                 while (i < len && /^\|.*\|/.test(rows[i])) {
                     arry = rows[i].split('|');
                     _val = []
                     for (j = 1, jlen = arry.length - 1; j < jlen; j++) {
-                        _val.push(new Node("td", {}, inline(arry[j])));
+                        _val.push(new VNode("td", {}, inline(arry[j])));
                     }
-                    tbodyChild.push(new Node("tr",{}, _val));
+                    tbodyChild.push(new VNode("tr",{}, _val));
                     i++;
                 }
                 i--;
-                child.push(new Node('tbody', {}, tbodyChild))
-                nodes.push(new Node("table", {"style": "width:100%; margin-top:35px"}, child));
+                child.push(new VNode('tbody', {}, tbodyChild))
+                nodes.push(new VNode("table", {"style": "width:100%; margin-top:35px"}, child));
             }else{
-                nodes.push(new Node("p", {}, inline(rows[i])));
+                nodes.push(new VNode("p", {}, inline(rows[i])));
             }
         }else if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(rows[i])){
-            nodes.push(new Node("hr"))            
+            nodes.push(new VNode("hr"))            
         }else if(child = aline(rows[i])){
             // 单行成功
             child.forEach(element => {
@@ -177,8 +177,7 @@ function textToNode(text){
             })
         }else {
             // 无 单、多行
-            child = inline(rows[i])
-            nodes.push(new Node("p", {}, child));
+            nodes.push(new VNode("p", {}, inline(rows[i])));
         }
     }
     return nodes;
@@ -221,13 +220,13 @@ function htmlToMd(html){
         md += html.data;
     }else{
         let _is = true;
-        for(let i = 0; i < inlineRule.length; i++){
-            if(html.nodeName.toLowerCase() == inlineRule[i].tag){
-                md += inlineRule[i].left;
+        for(let i = 0; i < inlineRules.length; i++){
+            if(html.nodeName.toLowerCase() == inlineRules[i].tag){
+                md += inlineRules[i].left;
                 for(let i = 0; i < html.childNodes.length; i++){
                     md += htmlToMd(html.childNodes[i]);
                 }
-                md += inlineRule[i].right;
+                md += inlineRules[i].right;
                 _is = false;
                 break;
             }

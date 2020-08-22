@@ -1,5 +1,5 @@
-import TextNode from "../../vNode/text"
-import Node from "../../vNode"
+import VTextNode from "../../vNode/text"
+import VNode from "../../vNode"
 import inline from "../inline"
 
 const bold = {tag: 'b', "left": "**", "right": "**", "re": /(\*{2})([^\*].*?)(\*{2})/g, "fun": blodFun}
@@ -14,19 +14,19 @@ const del = {tag: 'del', "left": "~~", "right": "~~", "re": /~{2}.*?~{2}/g, "fun
 const ins = {tag: 'ins', "left": "__", "right": "__", "re": /_{2}.*?_{2}/g, "fun":insFun}
 const sup = {tag: 'sup', "left": "^", "right": "^", "re": /\^[^\^]+\^/g, "fun":supFun}
 const sub = {tag: 'sub', "left": "~", "right": "~", "re": /~[^~]+~/g, "fun":subFun}
-export const inlineRule = [bi, bold, mark, inline_code, italic, img, a, math, del, ins, sup, sub,]
+export const inlineRules = [bi, bold, mark, inline_code, italic, img, a, math, del, ins, sup, sub,]
 
 function modelFun_1(model){
-    let lSpan = new Node("span", {"class": "art-hide"}, new TextNode(model[0]))
-    let cSpan = new Node(model[4], {"class": "art-text-double"}, new TextNode(model[2].substring(model[1], model[2].length - model[1])))
-    let rSpan = new Node("span", {"class": "art-hide"}, new TextNode(model[3]))
+    let lSpan = new VNode("span", {"class": "art-hide"}, new VTextNode(model[0]))
+    let cSpan = new VNode(model[4], {"class": "art-text-double"}, new VTextNode(model[2].substring(model[1], model[2].length - model[1])))
+    let rSpan = new VNode("span", {"class": "art-hide"}, new VTextNode(model[3]))
     return [lSpan, cSpan, rSpan]
 }
 function modelFun_2(model){
-  let lSpan = new Node("span", {"class": "art-hide"}, new TextNode(model[0]))
-  let cSpan = new Node('span', {"class": "art-text-double"}, new TextNode(model[2].substring(model[1], model[2].length - model[1])))
-  let rSpan = new Node("span", {"class": "art-hide"}, new TextNode(model[3]))
-  let span = new Node(model[4], {}, [lSpan, cSpan, rSpan]);
+  let lSpan = new VNode("span", {"class": "art-hide"}, new VTextNode(model[0]))
+  let cSpan = new VNode('span', {"class": "art-text-double"}, new VTextNode(model[2].substring(model[1], model[2].length - model[1])))
+  let rSpan = new VNode("span", {"class": "art-hide"}, new VTextNode(model[3]))
+  let span = new VNode(model[4], {}, [lSpan, cSpan, rSpan]);
   return [span];
 }
 function aFun(text){
@@ -35,10 +35,10 @@ function aFun(text){
     let url = text.match(re1)[0];
     let title = text.match(re2)[0];
 
-    let lSpan = new Node("span", {"class": "art-hide"}, new TextNode("["))
-    let cA = new Node("a", {"href": url.substring(1, url.length - 1), "class": "art-text-double", "title": "alt+点击", style: 'cursor: pointer;'}, 
-                        new TextNode(title.substring(1, title.length -1)));
-    let rSpan = new Node("span", {"class": "art-hide"}, new TextNode("]" + url))
+    let lSpan = new VNode("span", {"class": "art-hide"}, new VTextNode("["))
+    let cA = new VNode("a", {"href": url.substring(1, url.length - 1), "class": "art-text-double", "title": "alt+点击", style: 'cursor: pointer;'}, 
+                        new VTextNode(title.substring(1, title.length -1)));
+    let rSpan = new VNode("span", {"class": "art-hide"}, new VTextNode("]" + url))
     
     return [lSpan, cA, rSpan];
 }
@@ -47,17 +47,17 @@ function imgFun(text){
     let re2 = /\[.*\]/;
     let url = text.match(re1)[0];
     let title = text.match(re2)[0];
-    let lSpan = new Node("span", {"class": "art-hide"}, [new Node("span", {"class": "art-shield", "__dom__": "imgTool"}, []), new TextNode(text)]);
-    let cImg = new Node("img", {"src": url.substring(1, url.length - 1), "alt": title.substring(1, title.length -1),
+    let lSpan = new VNode("span", {"class": "art-hide"}, [new VNode("span", {"class": "art-shield", "__dom__": "imgTool"}, []), new VTextNode(text)]);
+    let cImg = new VNode("img", {"src": url.substring(1, url.length - 1), "alt": title.substring(1, title.length -1),
                                 "contenteditable": "false", "style": "margin: 0 auto;display: block;"}, null); 
     return [lSpan, cImg];
 }
 function mathFun(text){
-    let lSpan = new Node("span", {"class": "art-hide"}, new TextNode("$"));
-    let cSpan = new Node("span", {"class": "art-text-double", style: 'position: relative;', "contenteditable": "false"}, 
-                            new Node("span", 
+    let lSpan = new VNode("span", {"class": "art-hide"}, new VTextNode("$"));
+    let cSpan = new VNode("span", {"class": "art-text-double", style: 'position: relative;', "contenteditable": "false"}, 
+                            new VNode("span", 
         {"class": "art-shield", style: 'position: absolute;top: 35px;display: inline-table;', "contenteditable": "false", "__dom__": "math", "art-math":text.substring(1, text.length - 1)}, null));
-    let rSpan = new Node("span", {"class": "art-hide"}, new TextNode(text.substring(1, text.length - 1) + "$"))
+    let rSpan = new VNode("span", {"class": "art-hide"}, new VTextNode(text.substring(1, text.length - 1) + "$"))
     return [lSpan, cSpan, rSpan]
 }
 function inlineCodeFun(text){
@@ -85,10 +85,10 @@ function subFun(text){
   return modelFun_2(["~", 1, text, "~", "sub"])
 }
 function biFun(text){
-  let lSpan = new Node("span", {"class": "art-hide"}, new TextNode('***'))
-  let cSpan = new Node('span', {"class": "art-text-double"}, new TextNode(text.substring(3, text.length - 3)))
-  let rSpan = new Node("span", {"class": "art-hide"}, new TextNode('***'))
-  let span = new Node('i', {}, new Node('b', {}, [lSpan, cSpan, rSpan]));
+  let lSpan = new VNode("span", {"class": "art-hide"}, new VTextNode('***'))
+  let cSpan = new VNode('span', {"class": "art-text-double"}, new VTextNode(text.substring(3, text.length - 3)))
+  let rSpan = new VNode("span", {"class": "art-hide"}, new VTextNode('***'))
+  let span = new VNode('i', {}, new VNode('b', {}, [lSpan, cSpan, rSpan]));
   return [span];
 }
 
@@ -102,28 +102,28 @@ const h6 = {"first": "######", "last" : "", "re": /^######\s/, "fun": h6Fun}
 export const alineRule = [h1, h2, h3, h4, h5, h6]
 
 function h1Fun(text){
-  let child = [new Node("span", {"class": "art-hide"}, new TextNode("# ")), ...inline(text.substring(2))];
-  return [new Node("h1", {}, child)]
+  let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("# ")), ...inline(text.substring(2))];
+  return [new VNode("h1", {}, child)]
 }
 function h2Fun(text){
-  let child = [new Node("span", {"class": "art-hide"}, new TextNode("## ")), ...inline(text.substring(3))];
-  return [new Node("h2", {}, child)]
+  let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("## ")), ...inline(text.substring(3))];
+  return [new VNode("h2", {}, child)]
 }
 function h3Fun(text){
-  let child = [new Node("span", {"class": "art-hide"}, new TextNode("### ")), ...inline(text.substring(4))];
-  return [new Node("h3", {}, child)]
+  let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("### ")), ...inline(text.substring(4))];
+  return [new VNode("h3", {}, child)]
 }
 function h4Fun(text){
-  let child = [new Node("span", {"class": "art-hide"}, new TextNode("#### ")), ...inline(text.substring(5))];
-  return [new Node("h4", {}, child)]
+  let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("#### ")), ...inline(text.substring(5))];
+  return [new VNode("h4", {}, child)]
 }
 function h5Fun(text){
-  let child = [new Node("span", {"class": "art-hide"}, new TextNode("##### ")), ...inline(text.substring(6))];
-  return [new Node("h5", {}, child)]
+  let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("##### ")), ...inline(text.substring(6))];
+  return [new VNode("h5", {}, child)]
 }
 function h6Fun(text){
-  let child = [new Node("span", {"class": "art-hide"}, new TextNode("###### ")), ...inline(text.substring(7))];
-  return [new Node("h6", {}, child)]
+  let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("###### ")), ...inline(text.substring(7))];
+  return [new VNode("h6", {}, child)]
 }
 
 /* 

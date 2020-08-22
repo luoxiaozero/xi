@@ -1,22 +1,30 @@
-import VNode from "../index"
-
-class VTextNode extends VNode{
+class VTextNode{
+    nodeName: string;
     text: string;
     constructor(text){
-        super("#text", {}, []);
+        this.nodeName = '#text';
         this.text = text;
     }
     
-    getText(){
-        return this.text;
+    newDom(){
+        return document.createTextNode(this.text)
+    }
+    render(dom){
+        if(dom.nodeName.toLowerCase() == "#text"){
+            if(this.text == dom.nodeValue){
+                return null;
+            }else{
+                dom.nodeValue = this.text;
+                return false;
+            }
+        }else{
+            dom.parentNode.replaceChild(this.newDom(), dom); 
+        }
+        return null;
     }
 
-    getMd(){
+    getMd(): string{
         return this.text;
-    }
-    
-    getDom(){
-        return document.createTextNode(this.text)
     }
 }
 export default VTextNode;

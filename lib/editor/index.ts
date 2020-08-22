@@ -218,7 +218,6 @@ class Editor{
                 range.collapse(true);
                 this.sel.removeAllRanges();
                 this.sel.addRange(range);
-                console.log("无执行2226")
                 return false;
             }else if(location[4][0] == 0 && location[4][1].nodeName == 'LI' && location[4][1].childNodes.length == 1 && location[4][1].childNodes[0].nodeName == 'BR'){
                 // li 退出
@@ -236,7 +235,6 @@ class Editor{
                 range.collapse(true);
                 this.sel.removeAllRanges();
                 this.sel.addRange(range);
-                console.log("无执行2226")
                 return false;
             }else if(location[4][1].parentNode.nodeName == 'P' && location[4][1].parentNode.parentNode.nodeName == 'LI'){
                 // li 中新建一行
@@ -254,7 +252,6 @@ class Editor{
                 range.collapse(true);
                 this.sel.removeAllRanges();
                 this.sel.addRange(range);
-                console.log("无执行2225")
                 return false;
             }else if(location[4][1].nodeName == 'P' && location[4][1].parentNode.nodeName == 'LI' 
                     && location[4][1].childNodes.length == 1 && location[4][1].childNodes[0].nodeName == 'BR'){ 
@@ -273,7 +270,6 @@ class Editor{
                 range.collapse(true);
                 this.sel.removeAllRanges();
                 this.sel.addRange(range);
-                console.log("无执行222")
                 return false;
             }else if(node.nodeName == 'pre'){
                 let text = '\n\r';
@@ -286,7 +282,6 @@ class Editor{
                 range.collapse(true);
                 this.sel.removeAllRanges();
                 this.sel.addRange(range);
-                console.log("无执行222")
                 return false;
             }else{
                 console.log("无执行", node)
@@ -298,7 +293,8 @@ class Editor{
     render(){
         let location = this.getSelection();
         this.location = location;
-        this.editorHtmlNode.domToNode(this.editorHtmlDom);
+        let vnodes = VNode.domToNode(this.editorHtmlDom) as VNode;
+        this.editorHtmlNode.childNodes = vnodes.childNodes;
         this.editorHtmlNode.dispose();
 
         // this.container.blur();
@@ -551,7 +547,7 @@ class Editor{
         }
         return md;
     }
-    setMd(md){
+    setMd(md: string){
         let childNodes = textToNode(md);
         if(childNodes){
             this.editorHtmlNode.childNodes = childNodes;

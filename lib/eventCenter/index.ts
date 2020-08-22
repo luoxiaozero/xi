@@ -51,12 +51,16 @@ class EventCenter{
         this.editorHtmlDom.removeEventListener(eventName, fun, useCapture);
     }
 
-    keydown(e: KeyboardEvent, _this: EventCenter): Boolean{
+    keydown(e: KeyboardEvent, _this: EventCenter): boolean{
         let keyCode: number = e.keyCode;
         if(keyCode == 13){
             // 回车时渲染
-            return _this.artText.editor.enterRender();
+            if(!_this.artText.editor.enterRender()){
+                e.preventDefault();
+                return false;
+            }
         }
+        return true;
     }
 
     keyup(e: KeyboardEvent, _this: EventCenter){

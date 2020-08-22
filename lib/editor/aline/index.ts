@@ -1,5 +1,4 @@
 import {alineRule} from "../rules"
-import inline from "../inline"
 import VNode from "../../vNode"
 function aline(text: string): any[]{ 
     // str = str.replace(/\s/g, '&nbsp;'); 
@@ -11,6 +10,6 @@ function aline(text: string): any[]{
             return alineRule[k]["fun"](text);
         }   
     }
-    return [new VNode("p", {}, inline(text))];
+    return null;
 }
 export default aline;
