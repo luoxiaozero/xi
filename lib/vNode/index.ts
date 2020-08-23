@@ -118,7 +118,7 @@ class VNode {
     getMd(model='editor') {
         let md = ""
         if (this.nodeName == "a") {
-            md += this.childNodes[0].childNodes;
+            md += this.childNodes[0].text;
         } else if (this.nodeName == "hr" && model == 'read') {
             md += '***\n';
         } else if (this.nodeName == 'input' && this.attr['type'] == "checkbox" && model == 'read') {
