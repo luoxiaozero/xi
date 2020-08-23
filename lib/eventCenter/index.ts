@@ -1,5 +1,5 @@
 import {htmlToMd} from "../editor/toNode/index"
-import ArtText from "lib";
+import ArtText from "../index";
 
 class EventCenter{
 
@@ -126,12 +126,13 @@ class EventCenter{
         }
     }
     getAsString(_this: EventCenter): Function{
+        // 剪贴事件回调
         function closure(str: string){
             let html: HTMLHtmlElement = document.createElement('html');
             html.innerHTML = str;    
             let body = html.childNodes[1];
 
-            let location = _this.artText.editor.location;
+            let location = _this.artText.editor.cursor.location;
             console.log(location);
             let md = htmlToMd(body);
             console.log(md);

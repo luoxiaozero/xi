@@ -1,7 +1,7 @@
 import floatAuxiliaryTool from './floatAuxiliaryTool'
 import floatToolbar from './floatToolbar'
 import {message} from './messageTool'
-import ArtText from 'lib';
+import ArtText from '../index';
 import * as defaultFun from './default'
 import {toolbarTool} from './toolbarTool'
 
@@ -9,6 +9,7 @@ class Tool{
     static loadScript = defaultFun.loadScript;
     static loadCss = defaultFun.loadCss;
     static addCss = defaultFun.addCss;
+    static hasClass = defaultFun.hasClass;
 
     artText: ArtText;
     container: HTMLHtmlElement;
@@ -37,7 +38,7 @@ class Tool{
         Tool.addCss('.art-floatAuxiliaryTool-li:hover{background-color: #f0f0f0;color:' + this.artText.config.theme.get('color') + '}');
         this.container.appendChild(this.floatAuxiliaryTool);
 
-        this.floatToolbar = floatToolbar();
+        this.floatToolbar = floatToolbar(this.artText);
         this.floatToolbar.style.backgroundColor = this.artText.config.theme.get('backgroundColor');
         Tool.addCss('.art-floatToolbar-span{padding: 8px 10px;cursor: pointer;}.art-floatToolbar-span:hover{color:' + this.artText.config.theme.get('color') + '}');
         this.container.appendChild(this.floatToolbar);

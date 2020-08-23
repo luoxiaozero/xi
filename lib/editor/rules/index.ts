@@ -53,12 +53,11 @@ function imgFun(text){
     return [lSpan, cImg];
 }
 function mathFun(text){
-    let lSpan = new VNode("span", {"class": "art-hide"}, new VTextNode("$"));
-    let cSpan = new VNode("span", {"class": "art-text-double", style: 'position: relative;', "contenteditable": "false"}, 
+    let rSpan = new VNode("span", {"class": "art-hide art-math"}, new VTextNode(text));
+    let lSpan = new VNode("span", {"class": "art-shield", style: 'position: relative;', "contenteditable": "false"}, 
                             new VNode("span", 
-        {"class": "art-shield", style: 'position: absolute;top: 35px;display: inline-table;', "contenteditable": "false", "__dom__": "math", "art-math":text.substring(1, text.length - 1)}, null));
-    let rSpan = new VNode("span", {"class": "art-hide"}, new VTextNode(text.substring(1, text.length - 1) + "$"))
-    return [lSpan, cSpan, rSpan]
+        {"class": "art-shield", style: 'top: 35px;display: inline-table;', "contenteditable": "false", "__dom__": "math", "art-math":text.substring(1, text.length - 1)}, null));
+    return [lSpan, rSpan]
 }
 function inlineCodeFun(text){
     return modelFun_1(["`", 1, text, "`", "code"])

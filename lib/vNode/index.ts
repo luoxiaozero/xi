@@ -5,6 +5,7 @@ import { textToNode } from "../editor/toNode/index"
 import inline from "../editor/inline/index"
 import VTextNode from "./text";
 import Editor from "../editor"
+import Tool from "../tool"
 
 class VNode {
     nodeName: string;
@@ -46,14 +47,11 @@ class VNode {
         })
         return dom;
     }
-    hasClass(element, cls) {
-        return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
-    }
     render(dom: HTMLElement) {
         if (dom.nodeName.toLowerCase() == this.nodeName) {
             if (this.nodeName == "code") {
                 return null
-            } else if (this.hasClass(dom, "art-shield")) {
+            } else if (Tool.hasClass(dom, "art-shield")) {
                 let math = dom.getAttribute("art-math")
                 if (math && this.attr["art-math"] != math && Editor.katex) {
                     dom.innerHTML = Editor.katex.renderToString(this.attr["art-math"], { throwOnError: false });

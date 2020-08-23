@@ -1,4 +1,4 @@
-import ArtText from "lib";
+import ArtText from "../../index";
 
 export function message(artText: ArtText, message: string, type: string='null'){
     let root = document.createElement('div');

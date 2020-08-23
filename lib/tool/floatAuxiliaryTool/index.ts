@@ -20,8 +20,9 @@ export default function floatAuxiliary(): HTMLDivElement{
     li.setAttribute('class', 'art-floatAuxiliaryTool-li')
     li.setAttribute('style', 'padding: 3px 20px;margin:3px 0; cursor: pointer;');
     li.innerHTML = '使用百度搜索'
-
+    li.onmousedown = <any>closure(search);
     ul.appendChild(li);
+
     let hr = document.createElement('hr');
     hr.style.height = '0';
     hr.style.marginBottom = '0';
@@ -31,23 +32,54 @@ export default function floatAuxiliary(): HTMLDivElement{
     li.setAttribute('class', 'art-floatAuxiliaryTool-li')
     li.setAttribute('style', 'padding: 3px 20px;margin:3px 0; cursor: pointer;');
     li.innerText = '剪切'
+    li.onmousedown = <any>closure(cut);
     ul.appendChild(li);
 
     li = document.createElement('li');
     li.setAttribute('class', 'art-floatAuxiliaryTool-li')
     li.setAttribute('style', 'padding: 3px 20px;margin:3px 0; cursor: pointer;');
     li.innerText = '复制'
-
+    li.onmousedown = <any>closure(copy);
     ul.appendChild(li);
 
     li = document.createElement('li');
     li.setAttribute('class', 'art-floatAuxiliaryTool-li');
     li.setAttribute('style', 'padding: 3px 20px;margin:3px 0; cursor: pointer;');
     li.innerText = '粘贴'
-
+    li.onmousedown = <any>closure(paste);
     ul.appendChild(li);
 
     box.appendChild(ul);
 
+    function closure(fun: Function): Function{
+        // 实现闭包
+        function c(e){
+            fun(e, box);
+        }
+        return c;
+    }
+
     return box;
+}
+function search(e, box: HTMLDivElement) {
+    e;
+    let s = window.getSelection().toString();
+    box.style.display = 'none';
+    window.open("https://www.baidu.com/s?ie=UTF-8&wd=" + s); 
+}
+function copy(e, box: HTMLDivElement) {
+    e;
+    box.style.display = 'none';
+    document.execCommand('Copy')
+    return true;
+}
+function cut(e, box: HTMLDivElement) {
+    e;
+    box.style.display = 'none';
+    document.execCommand('Cut');
+}
+function paste(e, box: HTMLDivElement) {
+    e;
+    box.style.display = 'none';
+    document.execCommand('Paste');
 }

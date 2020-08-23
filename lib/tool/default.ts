@@ -29,4 +29,7 @@ function addCss(css: string): void{
 
     head.appendChild(style);
 }
-export {loadCss, loadScript, addCss}
+function hasClass(element: HTMLElement, cls: string): boolean{
+    return (' ' + element.className + ' ').indexOf(' ' + cls + ' ') > -1;
+}
+export {loadCss, loadScript, addCss, hasClass}
