@@ -4,7 +4,7 @@ import katexCss from"../external/css/katex.min.css"
 import katex from "../external/js/katex.min.js"
 import hljs from "../external/js/highlight.min.js"
 
-let md = "\
+let md = '\
 2020 0818\n\
 ## markdown 编辑  [百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
 Markdown是一种可以使用普通文本编辑器编写的标记语言，通过简单的标记语法，它可以使普通文本内容具有一定的格式。\n\
@@ -30,6 +30,8 @@ __下划线__\n\
 上标：X^2^  下标：O~2~\n\
 数学公式：$x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$\n\
 ==高亮==245==123==\n\
+#### html\n\
+<span style="color: red">123</span>\n\
 #### 链接 \n\
 [Title](URL)\n\
 #### 图片\n\
@@ -65,7 +67,7 @@ __下划线__\n\
 ***\n\
 #### 代码\n\
 `print(\"123\")`\n\
-`alert('Hello World');`\n\
+`alert(\'Hello World\');`\n\
 ``` python\n\
 import sys\n\
 def aa(x):\n\
@@ -95,7 +97,7 @@ class bb:\n\
         self.y = y\n\
         dir(self)\n\
 ```\n\
-\n"
+\n'
 function uploadImg(img){
     return 'https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=1583317410,1374114198&fm=74&app=80&f=PNG?w=200&h=200';
 }
