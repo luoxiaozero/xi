@@ -1,4 +1,5 @@
 import ArtText from "../..";
+import {blod, italic, del, ins, sup, sub} from "../default";
 
 export default function floatToolbar(artText: ArtText): HTMLDivElement{
     //dom.getBoundingClientRect()
@@ -19,8 +20,9 @@ export default function floatToolbar(artText: ArtText): HTMLDivElement{
 
     function closure(fun: Function): Function{
         // 实现闭包
-        function c(e){
-            fun(e, box, artText);
+        function c(){
+            fun(artText);
+            box.style.display = 'none';
         }
         return c;
     }
@@ -32,53 +34,13 @@ export default function floatToolbar(artText: ArtText): HTMLDivElement{
         span.onmousedown = <any>closure(fun);
         box.appendChild(span); 
     }
-    newChild('B', '粗体', blod);
-    newChild('I', '斜体', italic);
-    newChild('D', '删除线', del);
-    newChild('S', '下划线', ins);
-    newChild('u', '上标', sup);
-    newChild('d', '下标', sub);
+
+    newChild('B', '粗体(ctrl+b)', blod);
+    newChild('I', '斜体(crtl+i)', italic);
+    newChild('D', '删除线(ctrl+shift+d)', del);
+    newChild('S', '下划线(ctrl+u)', ins);
+    newChild('u', '上标(ctrl+alt+s)', sup);
+    newChild('d', '下标(ctrl+shift+s)', sub);
 
     return box;
-}
-
-function blod(e, box: HTMLDivElement, artText: ArtText) {
-    e;
-    model(box, artText, '**');
-}
-
-function italic(e, box: HTMLDivElement, artText: ArtText) {
-    e;
-    model(box, artText, '*');
-}
-function del(e, box: HTMLDivElement, artText: ArtText){
-    e;
-    model(box, artText, '~~');
-}
-function ins(e, box: HTMLDivElement, artText: ArtText){
-    e;
-    model(box, artText, '__');
-} 
-function sup(e, box: HTMLDivElement, artText: ArtText){
-    e;
-    model(box, artText, '^');
-}
-function sub(e, box: HTMLDivElement, artText: ArtText){
-    e;
-    model(box, artText, '~');
-} 
-function model(box: HTMLDivElement, artText: ArtText, str: string) {
-    let location = artText.editor.cursor.getSelection();
-    if(location.anchorNode.nodeName == '#text'){
-        let nodeValue = location.anchorNode.nodeValue;
-        nodeValue = nodeValue.substring(0, location.anchorOffset) + str + nodeValue.substring(location.anchorOffset)
-        location.anchorNode.nodeValue = nodeValue;
-    }
-    if(location.focusNode.nodeName == '#text'){
-        let nodeValue = location.focusNode.nodeValue;
-        nodeValue = nodeValue.substring(0, location.focusOffset) + str + nodeValue.substring(location.focusOffset)
-        location.focusNode.nodeValue = nodeValue;
-    }
-    artText.editor.render();
-    box.style.display = 'none';
 }

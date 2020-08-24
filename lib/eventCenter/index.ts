@@ -1,5 +1,6 @@
 import {htmlToMd} from "../editor/toNode/index"
 import ArtText from "../index";
+import {blod, italic, del, ins, sup, sub, mark} from "../tool/default";
 
 class EventCenter{
 
@@ -53,6 +54,9 @@ class EventCenter{
 
     keydown(e: KeyboardEvent, _this: EventCenter): boolean{
         let keyCode: number = e.keyCode;
+        if(!_this.shortcutKey(e, _this.artText)){
+            return false;
+        }
         if(keyCode == 13){
             // 回车时渲染
             if(!_this.artText.editor.enterRender()){
@@ -61,6 +65,34 @@ class EventCenter{
             }
         }
         return true;
+    }
+
+    shortcutKey(e: KeyboardEvent, artText: ArtText): boolean{
+        if(e.ctrlKey && e.keyCode == 66){
+            // ctrl + b 粗体
+            blod(artText);
+        } else if(e.ctrlKey && e.keyCode == 73){
+            // ctrl + i 斜体
+            italic(artText);
+        } else if(e.ctrlKey && e.shiftKey && e.keyCode == 68){
+            // ctrl + shift + d 删除线
+            del(artText);
+        } else if(e.ctrlKey && e.keyCode == 85){
+            // ctrl + u 下划线
+            ins(artText);
+        } else if(e.ctrlKey && e.altKey && e.keyCode == 83){
+            // ctrl + alt + s 上标
+            sup(artText);
+        } else if(e.ctrlKey && e.shiftKey && e.keyCode == 83){
+            // ctrl + shift + s 下标
+            sub(artText);
+        } else if(e.ctrlKey  && e.keyCode == 77){
+            // ctrl + m 标记
+            mark(artText);
+        }else{
+            return true;   
+        }
+        return false;       
     }
 
     keyup(e: KeyboardEvent, _this: EventCenter){

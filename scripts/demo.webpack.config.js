@@ -12,9 +12,6 @@ const bannerPack = new webpack.BannerPlugin({
   entryOnly: true
 })
 
-const constantPack = new webpack.DefinePlugin({
-  MUYA_VERSION: JSON.stringify(pkg.version)
-})
 
 const proMode = process.env.NODE_ENV === 'production'
 
@@ -32,7 +29,6 @@ module.exports = {
 
   plugins: [
     bannerPack,
-    constantPack,
     new MiniCssExtractPlugin({
       filename: 'arttext.css'
     }),

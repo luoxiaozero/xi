@@ -170,12 +170,11 @@ export default class Cursor {
             var pNode = this.editorHtmlDom.childNodes[this.location.focusAlineOffset];
             var pLen = this.location.anchorInlineOffset;
             this.setTool(pNode as HTMLElement)
-            console.log(this.location, pNode, pNode.nodeName)
             if(pNode.nodeName == 'HR'){
                 // 不可调优先度
                 info = [pNode, 0];
             }else if (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
-                this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD" || this.location.anchorNode.nodeName === "DIV") {
+                this.location.focusNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD" || this.location.anchorNode.nodeName === "DIV") {
                 info = [this.location.anchorNode, 0]
             } else if (this.location.anchorOffset == 0 && ((this.location.anchorNode.parentNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.parentNode.nodeName == 'PRE') || this.location.anchorNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.nodeName == 'PRE')) {
                 info = [this.location.anchorNode, 0] 

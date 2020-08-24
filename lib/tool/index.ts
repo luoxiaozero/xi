@@ -65,8 +65,6 @@ class Tool{
         }else{
             this.floatToolbar.style.display = 'inline';
         }
-        console.log(event);
-        console.log(this.artText.eventCenter.clickInfo);
         let pageXLenght  = (<any>event).pageX  - (this.artText.eventCenter.clickInfo['pageX'] );
         let pageYLenght  = (<any>event).pageY  - (this.artText.eventCenter.clickInfo['pageY'] );
         console.log(pageXLenght, pageYLenght)
