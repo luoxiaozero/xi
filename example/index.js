@@ -68,7 +68,7 @@ __下划线__\n\
 #### 代码\n\
 `print(\"123\")`\n\
 `alert(\'Hello World\');`\n\
-``` python\n\
+```\n\
 import sys\n\
 def aa(x):\n\
     return x\n\

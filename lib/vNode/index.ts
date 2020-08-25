@@ -177,7 +177,7 @@ class VNode {
             }
             md += '\n';
             for (let i = 0; i < this.childNodes.length; i++) {
-                md += this.childNodes[i].getMd(model) + '\n';
+                md += this.childNodes[i].getMd(model);
             }
             md += '```\n'
         } else if (this.attr["class"] && this.attr["class"] == "art-shield") {

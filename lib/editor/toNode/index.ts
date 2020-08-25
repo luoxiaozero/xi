@@ -95,7 +95,8 @@ function textToNode(text: string){
                 child.push(bDispose(rows[i]));
                 i++;
             }
-            i--;
+            if(!(i < len && rows[i] == ''))
+                i--;
             nodes.push(buo(new VNode("blockquote", {}, child)))
         }else if(/^\*\s/.test(rows[i])){
             child = [];
@@ -103,7 +104,8 @@ function textToNode(text: string){
                 child.push(uoDispose(rows[i], 'ul'));  
                 i++;
             } 
-            i--;
+            if(!(i < len && rows[i] == ''))
+                i--;
             nodes.push(buo(new VNode("ul", {}, child)));
         }else if(/^\d\.\s/.test(rows[i])){
             child = [];
@@ -111,35 +113,34 @@ function textToNode(text: string){
                 child.push(uoDispose(rows[i], 'ol'));  
                 i++;
             } 
-            i--;
+            if(!(i < len && rows[i] == ''))
+                i--;
             nodes.push(buo(new VNode("ol", {}, child)));
-        }else if(/^```\s/.test(rows[i])){
-            let lang = rows[i].substring(4);
+        }else if(/^```/.test(rows[i])){
+            let lang = rows[i].match(/^```\s*([^\s]*?)\s*$/)[1];
             let j, _is = false, temp='';
-            child = [];
             for(j = i + 1;j < len; j++){                     
                 if(/^```$/.test(rows[j])){
                     _is = true;
                     break;
                 }
                 temp += rows[j] + '\n';
-                if(lang){
-                    child.push(new VNode("code", {"class": "lang-" + lang}, new VTextNode(rows[j])));
-                }else{
-                    child.push(new VNode("code", {}, new VTextNode(rows[j])));
-                }
             }
             if(_is){
                 i = j;
                 let code;
-                if(lang){
+                if(lang != undefined && lang != ''){
                     code = new VNode("code", {"class": "lang-" + lang}, new VTextNode(temp));
                 }else{
                     code = new VNode("code", {}, new VTextNode(temp));
-                }
+                }    
                 nodes.push(new VNode("pre", {'style': ' margin-top:35px'}, code));
+                if(i + 1 < len && rows[i + 1] == '')
+                    i++;
             }else{
                 nodes.push(new VNode("p", {}, new VTextNode(rows[i])));
+                if(i + 1 < len && rows[i + 1] == '')
+                    i++;
             }       
         }else if(/^\|.*\|/.test(rows[i])){
             let arry, j, jlen;
@@ -162,22 +163,31 @@ function textToNode(text: string){
                     tbodyChild.push(new VNode("tr",{}, _val));
                     i++;
                 }
-                i--;
+                if(!(i < len && rows[i] == ''))
+                    i--;
                 child.push(new VNode('tbody', {}, tbodyChild))
                 nodes.push(new VNode("table", {"style": "width:100%; margin-top:35px"}, child));
             }else{
                 nodes.push(new VNode("p", {}, inline(rows[i])));
+                if(i + 1 < len && rows[i + 1] == '')
+                    i++;
             }
         }else if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(rows[i])){
-            nodes.push(new VNode("hr"))            
+            nodes.push(new VNode("hr"));
+            if(i + 1 < len && rows[i + 1] == '')
+                i++;            
         }else if(child = aline(rows[i])){
             // 单行成功
             child.forEach(element => {
                 nodes.push(element);
             })
+            if(i + 1 < len && rows[i + 1] == '')
+                i++;
         }else {
             // 无 单、多行
             nodes.push(new VNode("p", {}, inline(rows[i])));
+            if(i + 1 < len && rows[i + 1] == '')
+                i++;
         }
     }
     return nodes;

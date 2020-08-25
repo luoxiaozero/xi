@@ -151,13 +151,13 @@ class Editor{
                 this.editorHtmlDom.replaceChild(table, this.editorHtmlDom.childNodes[location.anchorAlineOffset]); 
                 Cursor.setCursor(tr2.childNodes[0], 0);
                 return false;
-            }else if(/^```\s?/.test(md) || /^```\s\S+/.test(md)){
+            }else if(/^```/.test(md)){
                 // 生成code
                 let pre = document.createElement('pre');
                 let code = document.createElement('code');
-                code.innerHTML = '<br/>';
-                if(/^```\s\S+/.test(md)){
-                    let lang = md.substring(4);
+                code.innerHTML = '\n';
+                let lang = md.match(/^```\s*([^\s]*?)\s*$/)[1];
+                if(lang != undefined && lang != ''){
                     code.setAttribute('class', 'lang-' + lang);
                 }
                 pre.appendChild(code);
@@ -269,7 +269,7 @@ class Editor{
     getMd(){
         let md = '';
         for(let i = 0; i < this.editorHtmlNode.childNodes.length; i++){
-            md += this.editorHtmlNode.childNodes[i].getMd('read');// + '\n';
+            md += this.editorHtmlNode.childNodes[i].getMd('read') + '\n';
         }
         return md;
     }
@@ -292,7 +292,7 @@ class Editor{
         this.editorHtmlDom.style.display = 'none';
         this.editorMdDom.style.display = 'inline';
         this.editorMdDom.value = this.getMd();
-        this.editorMdDom.style.height = this.editorMdDom.scrollHeight + 'px';
+        this.editorMdDom.style.height = this.editorMdDom.scrollHeight + 5 + 'px';
     }
     closeTextarea(){
         this.editorHtmlDom.style.display = 'inline';
