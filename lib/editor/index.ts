@@ -15,6 +15,7 @@ class Editor{
     editorMdDom: HTMLTextAreaElement;
     editorDom: HTMLDivElement;
     cursor: Cursor;
+    mdFileName: String; 
     
     constructor(artText: ArtText, container: HTMLHtmlElement) {
         this.artText = artText;   
@@ -22,7 +23,8 @@ class Editor{
         
         this.editorHtmlNode = this.createRootNode();
 
-        this.cursor = new Cursor(this.editorHtmlDom);    
+        this.cursor = new Cursor(this.editorHtmlDom);  
+        this.mdFileName = null;  
     } 
     createRootNode(){
         let p = new VNode("p", {}, new VNode("br"))
@@ -60,7 +62,7 @@ class Editor{
         this.editorMdDom.style.display = 'none'; 
         this.editorMdDom.addEventListener('input', function(e) {
             let target = e.target as HTMLHtmlElement;
-            target.style.height = 'auto';
+            //target.style.height = 'auto';
             target.style.height = this.scrollHeight + 'px';
             
         })
@@ -267,7 +269,7 @@ class Editor{
     getMd(){
         let md = '';
         for(let i = 0; i < this.editorHtmlNode.childNodes.length; i++){
-            md += this.editorHtmlNode.childNodes[i].getMd('read');
+            md += this.editorHtmlNode.childNodes[i].getMd('read');// + '\n';
         }
         return md;
     }
@@ -282,6 +284,10 @@ class Editor{
             Editor.hljs.initHighlighting(); 
         }
     }
+    openFile(md: string, name: string){
+        this.mdFileName = name;
+        this.setMd(md);
+    }
     openTextarea(){
         this.editorHtmlDom.style.display = 'none';
         this.editorMdDom.style.display = 'inline';
@@ -292,6 +298,14 @@ class Editor{
         this.editorHtmlDom.style.display = 'inline';
         this.setMd(this.editorMdDom.value)
         this.editorMdDom.style.display = 'none';
+    }
+    emptyEditor(){
+        if(this.editorHtmlDom.style.display == 'none'){
+            this.editorMdDom.value = '';
+            this.editorMdDom.style.height = 'auto';
+        }else{
+            this.setMd('')
+        }
     }
 }
 const defauleCss = '\n\

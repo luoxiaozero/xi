@@ -10,6 +10,7 @@ class Tool{
     static loadCss = defaultFun.loadCss;
     static addCss = defaultFun.addCss;
     static hasClass = defaultFun.hasClass;
+    static message: Function = null;
 
     artText: ArtText;
     container: HTMLHtmlElement;
@@ -28,6 +29,9 @@ class Tool{
         this.floatAuxiliaryTool = null;
         this.floatToolbar = null;
         this.mdHtml = null;
+        Tool.message = function(mes: string, type: string='null'){
+            message(artText, mes, type);
+        }
     }
     init(){
         this.toolbar = toolbarTool(this.artText.config.theme)
@@ -78,7 +82,7 @@ class Tool{
         }
         
     }
-    addDefaultTool(){
+    private addDefaultTool(){
         this.mdHtml = this.addTool('md', 
         ()=>{
             if(this.mdHtml.innerHTML == 'md'){
@@ -96,7 +100,7 @@ class Tool{
         this.addTool('本地载入', 
         ()=>{this.artText.editor.setMd(localStorage.md); message(this.artText, 'md载入成功', 'success');});
         this.addTool('清空', 
-        ()=>{this.artText.editor.setMd(''); message(this.artText, '清空成功', 'success');});
+        ()=>{this.artText.editor.emptyEditor(); message(this.artText, '清空成功', 'success');});
         this.addTool('<span style="position: absolute;right: 12px;color:#1abc9c" >ATTB</span>', () => {message(this.artText, '点击了一下');})
     }
     setDialog(header, body, footer=''){

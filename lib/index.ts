@@ -2,9 +2,11 @@ import Editor from './editor'
 import Config from './config'
 import Tool from './tool'
 import EventCenter from './eventCenter';
+import {exportMdFileMap} from './defaultPlugin'
+
 let win: any = window;
 class ArtText {
-    static plugins: Map<any, any>[] = [];
+    static plugins: Map<any, any>[] = [exportMdFileMap];
     static use (plugin: any, options: Map<any, any>= new Map()) {
         let map: Map<any, any> = new Map();
         map.set('plugin', plugin);
@@ -32,13 +34,15 @@ class ArtText {
             this.tool.init();
             this.eventCenter.init();
         }
-            
-        
+        this.eventCenter.executeFutureEvent('init-end');
     }
     registerPlugin(): void{
         for(let i = 0; i < ArtText.plugins.length; i++){
             if(ArtText.plugins[i].get('plugin').name == 'uploadImg'){
                 this.eventCenter.uploadImg = ArtText.plugins[i]['plugin'];
+            } 
+            if(ArtText.plugins[i].get('options').init){
+                ArtText.plugins[i].get('options').init(this);
             }
         }
     }
