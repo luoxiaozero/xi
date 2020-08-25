@@ -180,7 +180,7 @@ class Editor{
                 Cursor.setCursor(p, 0)
                 return false;
             }else if(location.anchorNode.parentNode.parentNode.nodeName == 'BLOCKQUOTE' && location.anchorNode.nextSibling == null 
-                    && location.anchorOffset == location[4][1].length)
+                    && location.anchorOffset == (<Text>location.anchorNode).length)
             {
                 // ul ol中的blockquote添加新行
                 let dom = location.anchorNode;
@@ -243,7 +243,7 @@ class Editor{
                 Cursor.setCursor(location.anchorNode, location.anchorOffset + 1);
                 return false;
             }else{
-                console.log("无执行", vnode)
+                console.log("无执行", location)
             }
         }
 
