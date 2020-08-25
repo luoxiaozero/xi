@@ -113,7 +113,7 @@ class VNode {
         }
     }
 
-    getMd(model='editor') {
+    getMd(model = 'editor') {
         let md = ""
         if (this.nodeName == "a") {
             md += this.childNodes[0].text;
@@ -137,25 +137,35 @@ class VNode {
             for (let i = 0; i < this.childNodes.length; i++) {
                 md += (i + 1).toString() + '. ' + this.childNodes[i].getMd(model) + '\n';
             }
+        } else if(model == 'read' && this.nodeName == 'li'){
+            if(this.childNodes.length > 0 && this.childNodes[0] == 'ul'){
+
+            }
+            for (let i = 0; i < this.childNodes.length; i++) {
+                md += this.childNodes[i].getMd(model);
+            }
         } else if (model == 'read' && ('h1 h2 h3 h4 h5 h6'.indexOf(this.nodeName) >= 0 || this.nodeName == 'p')) {
             for (let i = 0; i < this.childNodes.length; i++) {
                 md += this.childNodes[i].getMd(model)
             }
             md += '\n';
         } else if (model == 'read' && this.nodeName == 'table') {
-            for (let i = 0; i < this.childNodes.length; i++) {
-                md += '|';
-                let j;
-                for (j = 0; j < this.childNodes[i].childNodes.length; j++) {
-                    md += this.childNodes[i].childNodes[j].getMd(model) + '|';
-                }
-                md += '\n';
-                if (i == 0) {
-                    md += '|'
-                    while (j--) {
-                        md += '---|'
+            console.log(this);
+            for (let k = 0; k < this.childNodes.length; k++) {
+                for (let i = 0; i < this.childNodes[k].childNodes.length; i++) {
+                    md += '|';
+                    let j;
+                    for (j = 0; j < this.childNodes[k].childNodes[i].childNodes.length; j++) {
+                        md += this.childNodes[k].childNodes[i].childNodes[j].getMd(model) + '|';
                     }
                     md += '\n';
+                    if (k == 0) {
+                        md += '|'
+                        while (j--) {
+                            md += '---|'
+                        }
+                        md += '\n';
+                    }
                 }
             }
         } else if (model == 'read' && this.nodeName == 'pre') {
@@ -187,7 +197,7 @@ class VNode {
                     this.childNodes.splice(i, 1, ...nodes);
                 }
             }
-        }else if(this.attr["class"] && this.attr["class"].match(/art-shield/)) {
+        } else if (this.attr["class"] && this.attr["class"].match(/art-shield/)) {
             return null;
         } else if (this.nodeName == "blockquote") {
             for (let i = 0; i < this.childNodes.length; i++) {
