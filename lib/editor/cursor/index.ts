@@ -94,7 +94,7 @@ export default class Cursor {
         }
         return this.location;
     }
-    searchNode(node, len) {
+    searchNode(node: Node, len: number) {
         if (node.childNodes.length === 1 && node.childNodes[0].nodeName === "#text")
             if (len <= node.childNodes[0].textContent.length)
                 return [node.childNodes[0], len]
@@ -192,8 +192,8 @@ export default class Cursor {
             }
             if (info[0].nodeName == '#text' && Tool.hasClass(info[0].parentNode, 'art-math')) {
                 let classVal = (<HTMLSpanElement>info[0].parentNode.previousSibling.childNodes[0]).getAttribute("class");
-                if (classVal.indexOf('art-show-math') < 0) {
-                    classVal += ' art-show-math';
+                if (classVal == null || classVal.indexOf('art-show-math') < 0) {
+                    classVal = 'art-show-math';
                     (<HTMLSpanElement>info[0].parentNode.previousSibling.childNodes[0]).setAttribute("class", classVal);
                 }
             }

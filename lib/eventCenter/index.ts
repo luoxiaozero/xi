@@ -81,6 +81,12 @@ class EventCenter {
                 e.preventDefault();
                 return false;
             }
+        } else if (keyCode == 8){
+            // 退格时渲染
+            if (!_this.artText.editor.backRender()) {
+                e.preventDefault();
+                return false;
+            }
         }
         return true;
     }

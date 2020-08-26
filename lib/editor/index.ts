@@ -108,7 +108,7 @@ class Editor{
         if(key == 'right'){
             this.artText.tool.setFloatAuxiliaryTool('bu');
         }else{
-            if(this.cursor.location.anchorInlineOffset != this.cursor.location.focusInlineOffset 
+            if(this.cursor.location && this.cursor.location.anchorInlineOffset != this.cursor.location.focusInlineOffset 
                 && this.cursor.location.anchorAlineOffset == this.cursor.location.focusAlineOffset){
                 this.artText.tool.setFloatToolbar('bu');
             }else{
@@ -118,11 +118,24 @@ class Editor{
         }
         this.cursor.setSelection();
     }
+    backRender(): boolean{
+        let location = this.cursor.getSelection();
+        if(location){
+            let dom = this.editorHtmlDom.childNodes[location.anchorAlineOffset];
+            if(dom.nodeName == 'PRE'){
+                if(location.anchorNode.previousSibling == null && location.anchorInlineOffset == 0)
+                    return false;
+            }else{
+                console.log("无执行", location)
+            }
+        }
+        return true;
+    }
     enterRender(){
         let location = this.cursor.getSelection();
         if(location){
             let md = this.editorHtmlNode.childNodes[location.anchorAlineOffset].getMd();
-            let vnode = this.editorHtmlNode.childNodes[location.anchorAlineOffset];
+            let dom = this.editorHtmlDom.childNodes[location.anchorAlineOffset];
             if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(md)){
                 let hr = document.createElement('hr'); 
                 this.editorHtmlDom.replaceChild(hr, this.editorHtmlDom.childNodes[location.anchorAlineOffset]); 
@@ -234,7 +247,7 @@ class Editor{
                 dom.parentNode.removeChild(dom);
                 Cursor.setCursor(li, 0);
                 return false;
-            }else if(vnode.nodeName == 'pre'){
+            }else if(dom.nodeName == 'PRE'){
                 let text = '\n\r';
                 let data = location.anchorNode.nodeValue;
                 console.log(data);

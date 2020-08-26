@@ -83,9 +83,8 @@ function imgFun(text: string){
 }
 function mathFun(text: string){
     let rSpan = new VNode("span", {"class": "art-hide art-math"}, new VTextNode(text));
-    let lSpan = new VNode("span", {"class": "art-shield", style: 'position: relative;', "contenteditable": "false"}, 
-                            new VNode("span", 
-        {"class": "art-shield", style: 'top: 35px;display: inline-table;', "contenteditable": "false", "__dom__": "math", "art-math":text.substring(1, text.length - 1)}, null));
+    let lSpan = new VNode("span", {"class": "art-shield", style: 'position: relative;', "contenteditable": "false", "__dom__": "math"}, 
+                            new VNode("span", {style: 'top: 35px;display: inline-table;', "art-math":text.substring(1, text.length - 1)}, null));
     return [lSpan, rSpan]
 }
 function inlineCodeFun(text: string){

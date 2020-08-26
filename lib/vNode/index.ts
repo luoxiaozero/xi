@@ -27,15 +27,19 @@ class VNode {
         let dom = document.createElement(this.nodeName);
         for (let key in this.attr) {
             if (key === "__dom__") {
-                if (this.attr[key] === "math" && Editor.katex) {
-                    let html = Editor.katex.renderToString(this.attr["art-math"], { throwOnError: false });
-                    dom.innerHTML = html;
-                } else if (this.attr[key] === "tableTool") {
+                if (this.attr[key] === "tableTool") {
                     dom.appendChild(tableTool())
                 } else if (this.attr[key] === "imgTool") {
                     dom.appendChild(imgTool())
                 } else if (this.attr[key] === "codeTool") {
                     dom.appendChild(codeTool())
+                }
+            } else if (key == "art-math") {
+                if(Editor.katex){
+                    dom.innerHTML = Editor.katex.renderToString(this.attr["art-math"], { throwOnError: false });
+                    dom.setAttribute(key, this.attr[key]);
+                }else{
+                    dom.setAttribute(key, '\n@math:katex未加载出@\n');
                 }
             } else if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
                 dom.setAttribute(key, this.attr[key]);
@@ -51,10 +55,11 @@ class VNode {
         if (dom.nodeName.toLowerCase() == this.nodeName) {
             if (this.nodeName == "code") {
                 return null
-            } else if (Tool.hasClass(dom, "art-shield")) {
-                let math = dom.getAttribute("art-math")
-                if (math && this.attr["art-math"] != math && Editor.katex) {
-                    dom.innerHTML = Editor.katex.renderToString(this.attr["art-math"], { throwOnError: false });
+            } else if (Tool.hasClass(dom, "art-shield") && this.attr['__dom__'] == 'math' && Editor.katex) {
+                let math = (<HTMLElement>dom.childNodes[0]).getAttribute("art-math")
+                console.log(math)
+                if (math && this.childNodes[0].attr["art-math"] != math) {
+                    (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.katex.renderToString(this.childNodes[0].attr["art-math"], { throwOnError: false });
                 }
                 for (let key in this.attr) {
                     if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
