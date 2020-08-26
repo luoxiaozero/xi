@@ -11,7 +11,7 @@ function uoDispose(text, nodeName){
     }
     if(text.substring(num) == ""){
         return new VNode("li", {}, new VNode("br"));
-    }else if(nodeName == 'ul' && /^\[x\]\s/.test(text.substring(2))){
+    }else if(nodeName == 'ul' && /^\[x|X\]\s/.test(text.substring(2))){
         return new VNode("li", {}, [new VNode('input', {type: "checkbox", checked:"checked"}), ...inline(text.substring(6))]);
     }else if(nodeName == 'ul' && /^\[\s\]\s/.test(text.substring(2))){
         return new VNode("li", {}, [new VNode('input', {type: "checkbox"}), ...inline(text.substring(6))]);   

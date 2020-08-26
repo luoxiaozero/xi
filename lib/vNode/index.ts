@@ -232,7 +232,7 @@ class VNode {
                 } else {
                     if (this.childNodes[i].childNodes[0].nodeName == 'input') {
                         this.childNodes[i].childNodes = [this.childNodes[i].childNodes[0], ...inline(this.childNodes[i].getMd())];
-                    } else if (/^\[x\]\s/.test(this.childNodes[i].getMd())) {
+                    } else if (/^\[x|X\]\s/.test(this.childNodes[i].getMd())) {
                         this.childNodes[i].childNodes = [new VNode('input', { type: "checkbox", checked: "checked" }), ...inline(this.childNodes[i].getMd().substring(4))];
                     } else if (/^\[\s\]\s/.test(this.childNodes[i].getMd())) {
                         this.childNodes[i].childNodes = [new VNode('input', { type: "checkbox" }), ...inline(this.childNodes[i].getMd().substring(4))];
