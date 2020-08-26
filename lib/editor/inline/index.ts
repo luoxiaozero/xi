@@ -5,35 +5,39 @@ function inline(text: string) {
     if (text === "") {
         return [new VNode("br")]
     }
-    let nodes = [new VTextNode(text)]
-    for (let i = 0; i < inlineRules.length; i++) {
-        nodes = _inline(nodes, inlineRules[i])
-    }
-    return nodes;
-}
-function _inline(nodes: any[], inlineRule) {
-    let newNodes = [];
-    for (let i = 0; i < nodes.length; i++) {
-        let reMatch;
-        if (nodes[i] instanceof VTextNode && (reMatch = nodes[i].text.match(inlineRule["re"]))) {
-            for (let j = 0; j < reMatch.length; j++) {
-                let index = nodes[i].text.indexOf(reMatch[j]);
-                if (index != 0) {
-                    newNodes.push(new VTextNode(nodes[i].text.substring(0, index)));
+    let nodes = [], reMatch: RegExpMatchArray, reTrue;
+    while(text){
+        reTrue = null;
+        // 匹配那个规则最符合
+        for (let i = 0; i < inlineRules.length; i++) {
+            if(reMatch = text.match(inlineRules[i]["re"])){
+                if(reMatch.index == 0){
+                    reTrue = [reMatch, inlineRules[i]];
+                    break;
                 }
-                inlineRule["fun"](reMatch[j]).forEach(ele => {
-                    newNodes.push(ele);
-                });
-                if (j == (reMatch.length - 1) && index + reMatch[j].length < nodes[i].text.length) {
-                    newNodes.push(new VTextNode(nodes[i].text.substring(index + reMatch[j].length)));
-                }else {
-                    nodes[i].text = nodes[i].text.substring(index + reMatch[j].length);
+                if(reTrue){
+                    if(reTrue.index > reMatch.index){
+                        reTrue = [reMatch, inlineRules[i]];
+                    }
+                }else{
+                    reTrue = [reMatch, inlineRules[i]];
                 }
             }
-        } else {
-            newNodes.push(nodes[i]);
+        }
+        if(reTrue){
+            if (reTrue[0].index != 0) {
+                nodes.push(new VTextNode(text.substring(0, reTrue[0].index)));
+            }
+            reTrue[1]["fun"](reTrue[0][0]).forEach(ele => {
+                nodes.push(ele);
+            });
+            
+            text = text.substring(reTrue[0].index + reTrue[0][0].length)
+        }else{
+            nodes.push(new VTextNode(text));
+            break;
         }
     }
-    return newNodes;
+    return nodes;
 }
 export default inline;

@@ -2,19 +2,19 @@ import VTextNode from "../../vNode/text"
 import VNode from "../../vNode"
 import inline from "../inline"
 
-const bold = {tag: 'b', "left": "**", "right": "**", "re": /(\*{2})([^\*].*?)(\*{2})/g, "fun": blodFun}
-const italic = {tag: 'i', "left": "*", "right": "*", "re": /(\*)([^\*].*?)(\*)/g, "fun":italicFun}
-const bi = {tag: 'bi', "left": "***", "right": "***", "re": /(\*{3})([^\*].*?)(\*{3})/g, "fun":biFun}
-const inline_code = {tag: 'code', "left": "`", "right": "`", "re": /`[^`]+`/g, "fun": inlineCodeFun}
-const img = {tag: 'img', "left": "![", "centre": "](", "right": ")","re": /!\[.*\]\(.*\)/g, "fun": imgFun}
-const a = {tag: 'a', "left": "[", "centre": "](", "right": ")", "re": /\[.*\]\(.*\)/g, "fun": aFun}
-const math = {tag: 'math', "left": "$", "right": "$", "re": /\$.*?\$/g, "fun": mathFun}
-const mark = {tag: 'mark', "left": "==", "right": "==", "re": /\={2}[^\=].*?\={2}/g, "fun":markFun}
-const del = {tag: 'del', "left": "~~", "right": "~~", "re": /~{2}.*?~{2}/g, "fun":delFun}
-const ins = {tag: 'ins', "left": "__", "right": "__", "re": /_{2}.*?_{2}/g, "fun":insFun}
-const sup = {tag: 'sup', "left": "^", "right": "^", "re": /\^[^\^]+\^/g, "fun":supFun}
-const sub = {tag: 'sub', "left": "~", "right": "~", "re": /~[^~]+~/g, "fun":subFun}
-const html_tag = {tag: 'html_tag', left: 'null', right: 'null', 're': /(<!--[\s\S]*?-->|(<([a-zA-Z]{1}[a-zA-Z\d-]*) *[^\n<>]* *(?:\/)?>)(?:([\s\S]*?)(<\/\3 *>))?)/g, fun: htmlTagFun}
+const bold = {tag: 'b', "left": "**", "right": "**", "re": /(\*{2})([^\*].*?)(\*{2})/, "fun": blodFun}
+const italic = {tag: 'i', "left": "*", "right": "*", "re": /(\*)([^\*].*?)(\*)/, "fun":italicFun}
+const bi = {tag: 'bi', "left": "***", "right": "***", "re": /(\*{3})([^\*].*?)(\*{3})/, "fun":biFun}
+const inline_code = {tag: 'code', "left": "`", "right": "`", "re": /`[^`]+`/, "fun": inlineCodeFun}
+const img = {tag: 'img', "left": "![", "centre": "](", "right": ")","re": /!\[.*\]\(.*\)/, "fun": imgFun}
+const a = {tag: 'a', "left": "[", "centre": "](", "right": ")", "re": /\[.*\]\(.*\)/, "fun": aFun}
+const math = {tag: 'math', "left": "$", "right": "$", "re": /\$.*?\$/, "fun": mathFun}
+const mark = {tag: 'mark', "left": "==", "right": "==", "re": /\={2}[^\=].*?\={2}/, "fun":markFun}
+const del = {tag: 'del', "left": "~~", "right": "~~", "re": /~{2}.*?~{2}/, "fun":delFun}
+const ins = {tag: 'ins', "left": "__", "right": "__", "re": /_{2}.*?_{2}/, "fun":insFun}
+const sup = {tag: 'sup', "left": "^", "right": "^", "re": /\^[^\^]+\^/, "fun":supFun}
+const sub = {tag: 'sub', "left": "~", "right": "~", "re": /~[^~]+~/, "fun":subFun}
+const html_tag = {tag: 'html_tag', left: 'null', right: 'null', 're': /(<!--[\s\S]*?-->|(<([a-zA-Z]{1}[a-zA-Z\d-]*) *[^\n<>]* *(?:\/)?>)(?:([\s\S]*?)(<\/\3 *>))?)/, fun: htmlTagFun}
 export const inlineRules = [bi, bold, mark, inline_code, italic, img, a, math, del, ins, sup, sub, html_tag]
 
 function htmlTagFun(text: string){
