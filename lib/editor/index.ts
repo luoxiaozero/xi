@@ -264,6 +264,7 @@ class Editor{
     }
     render(){
         this.cursor.getSelection();
+        console.log(this.cursor.location)
         let vnodes = VNode.domToNode(this.editorHtmlDom) as VNode;
         this.editorHtmlNode.childNodes = vnodes.childNodes;
         this.editorHtmlNode.dispose();

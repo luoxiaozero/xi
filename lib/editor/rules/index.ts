@@ -1,6 +1,7 @@
 import VTextNode from "../../vNode/text"
 import VNode from "../../vNode"
 import inline from "../inline"
+import Editor from "../"
 
 const bold = {tag: 'b', "left": "**", "right": "**", "re": /(\*{2})([^\*].*?)(\*{2})/, "fun": blodFun}
 const italic = {tag: 'i', "left": "*", "right": "*", "re": /(\*)([^\*].*?)(\*)/, "fun":italicFun}
@@ -82,10 +83,15 @@ function imgFun(text: string){
     return [lSpan, cImg];
 }
 function mathFun(text: string){
+  if(Editor.katex){
     let rSpan = new VNode("span", {"class": "art-hide art-math"}, new VTextNode(text));
     let lSpan = new VNode("span", {"class": "art-shield", style: 'position: relative;', "contenteditable": "false", "__dom__": "math"}, 
                             new VNode("span", {style: 'top: 35px;display: inline-table;', "art-math":text.substring(1, text.length - 1)}, null));
-    return [lSpan, rSpan]
+                            return [lSpan, rSpan]
+  }else{
+    return [new VNode("span", {style: 'color: #777'}, new VTextNode(text))];
+  }
+  
 }
 function inlineCodeFun(text: string){
     return modelFun_1(["`", 1, text, "`", "code"])

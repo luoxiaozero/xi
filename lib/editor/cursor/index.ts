@@ -52,7 +52,8 @@ export default class Cursor {
             while (node.parentNode != this.editorHtmlDom) {
                 while (node.previousSibling) {
                     node = node.previousSibling;
-                    len += node.textContent.length;
+                    if(!Tool.hasClass(node as HTMLElement, 'art-shield'))
+                        len += node.textContent.length;
                 }
                 node = node.parentNode;
             }
@@ -63,7 +64,8 @@ export default class Cursor {
             while (nodeF.parentNode !== this.editorHtmlDom) {
                 while (nodeF.previousSibling) {
                     nodeF = nodeF.previousSibling;
-                    lenF += nodeF.textContent.length;
+                    if(!Tool.hasClass(nodeF as HTMLElement, 'art-shield'))
+                        lenF += nodeF.textContent.length;
                 }
                 nodeF = nodeF.parentNode;
             }
@@ -101,6 +103,8 @@ export default class Cursor {
             else
                 return [node.childNodes[0], len - node.textContent.length]
         for (let i = 0; i < node.childNodes.length; i++) {
+            if(Tool.hasClass(node.childNodes[i] as HTMLElement, 'art-shield'))
+                continue;
             if (node.childNodes[i].textContent.length < len) {
                 len -= node.childNodes[i].textContent.length;
             } else if (node.childNodes[i].nodeName === "#text") {

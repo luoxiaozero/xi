@@ -60,6 +60,7 @@ class VNode {
                 console.log(math)
                 if (math && this.childNodes[0].attr["art-math"] != math) {
                     (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.katex.renderToString(this.childNodes[0].attr["art-math"], { throwOnError: false });
+                    (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", this.childNodes[0].attr["art-math"]);
                 }
                 for (let key in this.attr) {
                     if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
