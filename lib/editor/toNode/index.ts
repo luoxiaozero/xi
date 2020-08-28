@@ -35,7 +35,7 @@ function bDispose(text){
     }else if(/^\*\s/.test(text.substring(2))){
         return new VNode('ul', {}, uoDispose(text.substring(2), 'ul'));
     }else if(/^\d\.\s/.test(text.substring(2))){
-        return new VNode('ol', {}, uoDispose(text.substring(3), 'ol'));
+        return new VNode('ol', {}, uoDispose(text.substring(2), 'ol'));
     }else{
         return new VNode("p", {}, inline(text.substring(2)));
     } 
@@ -97,6 +97,7 @@ function textToNode(text: string){
             }
             if(!(i < len && rows[i] == ''))
                 i--;
+            console.log(child)
             nodes.push(buo(new VNode("blockquote", {}, child)))
         }else if(/^\*\s/.test(rows[i])){
             child = [];

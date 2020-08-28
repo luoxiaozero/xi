@@ -1,4 +1,4 @@
-let md = "\
+let md = '\
 2020 0818\n\
 ## markdown 编辑  [百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
 Markdown是一种可以使用普通文本编辑器编写的标记语言，通过简单的标记语法，它可以使普通文本内容具有一定的格式。\n\
@@ -14,22 +14,22 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 #### H4 :#### Header 4\n\
 ##### H5 :##### Header 5\n\
 ###### H6 :###### Header 6\n\
-#### 字符效果和横线等\n\
-----\n\
-~~删除线~~\n\
-__下划线__\n\
-*斜体字* \n\
-**粗体**\n\
-***粗斜体***\n\
+#### 字符效果\n\
+~~删除线~~  __下划线__\n\
+***粗斜体***  **粗体**  *斜体字* \n\
 上标：X^2^  下标：O~2~\n\
 数学公式：$x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$\n\
-==高亮==245==123==\n\
+==高亮==\n\
+#### 横线\n\
+----\n\
+#### html\n\
+<span style="color: #158bb8">html鸢尾蓝文字</span>\n\
 #### 链接 \n\
 [Title](URL)\n\
 #### 图片\n\
-![ad](https://dss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=1089874897,1268118658&fm=26&gp=0.jpg)\n\
+![ad](imgs/tu--example.jpg)\n\
 #### 无序列表\n\
-* [x] 已完成**a**\n\
+* [x] 已完成\n\
 * [ ] 未完成\n\
 \n\
 * 无序列表\n\
@@ -43,23 +43,24 @@ __下划线__\n\
 2. 有序列表\n\
 #### 引用\n\
 > 引用\n\
-> 引用**粗体**\n\
-> > - 引用\n\
-> > - 引用\n\
-> > > * 引用3\n\
-> > > * 引用4\n\
-> * 引用\n\
+> **引用**\n\
+> > 1. 引用\n\
+> > 2. 引用\n\
+> > > * 引用\n\
+> > > * 引用\n\
 #### 表格\n\
-| ads1    |dadsad2  |dadasd3|\n\
-| ---    |---  |---|\n\
-| *as*dasd4 | dsadsad5 |6|\n\
-| asdasd | dsadsad |ads|\n\
+| 水果        | 价格    |  数量  |\n\
+| --------   | -----:   | :----: |\n\
+| 香蕉        | $1      |   5    |\n\
+| 苹果        | $1      |   6    |\n\
+| 草莓        | $1      |   7    |\n\
 \n\
-| 123 | 456 | abc |\n\
+***\n\
+| 123 | 456 | 789 |\n\
 #### 代码\n\
 `print(\"123\")`\n\
-`alert('Hello World');`\n\
-``` python\n\
+`alert(\'Hello World\');`\n\
+```\n\
 import sys\n\
 def aa(x):\n\
     return x\n\
@@ -88,7 +89,7 @@ class bb:\n\
         self.y = y\n\
         dir(self)\n\
 ```\n\
-\n"
+\n'
 window.onload = function() {
     const container = document.querySelector('#art');
     const art = new ArtText(container, {'md': md});
