@@ -40,16 +40,17 @@ class Tool{
 
         this.floatAuxiliaryTool = floatAuxiliaryTool();
         this.floatAuxiliaryTool.style.backgroundColor = this.artText.config.theme.get('backgroundColor');
-        Tool.addCss('.art-floatAuxiliaryTool-li:hover{background-color: #f0f0f0;color:' + this.artText.config.theme.get('color') + '}');
+        let floatAuxiliaryTool_li = '.art-floatAuxiliaryTool-li:hover{background-color: #f0f0f0;color:' + this.artText.config.theme.get('color') + '}';
         this.container.appendChild(this.floatAuxiliaryTool);
 
         this.floatToolbar = floatToolbar(this.artText);
         this.floatToolbar.style.backgroundColor = this.artText.config.theme.get('backgroundColor');
-        Tool.addCss('.art-floatToolbar-span{padding: 8px 10px;cursor: pointer;}.art-floatToolbar-span:hover{color:' + this.artText.config.theme.get('color') + '}');
+        let floatToolbar_span = '.art-floatToolbar-span{padding: 8px 10px;cursor: pointer;}.art-floatToolbar-span:hover{color:' + this.artText.config.theme.get('color') + '}';
         this.container.appendChild(this.floatToolbar);
 
         this.addDefaultTool();
-        Tool.addCss('.art-toolbar-span{padding:5px 5px;margin-right: 9px} .art-toolbar-span:hover{color:#1abc9c;}');
+        let toolbar_span = '.art-toolbar-span{padding:5px 5px;margin-right: 9px} .art-toolbar-span:hover{color:#1abc9c;}';
+        Tool.addCss(css + toolbar_span + floatToolbar_span + floatAuxiliaryTool_li)
     }
     setFloatAuxiliaryTool(sel='hidden'){
         if(sel == 'hidden'){
@@ -108,7 +109,7 @@ class Tool{
                     mdId += this.artText.editor.mdFileName;
                 }
                 localStorage[mdId] = this.artText.editor.getMd();
-                art_articles[mdId] = {ids: [mdId], time: timestamp}
+                art_articles[mdId] = {ids: [mdId], time: timestamp, name: mdId}
                 localStorage.art_articles = JSON.stringify(art_articles);
             }
             message(this.artText, 'md保存成功', 'success');
@@ -129,5 +130,5 @@ class Tool{
         return span;
     }
 }
-
+let css = '.art-VersionHistory-selected{color: #1aba9c}'
 export default Tool

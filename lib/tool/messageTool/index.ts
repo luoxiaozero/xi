@@ -16,6 +16,8 @@ export function message(artText: ArtText, message: string, type: string='null'){
     root.style.width = '340px';
     root.style.padding = '1px 10px 1px 15px'
     root.style.transition = 'opacity .3s,transform .4s,top .4s,-webkit-transform .4s';
+    root.style.zIndex = '1000';
+    
     root.style.overflow = 'hidden';
 
     let p = document.createElement('p');
