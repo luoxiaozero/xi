@@ -7,8 +7,8 @@ const bold = {tag: 'b', "left": "**", "right": "**", "re": /(\*{2})([^\*].*?)(\*
 const italic = {tag: 'i', "left": "*", "right": "*", "re": /(\*)([^\*].*?)(\*)/, "fun":italicFun}
 const bi = {tag: 'bi', "left": "***", "right": "***", "re": /(\*{3})([^\*].*?)(\*{3})/, "fun":biFun}
 const inline_code = {tag: 'code', "left": "`", "right": "`", "re": /`[^`]+`/, "fun": inlineCodeFun}
-const img = {tag: 'img', "left": "![", "centre": "](", "right": ")","re": /!\[.*\]\(.*\)/, "fun": imgFun}
-const a = {tag: 'a', "left": "[", "centre": "](", "right": ")", "re": /\[.*\]\(.*\)/, "fun": aFun}
+const img = {tag: 'img', "left": "![", "centre": "](", "right": ")","re": /!\[.*?\]\(.*?\)/, "fun": imgFun}
+const a = {tag: 'a', "left": "[", "centre": "](", "right": ")", "re": /\[.*?\]\(.*?\)/, "fun": aFun}
 const math = {tag: 'math', "left": "$", "right": "$", "re": /\$.*?\$/, "fun": mathFun}
 const mark = {tag: 'mark', "left": "==", "right": "==", "re": /\={2}[^\=].*?\={2}/, "fun":markFun}
 const del = {tag: 'del', "left": "~~", "right": "~~", "re": /~{2}.*?~{2}/, "fun":delFun}

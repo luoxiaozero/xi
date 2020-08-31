@@ -15,7 +15,8 @@ class Editor{
     editorMdDom: HTMLTextAreaElement;
     editorDom: HTMLDivElement;
     cursor: Cursor;
-    mdFileName: String; 
+    mdFileName: String;
+    directory: VNode[];
     
     constructor(artText: ArtText, container: HTMLHtmlElement) {
         this.artText = artText;   
@@ -25,6 +26,7 @@ class Editor{
 
         this.cursor = new Cursor(this.editorHtmlDom);  
         this.mdFileName = null;  
+        this.directory = [];
     } 
     createRootNode(){
         let p = new VNode("p", {}, new VNode("br"))
@@ -261,6 +263,15 @@ class Editor{
         }
 
         return true;
+    }
+    getDirectory(): VNode[]{
+        this.directory = [];
+        for(let i = 0; i < this.editorHtmlNode.childNodes.length; i++){
+            if(/^h\d$/.test(this.editorHtmlNode.childNodes[i].nodeName)){
+                this.directory.push(this.editorHtmlNode.childNodes[i]);
+            }
+        }
+        return this.directory;
     }
     render(){
         this.cursor.getSelection();

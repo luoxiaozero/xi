@@ -13,13 +13,36 @@ function exportMdFile(content:string, filename:string){
     // 然后移除
     document.body.removeChild(ele);
 }
+function importMdFile(artText: ArtText){
+    let ele = document.createElement('input');
+    ele.type = 'file';
+    ele.accept = '.md';
+    ele.style.display = 'none';
+
+    document.body.appendChild(ele);
+    ele.click();
+    ele.onchange = () => {
+        const reader = new FileReader()
+        reader.onload = ()=>{
+            console.log(reader.result.toString())
+            artText.editor.openFile(reader.result.toString(), ele.files[0].name);
+            console.log(artText.editor.editorHtmlNode)
+        }
+        reader.readAsText(ele.files[0],'utf8');
+    }
+    document.body.removeChild(ele);
+}
 function exportMdFileInit(artText: ArtText){
     function fun() {
         exportMdFile(artText.editor.getMd(), '123.md');
     }
+    function fun1() {
+        importMdFile(artText);
+    }
     function closure(): Function{
         function c(){
-            artText.tool.addTool('导出md', fun);
+            artText.tool.addTool('导入', fun1);
+            artText.tool.addTool('导出', fun);
         }
         return c;
     }

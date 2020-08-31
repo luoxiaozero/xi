@@ -4,6 +4,7 @@ import {message} from './messageTool'
 import ArtText from '../index';
 import * as defaultFun from './default'
 import {toolbarTool} from './toolbarTool'
+import VersionHistory from './versionHistoryTool';
 
 class Tool{
     static loadScript = defaultFun.loadScript;
@@ -17,14 +18,14 @@ class Tool{
     toolbar: HTMLDivElement;
     floatAuxiliaryTool: HTMLDivElement;
     floatToolbar: HTMLDivElement;
-    dialog: HTMLDivElement;
+    versionHistory: VersionHistory;
     mdHtml: HTMLSpanElement;
 
     constructor(artText: ArtText, container: HTMLHtmlElement){
         this.artText = artText;
         this.container = container;
 
-        this.dialog = null;
+        this.versionHistory = new VersionHistory(artText);
         this.toolbar = null;
         this.floatAuxiliaryTool = null;
         this.floatToolbar = null;
@@ -49,7 +50,6 @@ class Tool{
 
         this.addDefaultTool();
         Tool.addCss('.art-toolbar-span{padding:5px 5px;margin-right: 9px} .art-toolbar-span:hover{color:#1abc9c;}');
-
     }
     setFloatAuxiliaryTool(sel='hidden'){
         if(sel == 'hidden'){
@@ -93,25 +93,35 @@ class Tool{
                 this.artText.editor.closeTextarea();
             }
         });
-        
-        this.addTool('保存本地', 
-        ()=>{localStorage.md = this.artText.editor.getMd();message(this.artText, 'md保存成功', 'success');});
+        this.addTool('历史', 
+        ()=>{ this.versionHistory.open()});
 
-        this.addTool('本地载入', 
-        ()=>{this.artText.editor.setMd(localStorage.md); message(this.artText, 'md载入成功', 'success');});
+        this.addTool('保存', 
+        ()=>{
+            let art_articles = JSON.parse(localStorage.art_articles);
+            if(this.artText.editor.mdFileName && art_articles.hasOwnProperty(this.artText.editor.mdFileName)){
+                // pass
+            }else{
+                let timestamp=new Date().getTime();
+                let mdId = 'art_md_' + timestamp + '_';
+                if(this.artText.editor.mdFileName){
+                    mdId += this.artText.editor.mdFileName;
+                }
+                localStorage[mdId] = this.artText.editor.getMd();
+                art_articles[mdId] = {ids: [mdId], time: timestamp}
+                localStorage.art_articles = JSON.stringify(art_articles);
+            }
+            message(this.artText, 'md保存成功', 'success');
+        });
+
         this.addTool('清空', 
         ()=>{this.artText.editor.emptyEditor(); message(this.artText, '清空成功', 'success');});
-        this.addTool('<span style="position: absolute;right: 12px;color:#1abc9c" >ATTB</span>', () => {message(this.artText, '点击了一下');})
+        this.addTool('<span style="position: absolute;right: 12px;color:#1abc9c" >ATTB</span>', () => {message(this.artText, '点击了一下');}, false)
     }
-    setDialog(header, body, footer=''){
-        footer;
-        this.dialog.style.display = 'block';
-        (<HTMLDivElement>this.dialog.childNodes[0]).innerHTML = header;
-        this.dialog.childNodes[1].appendChild(body);
-    }
-    addTool(title: string, event: Function): HTMLSpanElement{
+    addTool(title: string, event: Function, addDefaultCss: boolean=true): HTMLSpanElement{
         let span = document.createElement('span');
-        span.setAttribute('class', 'art-toolbar-span')
+        if(addDefaultCss)
+            span.setAttribute('class', 'art-toolbar-span')
         span.style.cursor = 'pointer';
         span.innerHTML = title;
         span.addEventListener('click', <EventListenerOrEventListenerObject>event);

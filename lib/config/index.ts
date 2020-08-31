@@ -35,6 +35,9 @@ class Config{
             this.hljs = {js: 'https://libs.cdnjs.net/highlight.js/10.1.2/highlight.min.js', css: null}
         }
         this.theme = new Map([['backgroundColor', '#fff'], ['color', '#1abc9c']]);
+        if(localStorage.art_config == undefined){
+            localStorage.art_config = JSON.stringify({articles: 'art_articles'})
+        }
     }
 }
 export default Config
