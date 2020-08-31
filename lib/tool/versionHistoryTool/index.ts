@@ -24,7 +24,7 @@ class VersionHistory {
         this.root.style.boxShadow = '0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)';
         this.root.style.borderRadius = '2px';
         this.root.style.zIndex = '5'
-        this.root.style.display = 'flex';
+        this.root.style.display = 'none';
 
         this.maskLayer = document.createElement('div');
         this.maskLayer.style.position = 'fixed';
@@ -34,6 +34,7 @@ class VersionHistory {
         this.maskLayer.style.left = '0';
         this.maskLayer.style.background = 'rgba(26,26,26,.65)';
         this.maskLayer.style.zIndex = '1';
+        this.maskLayer.style.display = 'none';
 
         let closeSpan = document.createElement('span');
         closeSpan.style.position = 'absolute';
@@ -123,7 +124,6 @@ class VersionHistory {
         this.root.appendChild(dialogMain);
         artText.container.appendChild(this.root);
         artText.container.appendChild(this.maskLayer);
-        this.open();
     }
     open() {
         this.root.style.display = 'flex';
