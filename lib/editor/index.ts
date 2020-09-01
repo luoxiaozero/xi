@@ -4,6 +4,7 @@ import ArtText from "../../lib"
 import Config from "../config"
 import Tool from "../tool"
 import Cursor from "./cursor"
+import VTextNode from "../vNode/text"
 let win = window;
 class Editor{
     static hljs = null;
@@ -140,8 +141,24 @@ class Editor{
             let dom = this.editorHtmlDom.childNodes[location.anchorAlineOffset];
             if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(md)){
                 let hr = document.createElement('hr'); 
-                this.editorHtmlDom.replaceChild(hr, this.editorHtmlDom.childNodes[location.anchorAlineOffset]); 
+                this.editorHtmlDom.replaceChild(hr, dom); 
                 Cursor.setCursor(hr, 0);
+                return false;
+            } else if(/^\[(TOC)|(toc)\]$/.test(md)){
+                let div = document.createElement('div'); 
+                div.setAttribute('class', 'art-shield art-toc');
+                div.setAttribute('contenteditable', 'false')
+
+                let p = document.createElement('p');
+                p.innerHTML = '<br/>';
+                if(dom.nextSibling)
+                    dom.parentNode.insertBefore(p, dom.nextSibling);
+                else
+                    dom.parentNode.appendChild(p);
+
+                this.editorHtmlDom.replaceChild(div, dom); 
+                this.updateToc();
+                Cursor.setCursor(p, 0);
                 return false;
             }else if(/^\|.*\|/.test(md)){
                 // 生成table
@@ -279,7 +296,7 @@ class Editor{
         let vnodes = VNode.domToNode(this.editorHtmlDom) as VNode;
         this.editorHtmlNode.childNodes = vnodes.childNodes;
         this.editorHtmlNode.dispose();
-
+        this.updateToc();
         // this.container.blur();
         if(this.artText.config.renderFlag){
             this.editorHtmlNode.render(this.editorHtmlDom)
@@ -290,6 +307,25 @@ class Editor{
         }
         this.cursor.setSelection();
         
+    }
+    updateToc(){
+        let tocs = [];
+        let directory = [];
+        for(let vnode of this.editorHtmlNode.childNodes){
+            if(/^h\d$/.test(vnode.nodeName)){
+                let md = vnode.getMd();
+                md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
+                let a = new VNode('a', {href: '#' + md}, new VTextNode(vnode.getText()))
+                let d = new VNode('p', {class: 'art-toc-' + vnode.nodeName}, a)
+                directory.push(d);
+            }else if(vnode.attr.class && /art-toc/.test(vnode.attr.class)){
+                tocs.push(vnode);
+            }
+        }
+        for(let toc of tocs){
+            toc.childNodes = directory;
+        }
+        console.log(tocs, directory)
     }
     getMd(){
         let md = '';
@@ -303,6 +339,7 @@ class Editor{
         if(childNodes){
             this.editorHtmlNode.childNodes = childNodes;
         }
+        this.updateToc();
         this.editorHtmlNode.render(this.editorHtmlDom);
         if(Editor.hljs){
             Editor.hljs.initHighlighting.called = false;

@@ -177,6 +177,10 @@ function textToNode(text: string){
             nodes.push(new VNode("hr"));
             if(i + 1 < len && /^\s*$/.test(rows[i + 1]))
                 i++;            
+        } else if(/^\[(TOC)|(toc)\]$/.test(rows[i])){
+            nodes.push(new VNode('div', {class: 'art-shield art-toc', contenteditable: 'false', __dom__: 'toc'}));
+            if(i + 1 < len && /^\s*$/.test(rows[i + 1]))
+                i++; 
         }else if(child = aline(rows[i])){
             // 单行成功
             child.forEach(element => {

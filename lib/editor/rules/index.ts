@@ -136,27 +136,51 @@ export const alineRule = [h1, h2, h3, h4, h5, h6]
 
 function h1Fun(text: string){
   let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("# ")), ...inline(text.substring(2))];
-  return [new VNode("h1", {}, child)]
+  let h1 = new VNode("h1", {}, child);
+  let md = h1.getMd();
+  md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
+  h1.childNodes.unshift(new VNode('a', {class: 'art-shield', name: md}, null));
+  return [h1]
 }
 function h2Fun(text: string){
   let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("## ")), ...inline(text.substring(3))];
-  return [new VNode("h2", {}, child)]
+  let h2 = new VNode("h2", {}, child);
+  let md = h2.getMd();
+  md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
+  h2.childNodes.unshift(new VNode('a', {class: 'art-shield', name: md}, null));
+  return [h2]
 }
 function h3Fun(text: string){
   let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("### ")), ...inline(text.substring(4))];
-  return [new VNode("h3", {}, child)]
+  let h3 = new VNode("h3", {}, child);
+  let md = h3.getMd();
+  md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
+  h3.childNodes.unshift(new VNode('a', {class: 'art-shield', name: md}, null));
+  return [h3]
 }
 function h4Fun(text: string){
   let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("#### ")), ...inline(text.substring(5))];
-  return [new VNode("h4", {}, child)]
+  let h4 = new VNode("h4", {}, child);
+  let md = h4.getMd();
+  md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
+  h4.childNodes.unshift(new VNode('a', {class: 'art-shield', name: md}, null));
+  return [h4]
 }
 function h5Fun(text: string){
   let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("##### ")), ...inline(text.substring(6))];
-  return [new VNode("h5", {}, child)]
+  let h5 = new VNode("h5", {}, child);
+  let md = h5.getMd();
+  md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
+  h5.childNodes.unshift(new VNode('a', {class: 'art-shield', name: md}, null));
+  return [h5]
 }
 function h6Fun(text: string){
   let child = [new VNode("span", {"class": "art-hide"}, new VTextNode("###### ")), ...inline(text.substring(7))];
-  return [new VNode("h6", {}, child)]
+  let h6 = new VNode("h6", {}, child);
+  let md = h6.getMd();
+  md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
+  h6.childNodes.unshift(new VNode('a', {class: 'art-shield', name: md}, null));
+  return [h6]
 }
 
 /* 

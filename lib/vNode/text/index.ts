@@ -26,5 +26,9 @@ class VTextNode{
     getMd(): string{
         return this.text;
     }
+
+    getText(): string{
+        return this.text;
+    }
 }
 export default VTextNode;

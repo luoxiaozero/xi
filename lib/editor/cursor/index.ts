@@ -1,5 +1,6 @@
 import codeTool from "../../tool/codeTool"
 import tableTool from "../../tool/tableTool"
+import tocTool from '../../tool/tocTool'
 import Tool from "../../tool";
 class Location {
     anchorInlineOffset: number;
@@ -116,23 +117,32 @@ export default class Cursor {
         return null
     }
     setTool(alineDom: HTMLElement): boolean {
+        let tools = this.editorHtmlDom.getElementsByClassName('art-tocTool');
+        for (let i = 0; i < tools.length; i++) {
+            (<HTMLElement>tools[i]).style.visibility = 'hidden';
+        }
+
         if(Tool.hasClass(alineDom, 'art-shield')){
+            if(Tool.hasClass(alineDom, 'art-toc')){
+                if (alineDom.previousSibling && Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-tocTool")) {
+                    (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
+                } else {
+                    alineDom.parentNode.insertBefore(tocTool(), alineDom);
+                }
+                return true;
+            }
             return false;
         }
-        let pres = this.editorHtmlDom.getElementsByTagName('pre');
-        for (let i = 0; i < pres.length; i++) {
-            if (Tool.hasClass(pres[i].previousSibling as HTMLElement, "art-codeTool"))
-                (<HTMLElement>pres[i].previousSibling).style.visibility = 'hidden';
+        tools = this.editorHtmlDom.getElementsByClassName('art-codeTool');
+        for (let i = 0; i < tools.length; i++) {
+            (<HTMLElement>tools[i]).style.visibility = 'hidden';
         }
-
-        let tables = this.editorHtmlDom.getElementsByTagName('table');
-
-        for (let i = 0; i < tables.length; i++) {
-            if (Tool.hasClass(tables[i].previousSibling as HTMLElement, "art-tableTool"))
-                (<HTMLElement>tables[i].previousSibling).style.visibility = 'hidden';
-
+        
+        tools = this.editorHtmlDom.getElementsByClassName('art-tableTool');
+        for (let i = 0; i < tools.length; i++) {
+            (<HTMLElement>tools[i]).style.visibility = 'hidden';
         }
-
+        
         if (alineDom.nodeName == "PRE") {
             if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeTool")) {
                 (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';

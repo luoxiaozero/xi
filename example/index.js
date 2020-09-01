@@ -6,6 +6,7 @@ import hljs from "../external/js/highlight.min.js"
 import './tu.jpg'
 
 let md = '\
+[TOC]\n\
 2020 0818\n\
 ## markdown 编辑  [百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
 Markdown是一种可以使用普通文本编辑器编写的标记语言，通过简单的标记语法，它可以使普通文本内容具有一定的格式。\n\

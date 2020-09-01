@@ -130,5 +130,6 @@ class Tool{
         return span;
     }
 }
-let css = '.art-VersionHistory-selected{color: #1aba9c}'
+let css = '.art-VersionHistory-selected{color: #1aba9c}\n\
+.art-toc{border: 1px dashed #999;padding: 6px 15px;margin: 35px 0 15px;font-weight:500;}.art-toc p{margin-bottom: 2px}.art-toc a{border-bottom: none;color: #4183c4}.art-toc-h2{margin-left:2em}.art-toc-h3{margin-left:4em}.art-toc-h4{margin-left:6em}.art-toc-h5{margin-left:8em}.art-toc-h6{margin-left:10em}'
 export default Tool

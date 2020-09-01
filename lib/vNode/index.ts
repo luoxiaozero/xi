@@ -1,8 +1,8 @@
 import tableTool from "../tool/tableTool"
 import imgTool from "../tool/imgTool"
 import codeTool from "../tool/codeTool"
-import { textToNode } from "../editor/toNode/index"
 import inline from "../editor/inline/index"
+import aline from '../editor/aline'
 import VTextNode from "./text";
 import Editor from "../editor"
 import Tool from "../tool"
@@ -121,7 +121,9 @@ class VNode {
 
     getMd(model = 'editor') {
         let md = ""
-        if (this.nodeName == "a") {
+        if(/art-toc/.test(this.attr['class'])){
+            return '[TOC]\n'
+        }else if (this.nodeName == "a" && this.childNodes.length > 0) {
             md += this.childNodes[0].text;
         } else if (this.nodeName == "hr" && model == 'read') {
             md += '***\n';
@@ -195,6 +197,17 @@ class VNode {
         }
         return md;
     }
+    getText(): string{
+        let text = '';
+        for(let vnode of this.childNodes){
+            if(vnode.nodeName == '#text'){
+                text += vnode.getText();
+            }else if(vnode.attr['class'] != undefined && !/(art\-shield)|(art\-hide)|(art\-show)/.test(vnode.attr['class'])){
+                text += vnode.getText();
+            }
+        }
+        return text
+    }
     dispose() {
         if (this.attr['__root__'] == true) {
             for (let i = 0; i < this.childNodes.length; i++) {
@@ -264,8 +277,12 @@ class VNode {
         } else if (this.nodeName == "hr") {
             return null
         } else {
-            let nodes = textToNode(this.getMd());
-            return nodes;
+            // let nodes = textToNode(this.getMd());
+            let nodes = aline(this.getMd());
+            if(nodes)
+                return nodes;
+            else
+                return [new VNode("p", {}, inline(this.getMd()))];
         }
         return null
     }
