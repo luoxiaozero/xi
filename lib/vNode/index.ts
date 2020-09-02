@@ -55,13 +55,44 @@ class VNode {
         if (dom.nodeName.toLowerCase() == this.nodeName) {
             if (this.nodeName == "code") {
                 return null
-            } else if (Tool.hasClass(dom, "art-shield") && this.attr['__dom__'] == 'math' && Editor.katex) {
-                let math = (<HTMLElement>dom.childNodes[0]).getAttribute("art-math")
-                console.log(math)
-                if (math && this.childNodes[0].attr["art-math"] != math) {
-                    (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.katex.renderToString(this.childNodes[0].attr["art-math"], { throwOnError: false });
-                    (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", this.childNodes[0].attr["art-math"]);
+            } else if (Tool.hasClass(dom, "art-shield")) {
+                if(Tool.hasClass(dom, "art-flowTool") && Editor.flowchart && Editor.Raphael){
+                    dom.innerHTML = ''
+                    let md = (<HTMLPreElement>dom.previousSibling).innerText;
+                    try{
+                        let chart = Editor.flowchart.parse(md);
+                        chart.drawSVG(dom);
+                        (<HTMLPreElement>dom.previousSibling).style.display = 'none';
+                        dom.onclick = function click(){
+                            if(Tool.hasClass(this as HTMLDivElement, "art-flowTool")){
+                                (<HTMLPreElement>(<HTMLDivElement>this).previousSibling).style.display = 'inherit';
+                            }}
+                    }catch(error){
+                        console.error('flowchart发生错误')
+                        console.error(error);
+                    }
+                }else if(this.attr['__dom__'] == 'math' && Editor.katex){
+                    let math = (<HTMLElement>dom.childNodes[0]).getAttribute("art-math")
+                    if (math && this.childNodes[0].attr["art-math"] != math) {
+                        (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.katex.renderToString(this.childNodes[0].attr["art-math"], { throwOnError: false });
+                        (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", this.childNodes[0].attr["art-math"]);
+                    }
+                }else{
+                    for (let i = 0, j = 0; i < dom.childNodes.length || j < this.childNodes.length; i++, j++) {
+                        if (i >= dom.childNodes.length) {
+                            dom.appendChild(this.childNodes[j].newDom());
+                        } else if (j >= this.childNodes.length) {
+                            let len = dom.childNodes.length;
+                            while (i < len) {
+                                dom.removeChild(dom.lastChild);
+                                i++;
+                            }
+                        } else {
+                            this.childNodes[j].render(dom.childNodes[i])
+                        }
+                    }
                 }
+                
                 for (let key in this.attr) {
                     if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
                         dom.setAttribute(key, this.attr[key]);
@@ -210,7 +241,7 @@ class VNode {
     }
     dispose() {
         if (this.attr['__root__'] == true) {
-            for (let i = 0; i < this.childNodes.length; i++) {
+            for (let i = this.childNodes.length - 1; i >= 0 ; i--) {
                 let nodes = this.childNodes[i].dispose();
                 if (nodes && nodes.length > 0) {
                     this.childNodes.splice(i, 1, ...nodes);

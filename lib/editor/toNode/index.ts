@@ -97,7 +97,6 @@ function textToNode(text: string){
             }
             if(!(i < len && /^\s*$/.test(rows[i + 1])))
                 i--;
-            console.log(child)
             nodes.push(buo(new VNode("blockquote", {}, child)))
         }else if(/^\*\s/.test(rows[i])){
             child = [];
@@ -132,10 +131,14 @@ function textToNode(text: string){
                 let code;
                 if(lang != undefined && lang != ''){
                     code = new VNode("code", {"class": "lang-" + lang}, new VTextNode(temp));
+                    nodes.push(new VNode("pre", {'style': 'margin-top:35px', class: 'art-pre-' + lang}, code));
+                    if(lang == 'flow'){
+                        nodes.push(new VNode("div", {class: 'art-shield art-flowTool', 'contenteditable': 'false'}, []));
+                    }
                 }else{
                     code = new VNode("code", {}, new VTextNode(temp));
+                    nodes.push(new VNode("pre", {'style': 'margin-top:35px'}, code));
                 }    
-                nodes.push(new VNode("pre", {'style': ' margin-top:35px'}, code));
                 if(i + 1 < len && /^\s*$/.test(rows[i + 1]))
                     i++;
             }else{

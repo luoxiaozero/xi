@@ -10,6 +10,7 @@ class Config{
     runModel: RunModel;
     katex: any;
     hljs: any;
+    flowchart: any;
     theme: Map<any, any>
     constructor(config) {
         this.renderFlag = true;
@@ -34,6 +35,13 @@ class Config{
         }else{
             this.hljs = {js: 'https://libs.cdnjs.net/highlight.js/10.1.2/highlight.min.js', css: null}
         }
+
+        if(config.flowchart){
+            this.flowchart = config.flowchart;
+        }else{
+            this.flowchart = {js: ['https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.14.0/flowchart.min.js'], css: null}
+        }
+
         this.theme = new Map([['backgroundColor', '#fff'], ['color', '#1abc9c']]);
         if(localStorage.art_config == undefined){
             localStorage.art_config = JSON.stringify({articles: 'art_articles'})

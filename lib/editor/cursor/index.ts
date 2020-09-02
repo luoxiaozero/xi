@@ -142,12 +142,22 @@ export default class Cursor {
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
         }
+
+        tools = this.editorHtmlDom.getElementsByClassName('art-flowTool');
+        for (let i = 0; i < tools.length; i++) {
+            (<HTMLElement>tools[i]).style.border = 'inherit';
+            //(<HTMLElement>tools[i].previousSibling).style.display = 'none';
+        }
         
         if (alineDom.nodeName == "PRE") {
             if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeTool")) {
                 (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
             } else {
                 alineDom.parentNode.insertBefore(codeTool(), alineDom);
+            }
+            if (Tool.hasClass(alineDom as HTMLElement, "art-pre-flow")) {
+                alineDom.style.display = 'inherit';
+                (<HTMLDivElement>alineDom.nextSibling).style.border = '1px solid #999';
             }
             return true;
         }

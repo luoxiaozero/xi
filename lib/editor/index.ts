@@ -7,8 +7,40 @@ import Cursor from "./cursor"
 import VTextNode from "../vNode/text"
 let win = window;
 class Editor{
-    static hljs = null;
-    static katex = null;
+    static artTexts: ArtText[] = [];
+    static updataArtTextRender(){
+        for(let art of Editor.artTexts){
+            art.editor.render()
+        }
+    }
+    static _hljs = null;
+    static get hljs(){
+        return Editor._hljs;
+    }
+    static set hljs(value){
+        Editor._hljs = value;
+        Editor.updataArtTextRender();
+    }
+
+    static _katex = null;
+    static get katex(){
+        return Editor._katex;
+    }
+    static set katex(value){
+        Editor._katex = value;
+        Editor.updataArtTextRender();
+    }
+
+    static _flowchart = null;
+    static get flowchart(){
+        return Editor._flowchart;
+    }
+    static set flowchart(value){
+        Editor._flowchart = value;
+        Editor.updataArtTextRender();
+    }
+
+    static Raphael = null;
     artText: ArtText;
     container: HTMLHtmlElement;
     editorHtmlNode: VNode;
@@ -28,6 +60,7 @@ class Editor{
         this.cursor = new Cursor(this.editorHtmlDom);  
         this.mdFileName = null;  
         this.directory = [];
+        Editor.artTexts.push(artText);
     } 
     createRootNode(){
         let p = new VNode("p", {}, new VNode("br"))
@@ -104,6 +137,13 @@ class Editor{
         }else if(this.artText.config.katex.css){
             Tool.loadCss(this.artText.config.katex.css)
         }
+
+        if(this.artText.config.flowchart.jsFun){
+            Editor.flowchart = this.artText.config.flowchart.jsFun;
+        }else if(this.artText.config.flowchart.js){
+            Tool.loadScript(this.artText.config.flowchart.js[0], ()=>{Editor.Raphael = win['Raphael']})
+            Tool.loadScript(this.artText.config.flowchart.js[1], ()=>{Editor.flowchart = win['flowchart']})
+        }
         this.setMd(this.artText.config.md)
     }
     click(key='left'){
@@ -137,6 +177,8 @@ class Editor{
     enterRender(){
         let location = this.cursor.getSelection();
         if(location){
+            let vnodes = VNode.domToNode(this.editorHtmlDom) as VNode;
+            this.editorHtmlNode.childNodes = vnodes.childNodes;
             let md = this.editorHtmlNode.childNodes[location.anchorAlineOffset].getMd();
             let dom = this.editorHtmlDom.childNodes[location.anchorAlineOffset];
             if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(md)){
@@ -191,11 +233,19 @@ class Editor{
                 let lang = md.match(/^```\s*([^\s]*?)\s*$/)[1];
                 if(lang != undefined && lang != ''){
                     code.setAttribute('class', 'lang-' + lang);
+                    pre.setAttribute('class', 'art-pre-' + lang)
+                    if(lang == 'flow'){
+                        let div = document.createElement('div')
+                        div.setAttribute('class', 'art-shield art-flowTool');
+                        div.setAttribute('art-flow', '')
+                        div.setAttribute('contenteditable', 'false');
+                        this.editorHtmlDom.insertBefore(div, this.editorHtmlDom.childNodes[location.anchorAlineOffset].nextSibling); 
+                    }
                 }
                 pre.appendChild(code);
 
                 this.editorHtmlDom.replaceChild(pre, this.editorHtmlDom.childNodes[location.anchorAlineOffset]); 
-                Cursor.setCursor(code.childNodes[0].childNodes[0], 0);
+                Cursor.setCursor(code, 0);
                 return false;
             }else if(location.anchorNode.parentNode.nodeName == 'BLOCKQUOTE' && location.anchorOffset == 0 && location.anchorNode.nodeName == 'P'
                         && location.anchorNode.childNodes.length == 1 && location.anchorNode.childNodes[0].nodeName == 'BR'){
@@ -318,7 +368,7 @@ class Editor{
                 let a = new VNode('a', {href: '#' + md}, new VTextNode(vnode.getText()))
                 let d = new VNode('p', {class: 'art-toc-' + vnode.nodeName}, a)
                 directory.push(d);
-            }else if(vnode.attr.class && /art-toc/.test(vnode.attr.class)){
+            }else if(vnode.constructor.name == 'VNode' && vnode.attr.class && /art-toc/.test(vnode.attr.class)){
                 tocs.push(vnode);
             }
         }
