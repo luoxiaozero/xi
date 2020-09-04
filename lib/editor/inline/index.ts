@@ -16,7 +16,7 @@ function inline(text: string) {
                     break;
                 }
                 if(reTrue){
-                    if(reTrue.index > reMatch.index){
+                    if(reTrue[0].index > reMatch.index){
                         reTrue = [reMatch, inlineRules[i]];
                     }
                 }else{
