@@ -78,7 +78,7 @@ class VNode {
                         (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", this.childNodes[0].attr["art-math"]);
                     }
                 }else{
-                    for (let i = 0, j = 0; i < dom.childNodes.length || j < this.childNodes.length; i++, j++) {
+                    /*for (let i = 0, j = 0; i < dom.childNodes.length || j < this.childNodes.length; i++, j++) {
                         if (i >= dom.childNodes.length) {
                             dom.appendChild(this.childNodes[j].newDom());
                         } else if (j >= this.childNodes.length) {
@@ -90,7 +90,7 @@ class VNode {
                         } else {
                             this.childNodes[j].render(dom.childNodes[i])
                         }
-                    }
+                    }*/
                 }
                 
                 for (let key in this.attr) {
@@ -133,6 +133,13 @@ class VNode {
                 let it = dom.attributes[i];
                 vnode.attr[it.localName] = it.value;
             }
+            if(dom.nodeName == 'INPUT'){
+                if((<HTMLInputElement>dom).checked){
+                    vnode.attr['checked'] = 'checked';
+                }else if(vnode.attr['checked']){
+                    delete vnode.attr['checked'];
+                }
+            }
             for (let i = 0; i < dom.childNodes.length; i++) {
                 vnode.childNodes.push(VNode.domToNode(dom.childNodes[i] as HTMLElement));
             }
@@ -150,7 +157,7 @@ class VNode {
         }
     }
 
-    getMd(model = 'editor') {
+    getMd(model='editor') {
         let md = ""
         if(/art-toc/.test(this.attr['class'])){
             return '[TOC]\n'

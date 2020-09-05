@@ -375,7 +375,6 @@ class Editor{
         for(let toc of tocs){
             toc.childNodes = directory;
         }
-        console.log(tocs, directory)
     }
     getMd(){
         let md = '';
