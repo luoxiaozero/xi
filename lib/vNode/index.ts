@@ -3,7 +3,7 @@ import imgTool from "../tool/imgTool"
 import codeTool from "../tool/codeTool"
 import inline from "../editor/inline/index"
 import aline from '../editor/aline'
-import VTextNode from "./text";
+import VTextNode from "./vTextNode";
 import Editor from "../editor"
 import Tool from "../tool"
 
@@ -11,6 +11,9 @@ class VNode {
     nodeName: string;
     attr: {};
     childNodes: any[];
+    dom: HTMLElement;
+    parentNode: VNode;
+
     constructor(nodeName: string, attr: {} = {}, childNodes: any[] | VTextNode | VNode = null) {
         this.nodeName = nodeName;
         this.attr = attr;
@@ -21,6 +24,10 @@ class VNode {
         } else {
             this.childNodes = [childNodes]
         }
+        for(let node of this.childNodes){
+            node.parentNode = this;
+        }
+        this.parentNode = null;
     }
 
     newDom(): any {
@@ -124,37 +131,18 @@ class VNode {
         return null;
     }
 
-    static domToNode(dom: HTMLElement): VTextNode | VNode {
-        if (dom.nodeName == '#text') {
-            return new VTextNode(dom.nodeValue);
-        } else {
-            let vnode = new VNode(dom.nodeName.toLowerCase(), {}, []);
-            for (let i = 0; i < dom.attributes.length; i++) {
-                let it = dom.attributes[i];
-                vnode.attr[it.localName] = it.value;
-            }
-            if(dom.nodeName == 'INPUT'){
-                if((<HTMLInputElement>dom).checked){
-                    vnode.attr['checked'] = 'checked';
-                }else if(vnode.attr['checked']){
-                    delete vnode.attr['checked'];
-                }
-            }
-            for (let i = 0; i < dom.childNodes.length; i++) {
-                vnode.childNodes.push(VNode.domToNode(dom.childNodes[i] as HTMLElement));
-            }
-            return vnode;
-        }
+    appendChild(vnode: VNode | VTextNode) {
+        vnode.parentNode = this;
+        this.childNodes.push(vnode);
     }
-
-    appendChild(node) {
-        this.childNodes.push(node);
-    }
-    replaceChild(newNode, oldNode) {
+    replaceChild(newNode: VNode | VTextNode, oldNode: VNode | VTextNode): boolean {
         let index = this.childNodes.indexOf(oldNode)
         if (index != -1) {
+            newNode.parentNode = this;
             this.childNodes[index] = newNode;
+            return true;
         }
+        return false;
     }
 
     getMd(model='editor') {

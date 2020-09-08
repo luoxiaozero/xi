@@ -1,10 +1,10 @@
-import {textToNode} from "./toNode/index"
+import {textToNode, domToNode} from "./toNode/index"
 import VNode from '../vNode/index'
 import ArtText from "../../lib"
 import Config from "../config"
 import Tool from "../tool"
 import Cursor from "./cursor"
-import VTextNode from "../vNode/text"
+import VTextNode from "../vNode/vTextNode"
 let win = window;
 class Editor{
     static artTexts: ArtText[] = [];
@@ -177,7 +177,7 @@ class Editor{
     enterRender(){
         let location = this.cursor.getSelection();
         if(location){
-            let vnodes = VNode.domToNode(this.editorHtmlDom) as VNode;
+            let vnodes = domToNode(this.editorHtmlDom) as VNode;
             this.editorHtmlNode.childNodes = vnodes.childNodes;
             let md = this.editorHtmlNode.childNodes[location.anchorAlineOffset].getMd();
             let dom = this.editorHtmlDom.childNodes[location.anchorAlineOffset];
@@ -331,20 +331,15 @@ class Editor{
 
         return true;
     }
-    getDirectory(): VNode[]{
-        this.directory = [];
-        for(let i = 0; i < this.editorHtmlNode.childNodes.length; i++){
-            if(/^h\d$/.test(this.editorHtmlNode.childNodes[i].nodeName)){
-                this.directory.push(this.editorHtmlNode.childNodes[i]);
-            }
-        }
-        return this.directory;
-    }
     render(){
         this.cursor.getSelection();
-        console.log(this.cursor.location)
-        let vnodes = VNode.domToNode(this.editorHtmlDom) as VNode;
-        this.editorHtmlNode.childNodes = vnodes.childNodes;
+        let vnode = domToNode(this.editorHtmlDom) as VNode;
+        if(vnode){
+            this.editorHtmlNode.childNodes = [];
+            vnode.childNodes.forEach((value)=>{
+                this.editorHtmlNode.appendChild(value);
+            })
+        }
         this.editorHtmlNode.dispose();
         this.updateToc();
         // this.container.blur();
@@ -386,7 +381,10 @@ class Editor{
     setMd(md: string){
         let childNodes = textToNode(md);
         if(childNodes){
-            this.editorHtmlNode.childNodes = childNodes;
+            this.editorHtmlNode.childNodes = [];
+            childNodes.forEach((value)=>{
+                this.editorHtmlNode.appendChild(value);
+            })
         }
         this.updateToc();
         this.editorHtmlNode.render(this.editorHtmlDom);

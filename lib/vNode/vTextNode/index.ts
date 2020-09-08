@@ -1,9 +1,12 @@
+import VNode from '..'
 class VTextNode{
     nodeName: string;
     text: string;
+    parentNode: VNode;
     constructor(text){
         this.nodeName = '#text';
         this.text = text;
+        this.parentNode = null;
     }
     
     newDom(){

@@ -1,7 +1,7 @@
 import inline from "../inline/index"
 import aline from "../aline/index"
 import VNode from "../../vNode"
-import VTextNode from "../../vNode/text"
+import VTextNode from "../../vNode/vTextNode"
 import {inlineRules} from '../rules/index'
 function uoDispose(text, nodeName){
     // 处理
@@ -255,4 +255,26 @@ function htmlToMd(html){
     }
     return md;
 }
-export {textToNode, htmlToMd};
+function domToNode(dom: HTMLElement): VTextNode | VNode {
+    if (dom.nodeName == '#text') {
+        return new VTextNode(dom.nodeValue);
+    } else {
+        let vnode = new VNode(dom.nodeName.toLowerCase(), {}, []);
+        for (let i = 0; i < dom.attributes.length; i++) {
+            let it = dom.attributes[i];
+            vnode.attr[it.localName] = it.value;
+        }
+        if(dom.nodeName == 'INPUT'){
+            if((<HTMLInputElement>dom).checked){
+                vnode.attr['checked'] = 'checked';
+            }else if(vnode.attr['checked']){
+                delete vnode.attr['checked'];
+            }
+        }
+        for (let i = 0; i < dom.childNodes.length; i++) {
+            vnode.childNodes.push(domToNode(dom.childNodes[i] as HTMLElement));
+        }
+        return vnode;
+    }
+}
+export {textToNode, htmlToMd, domToNode};

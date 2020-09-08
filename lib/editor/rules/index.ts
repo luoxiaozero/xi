@@ -1,4 +1,4 @@
-import VTextNode from "../../vNode/text"
+import VTextNode from "../../vNode/vTextNode"
 import VNode from "../../vNode"
 import inline from "../inline"
 import Editor from "../"

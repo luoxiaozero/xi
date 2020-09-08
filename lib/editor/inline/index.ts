@@ -1,5 +1,5 @@
 import { inlineRules } from "../rules/index"
-import VTextNode from "../../vNode/text"
+import VTextNode from "../../vNode/vTextNode"
 import VNode from "../../vNode"
 function inline(text: string) {
     if (text === "") {
