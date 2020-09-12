@@ -122,8 +122,8 @@ class VersionHistory {
         this.root.appendChild(closeSpan);
         this.root.appendChild(dialogSide);
         this.root.appendChild(dialogMain);
-        artText.container.appendChild(this.root);
-        artText.container.appendChild(this.maskLayer);
+        artText.rootDom.appendChild(this.root);
+        artText.rootDom.appendChild(this.maskLayer);
     }
     open() {
         this.root.style.display = 'flex';

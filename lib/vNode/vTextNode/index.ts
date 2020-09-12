@@ -2,15 +2,20 @@ import VNode from '..'
 class VTextNode{
     nodeName: string;
     text: string;
+    dom: Text;
     parentNode: VNode;
     constructor(text){
         this.nodeName = '#text';
         this.text = text;
         this.parentNode = null;
+        this.dom = null;
     }
-    
+    domToNode(): VTextNode{
+        return new VTextNode(this.dom.nodeValue);
+    }
     newDom(){
-        return document.createTextNode(this.text)
+        this.dom = document.createTextNode(this.text);
+        return this.dom;
     }
     render(dom){
         if(dom.nodeName.toLowerCase() == "#text"){

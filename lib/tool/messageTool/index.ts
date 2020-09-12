@@ -46,11 +46,11 @@ export function message(artText: ArtText, message: string, type: string='null'){
         root.style.borderColor = '#e1f3d8';
         root.style.color = '#F56C6C';
     }else{
-        root.style.backgroundColor = artText.config.theme.get('backgroundColor');
+        root.style.backgroundColor = artText.options.theme.backgroundColor;
         root.style.color = '#676767';
     }
 
-    setTimeout(()=>{artText.container.removeChild(root);},3000);
-    artText.container.appendChild(root);
+    setTimeout(()=>{artText.rootDom.removeChild(root);},3000);
+    artText.rootDom.appendChild(root);
     return root;
 }

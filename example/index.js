@@ -102,6 +102,6 @@ function uploadImg(img){
 }
 ArtText.use(uploadImg, {main: 'uploadImg'})
 const container = document.querySelector('#art');
-const art = new ArtText(container, {'md': md, 'hljs':{jsFun: hljs}});
+const art = new ArtText(container, {markdown: md, code:{jsFun: hljs}});
 window.art = art;
 art.init();

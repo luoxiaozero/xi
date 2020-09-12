@@ -36,7 +36,7 @@ export default class Cursor {
 
     editorHtmlDom: HTMLDivElement;
     location: Location;
-    constructor(editorHtmlDom: HTMLDivElement) {
+    constructor(editorHtmlDom) {
         this.editorHtmlDom = editorHtmlDom;
         this.location = null;
     }

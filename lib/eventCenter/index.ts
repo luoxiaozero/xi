@@ -2,26 +2,45 @@ import { htmlToMd } from "../editor/toNode/index"
 import ArtText from "../index";
 import { blod, italic, del, ins, sup, sub, mark } from "../tool/default";
 import Tool from "../tool";
+export function executeFutureEvent(target, name, descriptor) {
+    target;
+    let oldValue = descriptor.value;
 
+    descriptor.value = function() {
+        for (let art of ArtText.artTexts) {
+            art.eventCenter.executeFutureEvent('start-' + name)
+        }
+        oldValue.apply(this, arguments)
+        for (let art of ArtText.artTexts) {
+            art.eventCenter.executeFutureEvent('end-' + name)
+        }
+    };
+    return descriptor;
+}
 class EventCenter {
 
-    editorHtmlDom: HTMLDivElement;
+    editorHtmlDom: HTMLElement;
     uploadImg: Function;
     clickInfo: Map<string, number>;
     artText: ArtText;
     isComposition: boolean;
     futureEvent: Map<string, Function[]>;
+    observer: MutationObserver;
+    eventListeners: any[];
 
-    constructor(artText: ArtText, editorHtmlDom: HTMLDivElement) {
+    constructor(artText: ArtText) {
         this.artText = artText;
-        this.editorHtmlDom = editorHtmlDom;
+        this.editorHtmlDom = null;
         this.uploadImg = null;
         this.clickInfo = null;
         this.isComposition = false;
         this.futureEvent = new Map();
+        this.observer = new MutationObserver(this.observerCallback);
+        this.eventListeners = [];
     }
 
     init(): void {
+        this.editorHtmlDom = this.artText.editor.htmlNode.dom;
         this.addEventListener('keydown', this.keydown);
         this.addEventListener('keyup', this.keyup);
 
@@ -41,7 +60,25 @@ class EventCenter {
         // 拖拽事件
         this.addEventListener('drop', this.drop)
         // this.ondrag
+
+        // 设置observer的配置选项
+        //let config = { attributes: true, childList: true, subtree: true };
+
+        //this.observer.observe(this.editorHtmlDom, config);
     }
+    observerCallback(mutationsList, observer) {
+        observer;
+        for (var mutation of mutationsList) {
+            if (mutation.type == 'childList') {
+                console.log('A child node has been added or removed.');
+            }
+            else if (mutation.type == 'attributes') {
+                console.log('The ' + mutation.attributeName + ' attribute was modified.');
+            }
+
+        }
+    }
+
     addFutureEvent(name: string, fun: Function) {
         if (this.futureEvent.has(name)) {
             this.futureEvent.get(name).push(fun);
@@ -61,15 +98,22 @@ class EventCenter {
     addEventListener(eventName: string, fun: Function, useCapture: boolean = false): void {
         let _this = this;
         function closure(e) {
+            _this.artText.editor.cursor.getSelection();
             fun(e, _this);
         }
         this.editorHtmlDom.addEventListener(eventName, closure, useCapture);
+        this.eventListeners.push([eventName, closure, useCapture])
     }
 
     removeEventListener(eventName: string, fun: EventListenerOrEventListenerObject, useCapture: boolean = false): void {
         this.editorHtmlDom.removeEventListener(eventName, fun, useCapture);
     }
 
+    removeAllEventListener(){
+        for(let e of this.eventListeners){
+            this.removeEventListener(e[0], e[1], e[2]);
+        }
+    }
     keydown(e: KeyboardEvent, _this: EventCenter): boolean {
         let keyCode: number = e.keyCode;
         if (!_this.shortcutKey(e, _this.artText)) {
@@ -81,7 +125,7 @@ class EventCenter {
                 e.preventDefault();
                 return false;
             }
-        } else if (keyCode == 8){
+        } else if (keyCode == 8) {
             // 退格时渲染
             if (!_this.artText.editor.backRender()) {
                 e.preventDefault();

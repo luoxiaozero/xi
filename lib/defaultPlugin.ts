@@ -26,7 +26,7 @@ function importMdFile(artText: ArtText){
         reader.onload = ()=>{
             console.log(reader.result.toString())
             artText.editor.openFile(reader.result.toString(), ele.files[0].name);
-            console.log(artText.editor.editorHtmlNode)
+            console.log(artText.editor.htmlNode)
         }
         reader.readAsText(ele.files[0],'utf8');
     }
@@ -46,8 +46,6 @@ function exportMdFileInit(artText: ArtText){
         }
         return c;
     }
-    artText.eventCenter.addFutureEvent('init-end', closure());
+    artText.eventCenter.addFutureEvent('end-init', closure());
 }
-export let exportMdFileMap: Map<any, any> = new Map();
-exportMdFileMap.set('plugin', exportMdFile);
-exportMdFileMap.set('options', {'name': 'exportMdFile', 'init': exportMdFileInit});
+export let exportMdFileMap = {plugin: exportMdFile, options: {name: 'exportMdFile', init: exportMdFileInit}}

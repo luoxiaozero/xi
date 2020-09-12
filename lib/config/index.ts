@@ -1,51 +1,9 @@
-enum RunModel{
-    editor='editor', 
-    read= 'read'
+export const ART_DEFAULT_OPTIONS = {
+    markdown: '',
+    runModel: 'editor', // editor: default, read, read-noStyle
+    math: {name: 'katex', js: 'https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js', css: 'https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css'},
+    code: {name: 'hljs', js: 'https://libs.cdnjs.net/highlight.js/10.1.2/highlight.min.js', css: null},
+    flowchart: {js: ['https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.14.0/flowchart.min.js'], css: null},
+    theme: {backgroundColor: '#fff', color: '#1abc9c'}
 }
-class Config{
-    static RunModel = RunModel;
-    
-    renderFlag: boolean;
-    md: string;
-    runModel: RunModel;
-    katex: any;
-    hljs: any;
-    flowchart: any;
-    theme: Map<any, any>
-    constructor(config) {
-        this.renderFlag = true;
-        this.md = '';
-        if(config.md){
-            this.md = config.md;
-        }
-        
-        this.runModel = RunModel.editor;// read
-        if(config.runModel){
-            this.runModel = config.runModel;
-        }
-
-        if(config.katex){
-            this.katex = config.katex;
-        }else{
-            this.katex = {js: 'https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js', css: 'https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css'}
-        }
-
-        if(config.hljs){
-            this.hljs = config.hljs;
-        }else{
-            this.hljs = {js: 'https://libs.cdnjs.net/highlight.js/10.1.2/highlight.min.js', css: null}
-        }
-
-        if(config.flowchart){
-            this.flowchart = config.flowchart;
-        }else{
-            this.flowchart = {js: ['https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/flowchart/1.14.0/flowchart.min.js'], css: null}
-        }
-
-        this.theme = new Map([['backgroundColor', '#fff'], ['color', '#1abc9c']]);
-        if(localStorage.art_config == undefined){
-            localStorage.art_config = JSON.stringify({articles: 'art_articles'})
-        }
-    }
-}
-export default Config
+  

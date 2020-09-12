@@ -1,151 +1,89 @@
 import {textToNode, domToNode} from "./toNode/index"
 import VNode from '../vNode/index'
 import ArtText from "../../lib"
-import Config from "../config"
 import Tool from "../tool"
 import Cursor from "./cursor"
 import VTextNode from "../vNode/vTextNode"
 let win = window;
 class Editor{
-    static artTexts: ArtText[] = [];
-    static updataArtTextRender(){
-        for(let art of Editor.artTexts){
-            art.editor.render()
-        }
-    }
-    static _hljs = null;
-    static get hljs(){
-        return Editor._hljs;
-    }
-    static set hljs(value){
-        Editor._hljs = value;
-        Editor.updataArtTextRender();
+    static plugins = {hljs: null, katex: null, flowchart: null, Raphael: null};
+    static setPlugin(key: string, value: any): void{
+        Editor.plugins[key] = value;
+        //ArtText.artTextsRender();
     }
 
-    static _katex = null;
-    static get katex(){
-        return Editor._katex;
-    }
-    static set katex(value){
-        Editor._katex = value;
-        Editor.updataArtTextRender();
-    }
-
-    static _flowchart = null;
-    static get flowchart(){
-        return Editor._flowchart;
-    }
-    static set flowchart(value){
-        Editor._flowchart = value;
-        Editor.updataArtTextRender();
-    }
-
-    static Raphael = null;
     artText: ArtText;
-    container: HTMLHtmlElement;
-    editorHtmlNode: VNode;
-    editorHtmlDom: HTMLDivElement;
-    editorMdDom: HTMLTextAreaElement;
-    editorDom: HTMLDivElement;
     cursor: Cursor;
-    mdFileName: String;
-    directory: VNode[];
+    htmlNode: VNode;
+    mdDom: HTMLTextAreaElement;
+    editorDom: HTMLDivElement;
+    fileInfo: {name: string};
     
-    constructor(artText: ArtText, container: HTMLHtmlElement) {
-        this.artText = artText;   
-        this.container = container;   
-        
-        this.editorHtmlNode = this.createRootNode();
+    constructor(artText: ArtText) {
+        this.artText = artText; 
 
-        this.cursor = new Cursor(this.editorHtmlDom);  
-        this.mdFileName = null;  
-        this.directory = [];
-        Editor.artTexts.push(artText);
+        this.editorDom = null;
+        this.htmlNode = null;
+        this.mdDom = null;
+
+        this.fileInfo = null;  
+        this.cursor = null;
     } 
-    createRootNode(){
-        let p = new VNode("p", {}, new VNode("br"))
-        let text;
-        if(this.artText.config.runModel == Config.RunModel.read){
-            text = 'false';
-        }else{
-            text = 'true';
+
+    public init(){
+        this.createRoot();
+        this.cursor = new Cursor(this.htmlNode.dom);  
+        Tool.addCss(defauleCss.replace('${theme.backgroundColor}', this.artText.options.theme.backgroundColor));
+        this.registerPlugin();
+        this.setMd(this.artText.options.markdown)
+    }
+
+    private registerPlugin(): void{
+        if(this.artText.options.code.jsFun){
+            Editor.setPlugin('hljs', this.artText.options.code.jsFun);
+        }else if(this.artText.options.code.js){
+            Tool.loadScript(this.artText.options.code.js, () => {Editor.setPlugin('hljs', win['hljs'])});
         }
-        let root = new VNode('div', {"__root__": true, contenteditable: text, 'class': 'art-editor-html'}, p);
 
+        if(this.artText.options.math.jsFun != undefined){
+            Editor.setPlugin('katex', this.artText.options.math.jsFun);
+        }else if(this.artText.options.math.js){
+            Tool.loadScript(this.artText.options.math.js, ()=>{Editor.setPlugin('katex', win['katex'])})
+        }
+
+        if(this.artText.options.math.css){
+            Tool.loadCss(this.artText.options.math.css)
+        }
+
+        if(this.artText.options.flowchart.jsFun){
+            Editor.setPlugin('flowchart', this.artText.options.flowchart.jsFun);
+        }else if(this.artText.options.flowchart.js){
+            Tool.loadScript(this.artText.options.flowchart.js[0], ()=>{Editor.setPlugin('Raphael', win['Raphael'])})
+            Tool.loadScript(this.artText.options.flowchart.js[1], ()=>{Editor.setPlugin('flowchart', win['flowchart'])})
+        }
+    }
+    private createRoot(): void{
         this.editorDom = document.createElement('div');
-        this.editorDom.setAttribute('class', 'art-editor')
+        this.editorDom.setAttribute('class', 'art-editor');
 
-        this.editorHtmlDom = document.createElement('div');
-        this.editorHtmlDom.setAttribute('class', 'art-editor-html')
+        this.htmlNode = new VNode('div', 
+                {__root__: true, contenteditable: 'true', class: 'art-editor-html', style: 'outline:none;white-space:pre-wrap;word-break:break-all'}, 
+                new VNode('p', {}, new VNode('br')));
 
-        this.editorMdDom = document.createElement('textarea');
-        this.editorMdDom.setAttribute('class', 'art-editor-md')
+        this.htmlNode.dom = document.createElement('div');
 
-        this.editorDom.appendChild(this.editorHtmlDom)
-        this.editorDom.appendChild(this.editorMdDom)
-        this.container.appendChild(this.editorDom);
-
-        this.editorHtmlDom.style.outline = "none";
-        this.editorHtmlDom.style.whiteSpace = "pre-wrap";
-        this.editorHtmlDom.style.wordBreak = 'break-all';
-        //this.container.style.wordBreak = "break-word";
-
-        this.editorMdDom.style.width = '100%';
-        this.editorMdDom.style.minHeight = '200px';
-        this.editorMdDom.style.border = 'none';
-        this.editorMdDom.style.outline = 'none';
-        this.editorMdDom.style.resize = 'none'; 
-        this.editorMdDom.style.display = 'none'; 
-        this.editorMdDom.addEventListener('input', function(e) {
-            let target = e.target as HTMLHtmlElement;
-            //target.style.height = 'auto';
-            target.style.height = this.scrollHeight + 'px';
-            
+        this.mdDom = document.createElement('textarea');
+        this.mdDom.setAttribute('class', 'art-editor-md')
+        this.mdDom.setAttribute('style', 'width:100%;min-height:200px;border:none;outline:none;resize:none;display:none')
+        this.mdDom.addEventListener('input', function(e) {
+            (<HTMLHtmlElement>e.target).style.height = this.scrollHeight + 'px';
         })
 
-        this.editorDom.style.boxShadow = '0 2px 12px 0 rgba(0, 0, 0, 0.1)';
-        this.editorDom.style.padding = '30px 25px';
-        this.editorDom.style.backgroundColor = this.artText.config.theme.get('backgroundColor');;
-        this.editorDom.style.borderRadius = '4px';
-        return root
+        this.editorDom.appendChild(this.htmlNode.dom)
+        this.editorDom.appendChild(this.mdDom)
+        this.artText.rootDom.appendChild(this.editorDom);
     }
-   
-    closure(fun: Function): Function{
-        // 实现闭包
-        let _this = this;
-        function c(e){
-            fun(e, _this);
-        }
-        return c;
-    }
-    init(){
-        Tool.addCss(defauleCss);
-        if(this.artText.config.hljs.jsFun){
-            Editor.hljs = this.artText.config.hljs.jsFun;
-        }else if(this.artText.config.hljs.js){
-            Tool.loadScript(this.artText.config.hljs.js, () => { Editor.hljs = win['hljs'];Editor.hljs.initHighlighting.called = false;Editor.hljs.initHighlighting();})
-        }
-
-        if(this.artText.config.katex.jsFun){
-            Editor.katex = this.artText.config.katex.jsFun;
-        }else if(this.artText.config.katex.js){
-            Tool.loadScript(this.artText.config.katex.js, ()=>{Editor.katex = win['katex']})
-        }
-
-        if(this.artText.config.katex.cssFun){
-
-        }else if(this.artText.config.katex.css){
-            Tool.loadCss(this.artText.config.katex.css)
-        }
-
-        if(this.artText.config.flowchart.jsFun){
-            Editor.flowchart = this.artText.config.flowchart.jsFun;
-        }else if(this.artText.config.flowchart.js){
-            Tool.loadScript(this.artText.config.flowchart.js[0], ()=>{Editor.Raphael = win['Raphael']})
-            Tool.loadScript(this.artText.config.flowchart.js[1], ()=>{Editor.flowchart = win['flowchart']})
-        }
-        this.setMd(this.artText.config.md)
-    }
+    
     click(key='left'){
         this.cursor.getSelection();
         if(key == 'right'){
@@ -164,7 +102,7 @@ class Editor{
     backRender(): boolean{
         let location = this.cursor.getSelection();
         if(location){
-            let dom = this.editorHtmlDom.childNodes[location.anchorAlineOffset];
+            let dom = this.htmlNode.dom.childNodes[location.anchorAlineOffset];
             if(dom.nodeName == 'PRE'){
                 if(location.anchorNode.previousSibling == null && location.anchorInlineOffset == 0)
                     return false;
@@ -177,13 +115,13 @@ class Editor{
     enterRender(){
         let location = this.cursor.getSelection();
         if(location){
-            let vnodes = domToNode(this.editorHtmlDom) as VNode;
-            this.editorHtmlNode.childNodes = vnodes.childNodes;
-            let md = this.editorHtmlNode.childNodes[location.anchorAlineOffset].getMd();
-            let dom = this.editorHtmlDom.childNodes[location.anchorAlineOffset];
+            let vnodes = domToNode(this.htmlNode.dom) as VNode;
+            this.htmlNode.childNodes = vnodes.childNodes;
+            let md = this.htmlNode.childNodes[location.anchorAlineOffset].getMd();
+            let dom = this.htmlNode.dom.childNodes[location.anchorAlineOffset];
             if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(md)){
                 let hr = document.createElement('hr'); 
-                this.editorHtmlDom.replaceChild(hr, dom); 
+                this.htmlNode.dom.replaceChild(hr, dom); 
                 Cursor.setCursor(hr, 0);
                 return false;
             } else if(/^\[(TOC)|(toc)\]$/.test(md)){
@@ -198,7 +136,7 @@ class Editor{
                 else
                     dom.parentNode.appendChild(p);
 
-                this.editorHtmlDom.replaceChild(div, dom); 
+                this.htmlNode.dom.replaceChild(div, dom); 
                 this.updateToc();
                 Cursor.setCursor(p, 0);
                 return false;
@@ -222,7 +160,7 @@ class Editor{
                 }
                 thead.appendChild(tr1);
                 tbody.appendChild(tr2);
-                this.editorHtmlDom.replaceChild(table, this.editorHtmlDom.childNodes[location.anchorAlineOffset]); 
+                this.htmlNode.dom.replaceChild(table, this.htmlNode.dom.childNodes[location.anchorAlineOffset]); 
                 Cursor.setCursor(tr2.childNodes[0], 0);
                 return false;
             }else if(/^```/.test(md)){
@@ -239,12 +177,12 @@ class Editor{
                         div.setAttribute('class', 'art-shield art-flowTool');
                         div.setAttribute('art-flow', '')
                         div.setAttribute('contenteditable', 'false');
-                        this.editorHtmlDom.insertBefore(div, this.editorHtmlDom.childNodes[location.anchorAlineOffset].nextSibling); 
+                        this.htmlNode.dom.insertBefore(div, this.htmlNode.dom.childNodes[location.anchorAlineOffset].nextSibling); 
                     }
                 }
                 pre.appendChild(code);
 
-                this.editorHtmlDom.replaceChild(pre, this.editorHtmlDom.childNodes[location.anchorAlineOffset]); 
+                this.htmlNode.dom.replaceChild(pre, this.htmlNode.dom.childNodes[location.anchorAlineOffset]); 
                 Cursor.setCursor(code, 0);
                 return false;
             }else if(location.anchorNode.parentNode.nodeName == 'BLOCKQUOTE' && location.anchorOffset == 0 && location.anchorNode.nodeName == 'P'
@@ -331,32 +269,103 @@ class Editor{
 
         return true;
     }
-    render(){
-        this.cursor.getSelection();
-        let vnode = domToNode(this.editorHtmlDom) as VNode;
-        if(vnode){
-            this.editorHtmlNode.childNodes = [];
-            vnode.childNodes.forEach((value)=>{
-                this.editorHtmlNode.appendChild(value);
-            })
+    nodeRender(dom, vnode) {
+        if (dom.nodeName.toLowerCase() == vnode.nodeName) {
+            if (vnode.nodeName == "code") {
+                return null
+            } else if (Tool.hasClass(dom, "art-shield")) {
+                if(Tool.hasClass(dom, "art-flowTool") && Editor.plugins.flowchart && Editor.plugins.Raphael){
+                    dom.innerHTML = ''
+                    let md = (<HTMLPreElement>dom.previousSibling).innerText;
+                    try{
+                        let chart = Editor.plugins.flowchart.parse(md);
+                        chart.drawSVG(dom);
+                        (<HTMLPreElement>dom.previousSibling).style.display = 'none';
+                        dom.onclick = function click(){
+                            if(Tool.hasClass(this as HTMLDivElement, "art-flowTool")){
+                                (<HTMLPreElement>(<HTMLDivElement>this).previousSibling).style.display = 'inherit';
+                            }}
+                    }catch(error){
+                        console.error('flowchart发生错误')
+                        console.error(error);
+                    }
+                }else if(vnode.attr['__dom__'] == 'math' && Editor.plugins.katex){
+                    let math = (<HTMLElement>dom.childNodes[0]).getAttribute("art-math")
+                    if (math && vnode.childNodes[0].attr["art-math"] != math) {
+                        (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.plugins.katex.renderToString(vnode.childNodes[0].attr["art-math"], { throwOnError: false });
+                        (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", vnode.childNodes[0].attr["art-math"]);
+                    }
+                }else{
+                    /*for (let i = 0, j = 0; i < dom.childNodes.length || j < this.childNodes.length; i++, j++) {
+                        if (i >= dom.childNodes.length) {
+                            dom.appendChild(this.childNodes[j].newDom());
+                        } else if (j >= this.childNodes.length) {
+                            let len = dom.childNodes.length;
+                            while (i < len) {
+                                dom.removeChild(dom.lastChild);
+                                i++;
+                            }
+                        } else {
+                            this.childNodes[j].render(dom.childNodes[i])
+                        }
+                    }*/
+                }
+                
+                for (let key in vnode.attr) {
+                    if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
+                        vnode.dom.setAttribute(key, vnode.attr[key]);
+                    }
+                }
+            } else {
+                for (let key in vnode.attr) {
+                    if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
+                        dom.setAttribute(key, vnode.attr[key]);
+                    }
+                }
+                for (let i = 0, j = 0; i < dom.childNodes.length || j < vnode.childNodes.length; i++, j++) {
+                    if (i >= dom.childNodes.length) {
+                        dom.appendChild(vnode.childNodes[j].newDom());
+                    } else if (j >= vnode.childNodes.length) {
+                        let len = dom.childNodes.length;
+                        while (i < len) {
+                            dom.removeChild(dom.lastChild);
+                            i++;
+                        }
+                    } else {
+                        vnode.childNodes[j].render()
+                    }
+                }
+            }
+        } else {
+            dom.parentNode.replaceChild(vnode.newDom(), dom);
         }
-        this.editorHtmlNode.dispose();
-        this.updateToc();
-        // this.container.blur();
-        if(this.artText.config.renderFlag){
-            this.editorHtmlNode.render(this.editorHtmlDom)
-            if(Editor.hljs && this.cursor.location && this.editorHtmlDom.childNodes[this.cursor.location.anchorAlineOffset].nodeName == 'PRE'){
-                Editor.hljs.initHighlighting.called = false;
-                Editor.hljs.initHighlighting(); 
+        return null;
+    }
+    render(){
+        let vnode = domToNode(this.htmlNode.dom) as VNode;
+        if(vnode){
+            this.htmlNode.childNodes = vnode.childNodes;
+            for(let i = 0; i < this.htmlNode.childNodes.length; i++){
+                this.htmlNode.childNodes[i].parentNode = this.htmlNode; 
             }
         }
-        this.cursor.setSelection();
+
+        this.htmlNode.dispose();
+    
         
+        this.updateToc();
+
+        this.htmlNode.render(this.htmlNode.dom)
+        if(Editor.plugins.hljs && this.cursor.location && this.htmlNode.dom.childNodes[this.cursor.location.anchorAlineOffset].nodeName == 'PRE'){
+            Editor.plugins.hljs.initHighlighting.called = false;
+            Editor.plugins.hljs.initHighlighting(); 
+        }
+        this.cursor.setSelection();
     }
     updateToc(){
         let tocs = [];
         let directory = [];
-        for(let vnode of this.editorHtmlNode.childNodes){
+        for(let vnode of this.htmlNode.childNodes){
             if(/^h\d$/.test(vnode.nodeName)){
                 let md = vnode.getMd();
                 md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
@@ -373,45 +382,45 @@ class Editor{
     }
     getMd(){
         let md = '';
-        for(let i = 0; i < this.editorHtmlNode.childNodes.length; i++){
-            md += this.editorHtmlNode.childNodes[i].getMd('read') + '\n';
+        for(let i = 0; i < this.htmlNode.childNodes.length; i++){
+            md += this.htmlNode.childNodes[i].getMd('read') + '\n';
         }
         return md;
     }
     setMd(md: string){
         let childNodes = textToNode(md);
         if(childNodes){
-            this.editorHtmlNode.childNodes = [];
-            childNodes.forEach((value)=>{
-                this.editorHtmlNode.appendChild(value);
-            })
+            this.htmlNode.childNodes = childNodes;
+            for(let i = 0; i < this.htmlNode.childNodes.length; i++){
+                this.htmlNode.childNodes[i].parentNode = this.htmlNode; 
+            }
         }
         this.updateToc();
-        this.editorHtmlNode.render(this.editorHtmlDom);
-        if(Editor.hljs){
-            Editor.hljs.initHighlighting.called = false;
-            Editor.hljs.initHighlighting(); 
+        this.htmlNode.render(this.htmlNode.dom);
+        if(Editor.plugins.hljs){
+            Editor.plugins.hljs.initHighlighting.called = false;
+            Editor.plugins.hljs.initHighlighting(); 
         }
     }
     openFile(md: string, name: string){
-        this.mdFileName = name;
+        this.fileInfo.name = name;
         this.setMd(md);
     }
     openTextarea(){
-        this.editorHtmlDom.style.display = 'none';
-        this.editorMdDom.style.display = 'inline';
-        this.editorMdDom.value = this.getMd();
-        this.editorMdDom.style.height = this.editorMdDom.scrollHeight + 5 + 'px';
+        this.htmlNode.dom.style.display = 'none';
+        this.mdDom.style.display = 'inline';
+        this.mdDom.value = this.getMd();
+        this.mdDom.style.height = this.mdDom.scrollHeight + 5 + 'px';
     }
     closeTextarea(){
-        this.editorHtmlDom.style.display = 'inline';
-        this.setMd(this.editorMdDom.value)
-        this.editorMdDom.style.display = 'none';
+        this.htmlNode.dom.style.display = 'inline';
+        this.setMd(this.mdDom.value)
+        this.mdDom.style.display = 'none';
     }
     emptyEditor(){
-        if(this.editorHtmlDom.style.display == 'none'){
-            this.editorMdDom.value = '';
-            this.editorMdDom.style.height = 'auto';
+        if(this.htmlNode.dom.style.display == 'none'){
+            this.mdDom.value = '';
+            this.mdDom.style.height = 'auto';
         }else{
             this.setMd('')
         }
@@ -421,5 +430,6 @@ const defauleCss = '\n\
 .art-hide{display: inline-block;width: 0;height: 0;overflow: hidden;vertical-align: middle;}\n\
 .art-show{color: #ccc;}\n\
 .art-editor-html pre code{white-space: pre-wrap;}\n\
-.art-show-math{position: absolute;padding: 13px 25px;background: #fff;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;}'
+.art-show-math{position: absolute;padding: 13px 25px;background: #fff;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;}\n\
+.art-editor{box-shadow:0 2px 12px 0 rgba(0, 0, 0, 0.1);padding:30px 25px;border-radius:4px;background-color:${theme.backgroundColor};'
 export default Editor

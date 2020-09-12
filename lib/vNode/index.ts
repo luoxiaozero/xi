@@ -15,6 +15,9 @@ class VNode {
     parentNode: VNode;
 
     constructor(nodeName: string, attr: {} = {}, childNodes: any[] | VTextNode | VNode = null) {
+        this.parentNode = null;
+        this.dom = null;
+
         this.nodeName = nodeName;
         this.attr = attr;
         if (childNodes instanceof Array) {
@@ -27,47 +30,67 @@ class VNode {
         for(let node of this.childNodes){
             node.parentNode = this;
         }
-        this.parentNode = null;
     }
 
     newDom(): any {
-        let dom = document.createElement(this.nodeName);
+        this.dom = document.createElement(this.nodeName);
         for (let key in this.attr) {
             if (key === "__dom__") {
                 if (this.attr[key] === "tableTool") {
-                    dom.appendChild(tableTool())
+                    this.dom.appendChild(tableTool())
                 } else if (this.attr[key] === "imgTool") {
-                    dom.appendChild(imgTool())
+                    this.dom.appendChild(imgTool())
                 } else if (this.attr[key] === "codeTool") {
-                    dom.appendChild(codeTool())
+                    this.dom.appendChild(codeTool())
                 }
             } else if (key == "art-math") {
-                if(Editor.katex){
-                    dom.innerHTML = Editor.katex.renderToString(this.attr["art-math"], { throwOnError: false });
-                    dom.setAttribute(key, this.attr[key]);
+                if(Editor.plugins.katex){
+                    this.dom.innerHTML = Editor.plugins.katex.renderToString(this.attr["art-math"], { throwOnError: false });
+                    this.dom.setAttribute(key, this.attr[key]);
                 }else{
-                    dom.setAttribute(key, '\n@math:katex未加载出@\n');
+                    this.dom.setAttribute(key, '\n@math:katex未加载出@\n');
                 }
             } else if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
-                dom.setAttribute(key, this.attr[key]);
+                this.dom.setAttribute(key, this.attr[key]);
             }
         }
 
         this.childNodes.forEach((element) => {
-            dom.appendChild(element.newDom());
+            this.dom.appendChild(element.newDom());
         })
-        return dom;
+        return this.dom;
+    }
+    domToNode(): VNode {
+        this.nodeName = this.dom.nodeName.toLowerCase(); 
+        this.attr = {};
+        for (let i = 0; i < this.dom.attributes.length; i++) {
+            let it = this.dom.attributes[i];
+            this.attr[it.localName] = it.value;
+        }
+            
+        if(this.dom.nodeName == 'INPUT'){
+            if((<HTMLInputElement>this.dom).checked){
+                this.attr['checked'] = 'checked';
+            }else if(this.attr['checked']){
+                delete this.attr['checked'];
+            }
+        }
+        for (let i = 0; i < this.dom.childNodes.length; i++) {
+            if(i < this.childNodes.length)
+                this.childNodes[i].domToNode();
+        }
+        return this;
     }
     render(dom: HTMLElement) {
         if (dom.nodeName.toLowerCase() == this.nodeName) {
             if (this.nodeName == "code") {
                 return null
             } else if (Tool.hasClass(dom, "art-shield")) {
-                if(Tool.hasClass(dom, "art-flowTool") && Editor.flowchart && Editor.Raphael){
+                if(Tool.hasClass(dom, "art-flowTool") && Editor.plugins.flowchart && Editor.plugins.Raphael){
                     dom.innerHTML = ''
                     let md = (<HTMLPreElement>dom.previousSibling).innerText;
                     try{
-                        let chart = Editor.flowchart.parse(md);
+                        let chart = Editor.plugins.flowchart.parse(md);
                         chart.drawSVG(dom);
                         (<HTMLPreElement>dom.previousSibling).style.display = 'none';
                         dom.onclick = function click(){
@@ -78,14 +101,14 @@ class VNode {
                         console.error('flowchart发生错误')
                         console.error(error);
                     }
-                }else if(this.attr['__dom__'] == 'math' && Editor.katex){
+                }else if(this.attr['__dom__'] == 'math' && Editor.plugins.katex){
                     let math = (<HTMLElement>dom.childNodes[0]).getAttribute("art-math")
                     if (math && this.childNodes[0].attr["art-math"] != math) {
-                        (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.katex.renderToString(this.childNodes[0].attr["art-math"], { throwOnError: false });
+                        (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.plugins.katex.renderToString(this.childNodes[0].attr["art-math"], { throwOnError: false });
                         (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", this.childNodes[0].attr["art-math"]);
                     }
-                }else{
-                    /*for (let i = 0, j = 0; i < dom.childNodes.length || j < this.childNodes.length; i++, j++) {
+                }else if(Tool.hasClass(dom, "art-toc")){
+                    for (let i = 0, j = 0; i < dom.childNodes.length || j < this.childNodes.length; i++, j++) {
                         if (i >= dom.childNodes.length) {
                             dom.appendChild(this.childNodes[j].newDom());
                         } else if (j >= this.childNodes.length) {
@@ -97,7 +120,7 @@ class VNode {
                         } else {
                             this.childNodes[j].render(dom.childNodes[i])
                         }
-                    }*/
+                    }
                 }
                 
                 for (let key in this.attr) {
@@ -134,6 +157,7 @@ class VNode {
     appendChild(vnode: VNode | VTextNode) {
         vnode.parentNode = this;
         this.childNodes.push(vnode);
+        this.childNodes[this.childNodes.length - 1].parentNode = this;
     }
     replaceChild(newNode: VNode | VTextNode, oldNode: VNode | VTextNode): boolean {
         let index = this.childNodes.indexOf(oldNode)

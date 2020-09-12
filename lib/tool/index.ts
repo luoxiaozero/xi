@@ -14,16 +14,15 @@ class Tool{
     static message: Function = null;
 
     artText: ArtText;
-    container: HTMLHtmlElement;
+    rooDom: HTMLElement;
     toolbar: HTMLDivElement;
     floatAuxiliaryTool: HTMLDivElement;
     floatToolbar: HTMLDivElement;
     versionHistory: VersionHistory;
     mdHtml: HTMLSpanElement;
 
-    constructor(artText: ArtText, container: HTMLHtmlElement){
+    constructor(artText: ArtText){
         this.artText = artText;
-        this.container = container;
 
         this.versionHistory = new VersionHistory(artText);
         this.toolbar = null;
@@ -35,18 +34,19 @@ class Tool{
         }
     }
     init(){
-        this.toolbar = toolbarTool(this.artText.config.theme)
-        this.container.insertBefore(this.toolbar, this.container.childNodes[0]);
+        this.rooDom = this.artText.rootDom;
+        this.toolbar = toolbarTool(this.artText.options.theme)
+        this.rooDom.insertBefore(this.toolbar, this.rooDom.childNodes[0]);
 
         this.floatAuxiliaryTool = floatAuxiliaryTool();
-        this.floatAuxiliaryTool.style.backgroundColor = this.artText.config.theme.get('backgroundColor');
-        let floatAuxiliaryTool_li = '.art-floatAuxiliaryTool-li:hover{background-color: #f0f0f0;color:' + this.artText.config.theme.get('color') + '}';
-        this.container.appendChild(this.floatAuxiliaryTool);
+        this.floatAuxiliaryTool.style.backgroundColor = this.artText.options.theme.backgroundColor;
+        let floatAuxiliaryTool_li = '.art-floatAuxiliaryTool-li:hover{background-color: #f0f0f0;color:' + this.artText.options.theme.color + '}';
+        this.rooDom.appendChild(this.floatAuxiliaryTool);
 
         this.floatToolbar = floatToolbar(this.artText);
-        this.floatToolbar.style.backgroundColor = this.artText.config.theme.get('backgroundColor');
-        let floatToolbar_span = '.art-floatToolbar-span{padding: 8px 10px;cursor: pointer;}.art-floatToolbar-span:hover{color:' + this.artText.config.theme.get('color') + '}';
-        this.container.appendChild(this.floatToolbar);
+        this.floatToolbar.style.backgroundColor = this.artText.options.theme.backgroundColor;
+        let floatToolbar_span = '.art-floatToolbar-span{padding: 8px 10px;cursor: pointer;}.art-floatToolbar-span:hover{color:' + this.artText.options.theme.color + '}';
+        this.rooDom.appendChild(this.floatToolbar);
 
         this.addDefaultTool();
         let toolbar_span = '.art-toolbar-span{padding:5px 5px;margin-right: 9px} .art-toolbar-span:hover{color:#1abc9c;}';
@@ -100,13 +100,13 @@ class Tool{
         this.addTool('保存', 
         ()=>{
             let art_articles = JSON.parse(localStorage.art_articles);
-            if(this.artText.editor.mdFileName && art_articles.hasOwnProperty(this.artText.editor.mdFileName)){
+            if(this.artText.editor.fileInfo.name && art_articles.hasOwnProperty(this.artText.editor.fileInfo.name)){
                 // pass
             }else{
                 let timestamp=new Date().getTime();
                 let mdId = 'art_md_' + timestamp + '_';
-                if(this.artText.editor.mdFileName){
-                    mdId += this.artText.editor.mdFileName;
+                if(this.artText.editor.fileInfo.name){
+                    mdId += this.artText.editor.fileInfo.name;
                 }
                 localStorage[mdId] = this.artText.editor.getMd();
                 art_articles[mdId] = {ids: [mdId], time: timestamp, name: mdId}
