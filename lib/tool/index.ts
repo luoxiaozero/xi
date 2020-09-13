@@ -52,8 +52,8 @@ class Tool{
         let toolbar_span = '.art-toolbar-span{padding:5px 5px;margin-right: 9px} .art-toolbar-span:hover{color:#1abc9c;}';
         Tool.addCss(css + toolbar_span + floatToolbar_span + floatAuxiliaryTool_li)
     }
-    setFloatAuxiliaryTool(sel='hidden'){
-        if(sel == 'hidden'){
+    setFloatAuxiliaryTool(flag){
+        if(flag == 'hide'){
             this.floatAuxiliaryTool.style.display = 'none';
             return false;
         }else{
@@ -63,8 +63,8 @@ class Tool{
         this.floatAuxiliaryTool.style.left = ((<any>event).pageX).toString() + 'px';
         //console.log(rect, rectFocus, event.pageY, event.pageX);
     }
-    setFloatToolbar(sel='hidden'){
-        if(sel == 'hidden'){
+    setFloatToolbar(flag){
+        if(flag == 'hide'){
             this.floatToolbar.style.display = 'none';
             return false;
         }else{
@@ -101,7 +101,8 @@ class Tool{
         ()=>{
             let art_articles = JSON.parse(localStorage.art_articles);
             if(this.artText.editor.fileInfo.name && art_articles.hasOwnProperty(this.artText.editor.fileInfo.name)){
-                // pass
+                Tool.message('逻辑无');
+                message(this.artText, '路基');
             }else{
                 let timestamp=new Date().getTime();
                 let mdId = 'art_md_' + timestamp + '_';
@@ -111,8 +112,9 @@ class Tool{
                 localStorage[mdId] = this.artText.editor.getMd();
                 art_articles[mdId] = {ids: [mdId], time: timestamp, name: mdId}
                 localStorage.art_articles = JSON.stringify(art_articles);
+                message(this.artText, 'md保存成功', 'success');
             }
-            message(this.artText, 'md保存成功', 'success');
+            // message(this.artText, 'md保存成功', 'success');
         });
 
         this.addTool('清空', 
@@ -131,6 +133,6 @@ class Tool{
     }
 }
 let css = '.art-VersionHistory-selected{color: #1aba9c}\n\
-.art-toc{border: 1px dashed #999;padding: 6px 15px;margin: 35px 0 15px;font-weight:500;}.art-toc p{margin-bottom: 2px}.art-toc a{border-bottom: none;color: #4183c4}.art-toc-h2{margin-left:2em}.art-toc-h3{margin-left:4em}.art-toc-h4{margin-left:6em}.art-toc-h5{margin-left:8em}.art-toc-h6{margin-left:10em}\n\
+.art-toc{padding: 6px 15px;margin: 35px 0 15px;font-weight:500;}.art-toc p{margin-bottom: 2px}.art-toc a{border-bottom: none;color: #4183c4}.art-toc-h2{margin-left:2em}.art-toc-h3{margin-left:4em}.art-toc-h4{margin-left:6em}.art-toc-h5{margin-left:8em}.art-toc-h6{margin-left:10em}\n\
 .art-flowTool{width:100%;text-align: center;}'
 export default Tool

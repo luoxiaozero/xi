@@ -60,27 +60,8 @@ class VNode {
         })
         return this.dom;
     }
-    domToNode(): VNode {
-        this.nodeName = this.dom.nodeName.toLowerCase(); 
-        this.attr = {};
-        for (let i = 0; i < this.dom.attributes.length; i++) {
-            let it = this.dom.attributes[i];
-            this.attr[it.localName] = it.value;
-        }
-            
-        if(this.dom.nodeName == 'INPUT'){
-            if((<HTMLInputElement>this.dom).checked){
-                this.attr['checked'] = 'checked';
-            }else if(this.attr['checked']){
-                delete this.attr['checked'];
-            }
-        }
-        for (let i = 0; i < this.dom.childNodes.length; i++) {
-            if(i < this.childNodes.length)
-                this.childNodes[i].domToNode();
-        }
-        return this;
-    }
+
+    /**@deprecated */
     render(dom: HTMLElement) {
         if (dom.nodeName.toLowerCase() == this.nodeName) {
             if (this.nodeName == "code") {
@@ -258,6 +239,8 @@ class VNode {
         }
         return text
     }
+
+    /**@deprecated */
     dispose() {
         if (this.attr['__root__'] == true) {
             for (let i = this.childNodes.length - 1; i >= 0 ; i--) {

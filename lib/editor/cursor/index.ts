@@ -31,6 +31,7 @@ class Location {
         this.focusOffset = focusOffset;
     }
 }
+
 export default class Cursor {
     static sel: Selection = window.getSelection();
 
@@ -40,7 +41,7 @@ export default class Cursor {
         this.editorHtmlDom = editorHtmlDom;
         this.location = null;
     }
-    getSelection(): Location {
+    public getSelection(): Location {
         let { anchorNode, anchorOffset, focusNode, focusOffset } = Cursor.sel;
         if (anchorNode && focusNode) {
             let node = anchorNode;
@@ -97,35 +98,47 @@ export default class Cursor {
         }
         return this.location;
     }
-    searchNode(node: Node, len: number) {
-        if (node.childNodes.length === 1 && node.childNodes[0].nodeName === "#text")
+    private searchNode(node: Node, len: number) {
+        if (node.childNodes.length == 1 && node.childNodes[0].nodeName == '#text'){
             if (len <= node.childNodes[0].textContent.length)
-                return [node.childNodes[0], len]
+                return [node.childNodes[0], len];
             else
-                return [node.childNodes[0], len - node.textContent.length]
-        for (let i = 0; i < node.childNodes.length; i++) {
-            if(Tool.hasClass(node.childNodes[i] as HTMLElement, 'art-shield'))
-                continue;
-            if (node.childNodes[i].textContent.length < len) {
-                len -= node.childNodes[i].textContent.length;
-            } else if (node.childNodes[i].nodeName === "#text") {
-                return [node.childNodes[i], len]
-            } else {
-                return this.searchNode(node.childNodes[i], len)
+                len -= node.textContent.length;
+        }
+            
+        else{
+            for (let i = 0; i < node.childNodes.length; i++) {
+                if(Tool.hasClass(node.childNodes[i] as HTMLElement, 'art-shield'))
+                    continue;
+                if (node.childNodes[i].textContent.length < len) {
+                    len -= node.childNodes[i].textContent.length;
+                } else if (node.childNodes[i].nodeName === "#text") {
+                    return [node.childNodes[i], len]
+                } else {
+                    return this.searchNode(node.childNodes[i], len)
+                }
             }
+        }
+        
+        console.log(len);
+        if(len == 1 && node.nextSibling){
+            console.log('---------------')
+            return this.searchNode(node.nextSibling, 0);
         }
         return null
     }
-    setTool(alineDom: HTMLElement): boolean {
+    private setTool(alineDom: HTMLElement): boolean {
         let tools = this.editorHtmlDom.getElementsByClassName('art-tocTool');
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
+            (<HTMLElement>tools[i].nextSibling).style.border = 'none';
         }
 
         if(Tool.hasClass(alineDom, 'art-shield')){
             if(Tool.hasClass(alineDom, 'art-toc')){
-                if (alineDom.previousSibling && Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-tocTool")) {
+                if (alineDom.previousSibling && Tool.hasClass(alineDom.previousSibling as HTMLElement, 'art-tocTool')) {
                     (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
+                    alineDom.style.border = '1px dashed #999';
                 } else {
                     alineDom.parentNode.insertBefore(tocTool(), alineDom);
                 }
@@ -146,7 +159,7 @@ export default class Cursor {
         tools = this.editorHtmlDom.getElementsByClassName('art-flowTool');
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.border = 'inherit';
-            //(<HTMLElement>tools[i].previousSibling).style.display = 'none';
+            (<HTMLElement>tools[i].previousSibling).style.display = 'none';
         }
         
         if (alineDom.nodeName == "PRE") {
@@ -171,7 +184,7 @@ export default class Cursor {
         }
         return false;
     }
-    setSelection(location: Location=undefined){
+    public setSelection(location: Location=undefined){
         if (typeof location == undefined || !location) {
             location = this.location;
         }
@@ -197,12 +210,15 @@ export default class Cursor {
             if(pNode.nodeName == 'HR'){
                 // 不可调优先度
                 info = [pNode, 0];
-            }else if (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
-                this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD" || this.location.anchorNode.nodeName === "DIV") {
-                info = [this.location.anchorNode, 0]
+            }else if (this.location.anchorOffset == 0 && (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
+                this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD" || this.location.anchorNode.nodeName === "DIV")) {
+                info = [this.location.anchorNode, 0];
+                console.log('---2', this.location.anchorOffset)
             } else if (this.location.anchorOffset == 0 && this.location.anchorNode.parentNode && ((this.location.anchorNode.parentNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.parentNode.nodeName == 'PRE') || this.location.anchorNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.nodeName == 'PRE')) {
                 info = [this.location.anchorNode, 0] 
+                console.log('---4');
             } else {
+                console.log('---')
                 info = this.searchNode(pNode, pLen);
             }
             console.log(info);
@@ -249,11 +265,28 @@ export default class Cursor {
             }
         }
     }
-    static setCursor(node: Node, offset: number) {
+    
+    static setCursor(node: Node, offset: number): void{
         let range = Cursor.sel.getRangeAt(0).cloneRange();
         range.setStart(node, offset);
         range.collapse(true);
         Cursor.sel.removeAllRanges();
         Cursor.sel.addRange(range);
     }
+
+    public moveCursor(direcction): boolean{
+        switch(direcction){
+            case 'ArrowRight':
+                this.location.anchorOffset++;
+                this.location.focusOffset++;
+                this.location.anchorInlineOffset++;
+                this.location.focusInlineOffset++;
+                break;
+            default:
+                return false;
+        }
+        this.setSelection();
+        return true;
+    }
+
 }

@@ -114,18 +114,23 @@ class EventCenter {
             this.removeEventListener(e[0], e[1], e[2]);
         }
     }
+
     keydown(e: KeyboardEvent, _this: EventCenter): boolean {
-        let keyCode: number = e.keyCode;
+        let key: string = e.key;
+        console.log(key);
         if (!_this.shortcutKey(e, _this.artText)) {
+            // 是否摁下快捷键
             return false;
-        }
-        if (keyCode == 13) {
+        } else if (/^Arrow(Right|Left|Up|Down)$/.test(key) && _this.artText.editor.cursor.moveCursor(key)){
+            e.preventDefault();
+            return false;
+        } else if (key == 'Enter') {
             // 回车时渲染
             if (!_this.artText.editor.enterRender()) {
                 e.preventDefault();
                 return false;
             }
-        } else if (keyCode == 8) {
+        } else if (key == 'Backspace') {
             // 退格时渲染
             if (!_this.artText.editor.backRender()) {
                 e.preventDefault();
@@ -164,8 +169,8 @@ class EventCenter {
     }
 
     keyup(e: KeyboardEvent, _this: EventCenter) {
-        let keyCode = e.keyCode;
-        if (keyCode == 8) {
+        let key: string = e.key;
+        if (key == 'Backspan') {
             if (_this.editorHtmlDom.innerHTML == "") {
                 // html编辑器为空时
                 _this.editorHtmlDom.innerHTML = "<div><p><br/></p></div>"
@@ -177,20 +182,31 @@ class EventCenter {
         }
     }
 
+    /**左点击 */
     click(e: MouseEvent, _this: EventCenter) {
         let dom = e.target as HTMLAnchorElement;
         if (e.altKey && dom.nodeName == "A") {
             //window.location.href=node.href;
             window.open(dom.href)
         } else {
-            _this.artText.editor.click('left');
+            let cursor = _this.artText.editor.cursor;
+            if(cursor.location && cursor.location.anchorInlineOffset != cursor.location.focusInlineOffset 
+                && cursor.location.anchorAlineOffset == cursor.location.focusAlineOffset){
+                _this.artText.tool.setFloatToolbar('show');
+            }else{
+                _this.artText.tool.setFloatToolbar('hide');
+            }
+            _this.artText.tool.setFloatAuxiliaryTool('hide');
+            cursor.setSelection();
         }
     }
 
+    /**右点击 */
     contextmenu(e: MouseEvent, _this: EventCenter) {
         e.preventDefault();
-        _this.artText.editor.click('right');
+        _this.artText.tool.setFloatAuxiliaryTool('show');
     }
+
 
     mousedown(e: MouseEvent, _this: EventCenter) {
         let obj: Map<string, number> = new Map();

@@ -17,6 +17,7 @@ class VTextNode{
         this.dom = document.createTextNode(this.text);
         return this.dom;
     }
+    /**@deprecated */
     render(dom){
         if(dom.nodeName.toLowerCase() == "#text"){
             if(this.text == dom.nodeValue){
