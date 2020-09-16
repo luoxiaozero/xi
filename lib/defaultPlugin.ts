@@ -46,6 +46,6 @@ function exportMdFileInit(artText: ArtText){
         }
         return c;
     }
-    artText.eventCenter.addFutureEvent('end-init', closure());
+    artText.eventCenter.addFutureEvent('-end-init', closure());
 }
 export let exportMdFileMap = {plugin: exportMdFile, options: {name: 'exportMdFile', init: exportMdFileInit}}

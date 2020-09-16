@@ -120,10 +120,8 @@ export default class Cursor {
             }
         }
         
-        console.log(len);
         if(len == 1 && node.nextSibling){
-            console.log('---------------')
-            return this.searchNode(node.nextSibling, 0);
+            return [node.nextSibling, 0];
         }
         return null
     }
@@ -213,12 +211,9 @@ export default class Cursor {
             }else if (this.location.anchorOffset == 0 && (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
                 this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD" || this.location.anchorNode.nodeName === "DIV")) {
                 info = [this.location.anchorNode, 0];
-                console.log('---2', this.location.anchorOffset)
             } else if (this.location.anchorOffset == 0 && this.location.anchorNode.parentNode && ((this.location.anchorNode.parentNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.parentNode.nodeName == 'PRE') || this.location.anchorNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.nodeName == 'PRE')) {
                 info = [this.location.anchorNode, 0] 
-                console.log('---4');
             } else {
-                console.log('---')
                 info = this.searchNode(pNode, pLen);
             }
             console.log(info);

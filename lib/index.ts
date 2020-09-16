@@ -37,7 +37,7 @@ class ArtText {
         ArtText.artTexts.push(this);
     } 
 
-    @executeFutureEvent
+    @executeFutureEvent()
     public init(): void{
         this.registerPlugin();
         this.editor.init();

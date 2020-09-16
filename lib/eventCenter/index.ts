@@ -2,21 +2,31 @@ import { htmlToMd } from "../editor/toNode/index"
 import ArtText from "../index";
 import { blod, italic, del, ins, sup, sub, mark } from "../tool/default";
 import Tool from "../tool";
-export function executeFutureEvent(target, name, descriptor) {
-    target;
-    let oldValue = descriptor.value;
+function executeFutureEvent(range: string = '') {
+    function closure(target, name, descriptor) {
+        target;
+        let oldValue = descriptor.value;
 
-    descriptor.value = function() {
-        for (let art of ArtText.artTexts) {
-            art.eventCenter.executeFutureEvent('start-' + name)
-        }
-        oldValue.apply(this, arguments)
-        for (let art of ArtText.artTexts) {
-            art.eventCenter.executeFutureEvent('end-' + name)
-        }
-    };
-    return descriptor;
+        descriptor.value = function () {
+            let art = null;
+            if (this instanceof ArtText) {
+                art = this;
+            } else if (this['artText'] != undefined && this['artText']) {
+                art = this['artText'];
+            }
+            if (art) {
+                art.eventCenter.executeFutureEvent(range + '-start-' + name)
+            }
+            oldValue.apply(this, arguments)
+            if (art) {
+                art.eventCenter.executeFutureEvent(range + '-end-' + name)
+            }
+        };
+        return descriptor;
+    }
+    return closure;
 }
+export { executeFutureEvent };
 class EventCenter {
 
     editorHtmlDom: HTMLElement;
@@ -39,6 +49,7 @@ class EventCenter {
         this.eventListeners = [];
     }
 
+    @executeFutureEvent('EventCenter')
     init(): void {
         this.editorHtmlDom = this.artText.editor.htmlNode.dom;
         this.addEventListener('keydown', this.keydown);
@@ -109,19 +120,18 @@ class EventCenter {
         this.editorHtmlDom.removeEventListener(eventName, fun, useCapture);
     }
 
-    removeAllEventListener(){
-        for(let e of this.eventListeners){
+    removeAllEventListener() {
+        for (let e of this.eventListeners) {
             this.removeEventListener(e[0], e[1], e[2]);
         }
     }
 
     keydown(e: KeyboardEvent, _this: EventCenter): boolean {
         let key: string = e.key;
-        console.log(key);
         if (!_this.shortcutKey(e, _this.artText)) {
             // 是否摁下快捷键
             return false;
-        } else if (/^Arrow(Right|Left|Up|Down)$/.test(key) && _this.artText.editor.cursor.moveCursor(key)){
+        } else if (/^Arrow(Right|Left|Up|Down)$/.test(key) && _this.artText.editor.cursor.moveCursor(key)) {
             e.preventDefault();
             return false;
         } else if (key == 'Enter') {
@@ -190,10 +200,10 @@ class EventCenter {
             window.open(dom.href)
         } else {
             let cursor = _this.artText.editor.cursor;
-            if(cursor.location && cursor.location.anchorInlineOffset != cursor.location.focusInlineOffset 
-                && cursor.location.anchorAlineOffset == cursor.location.focusAlineOffset){
+            if (cursor.location && cursor.location.anchorInlineOffset != cursor.location.focusInlineOffset
+                && cursor.location.anchorAlineOffset == cursor.location.focusAlineOffset) {
                 _this.artText.tool.setFloatToolbar('show');
-            }else{
+            } else {
                 _this.artText.tool.setFloatToolbar('hide');
             }
             _this.artText.tool.setFloatAuxiliaryTool('hide');

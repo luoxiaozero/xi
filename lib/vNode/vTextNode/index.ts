@@ -1,11 +1,13 @@
 import VNode from '..'
-class VTextNode{
+import VNodeObject from '../vNodeObject';
+
+class VTextNode extends VNodeObject{
     nodeName: string;
     text: string;
     dom: Text;
     parentNode: VNode;
     constructor(text){
-        this.nodeName = '#text';
+        super('#text');
         this.text = text;
         this.parentNode = null;
         this.dom = null;

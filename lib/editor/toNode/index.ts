@@ -273,7 +273,7 @@ function domToNode(dom: HTMLElement): VTextNode | VNode {
             }
         }
         for (let i = 0; i < dom.childNodes.length; i++) {
-            vnode.childNodes.push(domToNode(dom.childNodes[i] as HTMLElement));
+            vnode.appendChild(domToNode(<HTMLElement>dom.childNodes[i]));
         }
         return vnode;
     }

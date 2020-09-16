@@ -11,7 +11,7 @@ class Editor{
     static plugins = {hljs: null, katex: null, flowchart: null, Raphael: null};
     static setPlugin(key: string, value: any): void{
         Editor.plugins[key] = value;
-        ArtText.artTextsRender();
+        //ArtText.artTextsRender();
     }
 
     artText: ArtText;
@@ -72,7 +72,7 @@ class Editor{
                 {__root__: true, contenteditable: 'true', class: 'art-editor-html', style: 'outline:none;white-space:pre-wrap;word-break:break-all'}, 
                 new VNode('p', {}, new VNode('br')));
 
-        this.htmlNode.dom = document.createElement('div');
+        this.htmlNode.newDom();
 
         this.mdDom = document.createElement('textarea');
         this.mdDom.setAttribute('class', 'art-editor-md')
@@ -278,7 +278,7 @@ class Editor{
                 return null
             } else if (Tool.hasClass(dom, "art-shield")) {
                 if(Tool.hasClass(dom, "art-flowTool") && Editor.plugins.flowchart && Editor.plugins.Raphael){
-                    dom.innerHTML = ''
+                    /*dom.innerHTML = ''
                     let md = (<HTMLPreElement>dom.previousSibling).innerText;
                     try{
                         let chart = Editor.plugins.flowchart.parse(md);
@@ -291,12 +291,12 @@ class Editor{
                     }catch(error){
                         console.error('flowchart发生错误')
                         console.error(error);
-                    }
+                    }*/
                 }else if(vnode.attr['__dom__'] == 'math' && Editor.plugins.katex){
                     let math = (<HTMLElement>dom.childNodes[0]).getAttribute("art-math")
-                    if (math && vnode.childNodes[0].attr["art-math"] != math) {
-                        (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.plugins.katex.renderToString(vnode.childNodes[0].attr["art-math"], { throwOnError: false });
-                        (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", vnode.childNodes[0].attr["art-math"]);
+                    if (math && (<VNode>vnode.childNodes[0]).attr["art-math"] != math) {
+                        (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.plugins.katex.renderToString((<VNode>vnode.childNodes[0]).attr["art-math"], { throwOnError: false });
+                        (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", (<VNode>vnode.childNodes[0]).attr["art-math"]);
                     }
                 }else if(Tool.hasClass(dom, "art-toc")){
                     for (let i = 0, j = 0; i < dom.childNodes.length || j < vnode.childNodes.length; i++, j++) {
@@ -309,7 +309,7 @@ class Editor{
                                 i++;
                             }
                         } else {
-                            vnode.childNodes[j].render(dom.childNodes[i])
+                            this.nodeRender(<HTMLElement>dom.childNodes[i], <VNode>vnode.childNodes[j])
                         }
                     }
                 }
@@ -337,14 +337,14 @@ class Editor{
                     } else {
                         if(vnode.childNodes[j].nodeName == "#text"){
                             if(dom.childNodes[i].nodeName.toLowerCase() == "#text"){
-                                if(vnode.childNodes[j].text != dom.nodeValue){
-                                    dom.nodeValue = vnode.childNodes[j].text;
+                                if((<VTextNode>vnode.childNodes[j]).text != dom.childNodes[i].nodeValue){
+                                    dom.childNodes[i].nodeValue = (<VTextNode>vnode.childNodes[j]).text;
                                 }
                             }else{
                                 dom.parentNode.replaceChild(vnode.newDom(), dom); 
                             }
                         }else {
-                            this.nodeRender(dom.childNodes[i] as HTMLElement, vnode.childNodes[j]);
+                            this.nodeRender(dom.childNodes[i] as HTMLElement, <VNode>vnode.childNodes[j]);
                         }
                         
                     }
@@ -355,19 +355,19 @@ class Editor{
         }
         return null;
     }
-    public dispose(vnode: VNode, text: string=null) {
+    public dispose (vnode: VNode, text: string=null): VNode[]{
         if(text != null){
             let childNodes = textToNode(text);
             if(childNodes){
-                vnode.childNodes = childNodes;
-                for(let i = 0; i < vnode.childNodes.length; i++){
-                    vnode.childNodes[i].parentNode = vnode; 
+                vnode.childNodes = [];
+                for(let i = 0; i < childNodes.length; i++){
+                    vnode.appendChild(childNodes[i]); 
                 }
             }
-            return true;
+            return null;
         } else if (vnode.attr['__root__'] == true) {
             for (let i = vnode.childNodes.length - 1; i >= 0 ; i--) {
-                let nodes = vnode.childNodes[i].dispose();
+                let nodes = this.dispose(<VNode>vnode.childNodes[i]);
                 if (nodes && nodes.length > 0) {
                     vnode.childNodes.splice(i, 1, ...nodes);
                 }
@@ -377,7 +377,7 @@ class Editor{
         } else if (vnode.nodeName == "blockquote") {
             for (let i = 0; i < vnode.childNodes.length; i++) {
                 if (vnode.childNodes[i].nodeName == "blockquote" || vnode.childNodes[i].nodeName == "ul" || vnode.childNodes[i].nodeName == "ol") {
-                    vnode.childNodes[i].dispose();
+                    this.dispose(<VNode>vnode.childNodes[i]);
                 } else if (/^>\s/.test(vnode.childNodes[i].getMd())) {
                     vnode.childNodes[i] = new VNode("blockquote", {}, new VNode('p', {}, new VNode('br')));
                 } else if (/^\*\s/.test(vnode.childNodes[i].getMd())) {
@@ -385,34 +385,34 @@ class Editor{
                 } else if (/^\d\.\s/.test(vnode.childNodes[i].getMd())) {
                     vnode.childNodes[i] = new VNode("ol", {}, new VNode('li', {}, new VNode('br')));
                 } else {
-                    vnode.childNodes[i].childNodes = inline(vnode.childNodes[i].getMd());
+                    (<VNode>vnode.childNodes[i]).childNodes = inline(vnode.childNodes[i].getMd());
                 }
             }
         } else if (vnode.nodeName === "ul" || vnode.nodeName === "ol") {
             for (let i = 0; i < vnode.childNodes.length; i++) {
-                if (vnode.childNodes[i].childNodes[0].nodeName == "blockquote" || vnode.childNodes[i].childNodes[0].nodeName == "ul" || vnode.childNodes[i].childNodes[0].nodeName == "ol") {
-                    for (let j = 0; j < vnode.childNodes[i].childNodes.length; j++) {
-                        if (vnode.childNodes[i].childNodes[j].nodeName == "p") {
-                            vnode.childNodes[i].childNodes[j].childNodes = inline(vnode.childNodes[i].childNodes[j].getMd())
+                if ((<VNode>vnode.childNodes[i]).childNodes[0].nodeName == "blockquote" || (<VNode>vnode.childNodes[i]).childNodes[0].nodeName == "ul" || (<VNode>vnode.childNodes[i]).childNodes[0].nodeName == "ol") {
+                    for (let j = 0; j < (<VNode>vnode.childNodes[i]).childNodes.length; j++) {
+                        if ((<VNode>vnode.childNodes[i]).childNodes[j].nodeName == "p") {
+                            (<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes = inline((<VNode>vnode.childNodes[i]).childNodes[j].getMd())
                         } else {
-                            vnode.childNodes[i].childNodes[j].dispose();
+                            this.dispose(<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]);
                         }
                     }
                 } else if (/^>\s/.test(vnode.childNodes[i].getMd())) {
-                    vnode.childNodes[i].childNodes = [new VNode("blockquote", {}, new VNode('p', {}, new VNode('br')))];
+                    (<VNode>vnode.childNodes[i]).childNodes = [new VNode("blockquote", {}, new VNode('p', {}, new VNode('br')))];
                 } else if (/^\*\s/.test(vnode.childNodes[i].getMd())) {
-                    vnode.childNodes[i].childNodes = [new VNode("ul", {}, new VNode("li", {}, new VNode('br')))];
+                    (<VNode>vnode.childNodes[i]).childNodes = [new VNode("ul", {}, new VNode("li", {}, new VNode('br')))];
                 } else if (/^\d\.\s/.test(vnode.childNodes[i].getMd())) {
-                    vnode.childNodes[i].childNodes = [new VNode("ol", {}, new VNode("li", {}, new VNode('br')))];
+                    (<VNode>vnode.childNodes[i]).childNodes = [new VNode("ol", {}, new VNode("li", {}, new VNode('br')))];
                 } else {
-                    if (vnode.childNodes[i].childNodes[0].nodeName == 'input') {
-                        vnode.childNodes[i].childNodes = [vnode.childNodes[i].childNodes[0], ...inline(vnode.childNodes[i].getMd())];
+                    if ((<VNode>vnode.childNodes[i]).childNodes[0].nodeName == 'input') {
+                        (<VNode>vnode.childNodes[i]).childNodes = [(<VNode>vnode.childNodes[i]).childNodes[0], ...inline(vnode.childNodes[i].getMd())];
                     } else if (/^\[x|X\]\s/.test(vnode.childNodes[i].getMd())) {
-                        vnode.childNodes[i].childNodes = [new VNode('input', { type: "checkbox", checked: "checked" }), ...inline(vnode.childNodes[i].getMd().substring(4))];
+                        (<VNode>vnode.childNodes[i]).childNodes = [new VNode('input', { type: "checkbox", checked: "checked" }), ...inline(vnode.childNodes[i].getMd().substring(4))];
                     } else if (/^\[\s\]\s/.test(vnode.childNodes[i].getMd())) {
-                        vnode.childNodes[i].childNodes = [new VNode('input', { type: "checkbox" }), ...inline(vnode.childNodes[i].getMd().substring(4))];
+                        (<VNode>vnode.childNodes[i]).childNodes = [new VNode('input', { type: "checkbox" }), ...inline(vnode.childNodes[i].getMd().substring(4))];
                     } else {
-                        vnode.childNodes[i].childNodes = inline(vnode.childNodes[i].getMd());
+                        (<VNode>vnode.childNodes[i]).childNodes = inline(vnode.childNodes[i].getMd());
                     }
                 }
             }
@@ -420,11 +420,11 @@ class Editor{
             // table
             for (let i = 0; i < vnode.childNodes.length; i++) {
                 // thead tbody
-                for (let j = 0; j < vnode.childNodes[i].childNodes.length; j++) {
+                for (let j = 0; j < (<VNode>vnode.childNodes[i]).childNodes.length; j++) {
                     // tr
-                    for (let k = 0; k < vnode.childNodes[i].childNodes[j].childNodes.length; k++) {
-                        let nodes = inline(vnode.childNodes[i].childNodes[j].childNodes[k].getMd());
-                        vnode.childNodes[i].childNodes[j].childNodes[k].childNodes = nodes;
+                    for (let k = 0; k < (<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes.length; k++) {
+                        let nodes = inline((<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes[k].getMd());
+                        (<VNode>(<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes[k]).childNodes = nodes;
                     }
                 }
             }
@@ -438,16 +438,16 @@ class Editor{
             if(nodes)
                 return nodes;
             else
-                return [new VNode("p", {}, inline(this.getMd()))];
+                return [new VNode("p", {}, inline(vnode.getMd()))];
         }
         return null
     }
-    public render(){
+    public render(){ 
         let vnode = domToNode(this.htmlNode.dom) as VNode;
         if(vnode){
-            this.htmlNode.childNodes = vnode.childNodes;
-            for(let i = 0; i < this.htmlNode.childNodes.length; i++){
-                this.htmlNode.childNodes[i].parentNode = this.htmlNode; 
+            this.htmlNode.childNodes = [];
+            for(let i = 0; i < vnode.childNodes.length; i++){
+                this.htmlNode.appendChild(vnode.childNodes[i]);
             }
         }
 
@@ -471,7 +471,7 @@ class Editor{
                 let a = new VNode('a', {href: '#' + md}, new VTextNode(vnode.getText()))
                 let d = new VNode('p', {class: 'art-toc-' + vnode.nodeName}, a)
                 directory.push(d);
-            }else if(vnode.constructor.name == 'VNode' && vnode.attr.class && /art-toc/.test(vnode.attr.class)){
+            }else if(vnode.constructor.name == 'VNode' && (<VNode>vnode).attr['class'] && /art-toc/.test((<VNode>vnode).attr['class'])){
                 tocs.push(vnode);
             }
         }
@@ -490,10 +490,6 @@ class Editor{
         this.dispose(this.htmlNode, md);
         this.updateToc();
         this.nodeRender(this.htmlNode.dom, this.htmlNode);
-        if(Editor.plugins.hljs){
-            Editor.plugins.hljs.initHighlighting.called = false;
-            Editor.plugins.hljs.initHighlighting(); 
-        }
     }
     public openFile(md: string, name: string){
         console.log(`'${md}', '${name}'`);
