@@ -372,7 +372,9 @@ class Editor{
                     vnode.removeChild(vnode.childNodes[i]);
                     let refChild = vnode.childNodes[i];
                     for(let v of nodes){
-                        vnode.insertBefore(v, refChild);
+                        // 插入失败时，说明参考节点不存在，直接在后面添加
+                        if(!vnode.insertBefore(v, refChild))
+                            vnode.appendChild(v);
                     }
                 }
             }
@@ -438,7 +440,9 @@ class Editor{
             return null
         } else {
             // let nodes = textToNode(this.getMd());
+            console.log('else')
             let nodes = aline(vnode.getMd());
+            console.log(nodes, vnode.getMd())
             if(nodes)
                 return nodes;
             else
