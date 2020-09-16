@@ -369,23 +369,27 @@ class Editor{
             for (let i = vnode.childNodes.length - 1; i >= 0 ; i--) {
                 let nodes = this.dispose(<VNode>vnode.childNodes[i]);
                 if (nodes && nodes.length > 0) {
-                    vnode.childNodes.splice(i, 1, ...nodes);
+                    vnode.removeChild(vnode.childNodes[i]);
+                    let refChild = vnode.childNodes[i];
+                    for(let v of nodes){
+                        vnode.insertBefore(v, refChild);
+                    }
                 }
             }
-        } else if (vnode.attr["class"] && vnode.attr["class"].match(/art-shield/)) {
+        } else if (vnode.attr['class'] && vnode.attr['class'].match(/art-shield/)) {
             return null;
-        } else if (vnode.nodeName == "blockquote") {
+        } else if (vnode.nodeName == 'blockquote') {
             for (let i = 0; i < vnode.childNodes.length; i++) {
                 if (vnode.childNodes[i].nodeName == "blockquote" || vnode.childNodes[i].nodeName == "ul" || vnode.childNodes[i].nodeName == "ol") {
                     this.dispose(<VNode>vnode.childNodes[i]);
                 } else if (/^>\s/.test(vnode.childNodes[i].getMd())) {
-                    vnode.childNodes[i] = new VNode("blockquote", {}, new VNode('p', {}, new VNode('br')));
+                    vnode.replaceChild(new VNode('blockquote', {}, new VNode('p', {}, new VNode('br'))), vnode.childNodes[i])
                 } else if (/^\*\s/.test(vnode.childNodes[i].getMd())) {
-                    vnode.childNodes[i] = new VNode("ul", {}, new VNode('li', {}, new VNode('br')));
+                    vnode.replaceChild(new VNode('ul', {}, new VNode('li', {}, new VNode('br'))), vnode.childNodes[i])
                 } else if (/^\d\.\s/.test(vnode.childNodes[i].getMd())) {
-                    vnode.childNodes[i] = new VNode("ol", {}, new VNode('li', {}, new VNode('br')));
+                    vnode.replaceChild(new VNode('ol', {}, new VNode('li', {}, new VNode('br'))), vnode.childNodes[i])
                 } else {
-                    (<VNode>vnode.childNodes[i]).childNodes = inline(vnode.childNodes[i].getMd());
+                    (<VNode>vnode.childNodes[i]).replaceAllChild(inline(vnode.childNodes[i].getMd()));
                 }
             }
         } else if (vnode.nodeName === "ul" || vnode.nodeName === "ol") {
@@ -393,26 +397,26 @@ class Editor{
                 if ((<VNode>vnode.childNodes[i]).childNodes[0].nodeName == "blockquote" || (<VNode>vnode.childNodes[i]).childNodes[0].nodeName == "ul" || (<VNode>vnode.childNodes[i]).childNodes[0].nodeName == "ol") {
                     for (let j = 0; j < (<VNode>vnode.childNodes[i]).childNodes.length; j++) {
                         if ((<VNode>vnode.childNodes[i]).childNodes[j].nodeName == "p") {
-                            (<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes = inline((<VNode>vnode.childNodes[i]).childNodes[j].getMd())
+                            (<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).replaceAllChild(inline((<VNode>vnode.childNodes[i]).childNodes[j].getMd()));
                         } else {
                             this.dispose(<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]);
                         }
                     }
                 } else if (/^>\s/.test(vnode.childNodes[i].getMd())) {
-                    (<VNode>vnode.childNodes[i]).childNodes = [new VNode("blockquote", {}, new VNode('p', {}, new VNode('br')))];
+                    (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode("blockquote", {}, new VNode('p', {}, new VNode('br')))]);
                 } else if (/^\*\s/.test(vnode.childNodes[i].getMd())) {
-                    (<VNode>vnode.childNodes[i]).childNodes = [new VNode("ul", {}, new VNode("li", {}, new VNode('br')))];
+                    (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode("ul", {}, new VNode("li", {}, new VNode('br')))]);
                 } else if (/^\d\.\s/.test(vnode.childNodes[i].getMd())) {
-                    (<VNode>vnode.childNodes[i]).childNodes = [new VNode("ol", {}, new VNode("li", {}, new VNode('br')))];
+                    (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode("ol", {}, new VNode("li", {}, new VNode('br')))]);
                 } else {
                     if ((<VNode>vnode.childNodes[i]).childNodes[0].nodeName == 'input') {
-                        (<VNode>vnode.childNodes[i]).childNodes = [(<VNode>vnode.childNodes[i]).childNodes[0], ...inline(vnode.childNodes[i].getMd())];
+                        (<VNode>vnode.childNodes[i]).replaceAllChild([(<VNode>vnode.childNodes[i]).childNodes[0], ...inline(vnode.childNodes[i].getMd())]);
                     } else if (/^\[x|X\]\s/.test(vnode.childNodes[i].getMd())) {
-                        (<VNode>vnode.childNodes[i]).childNodes = [new VNode('input', { type: "checkbox", checked: "checked" }), ...inline(vnode.childNodes[i].getMd().substring(4))];
+                        (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode('input', { type: "checkbox", checked: "checked" }), ...inline(vnode.childNodes[i].getMd().substring(4))]);
                     } else if (/^\[\s\]\s/.test(vnode.childNodes[i].getMd())) {
-                        (<VNode>vnode.childNodes[i]).childNodes = [new VNode('input', { type: "checkbox" }), ...inline(vnode.childNodes[i].getMd().substring(4))];
+                        (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode('input', { type: "checkbox" }), ...inline(vnode.childNodes[i].getMd().substring(4))]);
                     } else {
-                        (<VNode>vnode.childNodes[i]).childNodes = inline(vnode.childNodes[i].getMd());
+                        (<VNode>vnode.childNodes[i]).replaceAllChild(inline(vnode.childNodes[i].getMd()));
                     }
                 }
             }
@@ -421,10 +425,10 @@ class Editor{
             for (let i = 0; i < vnode.childNodes.length; i++) {
                 // thead tbody
                 for (let j = 0; j < (<VNode>vnode.childNodes[i]).childNodes.length; j++) {
-                    // tr
-                    for (let k = 0; k < (<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes.length; k++) {
-                        let nodes = inline((<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes[k].getMd());
-                        (<VNode>(<VNode>(<VNode>vnode.childNodes[i]).childNodes[j]).childNodes[k]).childNodes = nodes;
+                    /**tr th */
+                    let t = (<VNode>vnode.childNodes[i]).childNodes[j] as VNode;
+                    for (let k = 0; k < t.childNodes.length; k++) {
+                        (<VNode>t.childNodes[k]).replaceAllChild(inline(t.childNodes[k].getMd()));
                     }
                 }
             }
@@ -443,13 +447,7 @@ class Editor{
         return null
     }
     public render(){ 
-        let vnode = domToNode(this.htmlNode.dom) as VNode;
-        if(vnode){
-            this.htmlNode.childNodes = [];
-            for(let i = 0; i < vnode.childNodes.length; i++){
-                this.htmlNode.appendChild(vnode.childNodes[i]);
-            }
-        }
+        this.htmlNode.replaceAllChild((domToNode(this.htmlNode.dom) as VNode).childNodes);
 
         this.dispose(this.htmlNode);
         this.updateToc();

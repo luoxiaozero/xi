@@ -1,44 +1,29 @@
 import VNode from '..'
 import VNodeObject from '../vNodeObject';
 
-class VTextNode extends VNodeObject{
+class VTextNode extends VNodeObject {
     nodeName: string;
     text: string;
     dom: Text;
     parentNode: VNode;
-    constructor(text){
+
+    constructor(text) {
         super('#text');
         this.text = text;
         this.parentNode = null;
         this.dom = null;
     }
-    domToNode(): VTextNode{
-        return new VTextNode(this.dom.nodeValue);
-    }
-    newDom(){
+
+    public newDom(): any {
         this.dom = document.createTextNode(this.text);
         return this.dom;
     }
-    /**@deprecated */
-    render(dom){
-        if(dom.nodeName.toLowerCase() == "#text"){
-            if(this.text == dom.nodeValue){
-                return null;
-            }else{
-                dom.nodeValue = this.text;
-                return false;
-            }
-        }else{
-            dom.parentNode.replaceChild(this.newDom(), dom); 
-        }
-        return null;
-    }
 
-    getMd(): string{
+    public getMd(): string {
         return this.text;
     }
 
-    getText(): string{
+    public getText(): string {
         return this.text;
     }
 }

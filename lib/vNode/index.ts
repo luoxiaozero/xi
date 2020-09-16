@@ -28,7 +28,8 @@ class VNode extends VNodeObject{
         }
     }
 
-    newDom(): any {
+    /**新建dom */
+    public newDom(): any {
         this.dom = document.createElement(this.nodeName);
         for (let key in this.attr) {
             if (key === "__dom__") {
@@ -57,11 +58,14 @@ class VNode extends VNodeObject{
         return this.dom;
     }
 
+    /**添加孩子节点 */
     public appendChild(vnode: VNode | VTextNode): boolean{
         this.childNodes.push(vnode);
         vnode.parentNode = this;
         return true;
     }
+
+    /**替换孩子节点 */ 
     public replaceChild(newNode: VNode | VTextNode, oldNode: VNode | VTextNode): boolean {
         let index = this.childNodes.indexOf(oldNode)
         if (index != -1) {
@@ -72,7 +76,20 @@ class VNode extends VNodeObject{
         return false;
     }
 
-    public insertBefore (newChild: VNode, refChild: VNode): boolean{
+    /**替换所有孩子节点 */
+    public replaceAllChild(newNodes: (VNode | VTextNode)[]): boolean {
+        if(newNodes){
+            this.childNodes = [];
+            for(let v of newNodes){
+                this.appendChild(v);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**插入参考孩子节点之前 */
+    public insertBefore (newChild: VNode | VTextNode, refChild: VNode | VTextNode): boolean{
         let index = this.childNodes.indexOf(refChild);
         if (index != -1) {
             newChild.parentNode = this;
@@ -82,7 +99,8 @@ class VNode extends VNodeObject{
         return false;
     }
 
-    public insertAfter (newChild: VNode, refChild: VNode): boolean {   
+    /**插入参考孩子节点之后 */
+    public insertAfter (newChild: VNode | VTextNode, refChild: VNode | VTextNode): boolean {   
         let index = this.childNodes.indexOf(refChild);
         if (index != -1) { 
             newChild.parentNode = this;
@@ -92,6 +110,7 @@ class VNode extends VNodeObject{
        return false;  
     }
 
+    /**删除孩子节点 */
     public removeChild (oldChild: VTextNode | VNode): boolean{
         let index = this.childNodes.indexOf(oldChild);
         if (index != -1) { 
@@ -101,7 +120,7 @@ class VNode extends VNodeObject{
        return false;  
     }
 
-    public getMd(model='editor') {
+    public getMd(model: string='editor'): string{
         let md = ""
         if(/art-toc/.test(this.attr['class'])){
             return '[TOC]\n'
@@ -178,7 +197,7 @@ class VNode extends VNodeObject{
         }
         return md;
     }
-    getText(): string{
+    public getText(): string{
         let text = '';
         for(let vnode of this.childNodes){
             if(vnode.nodeName == '#text'){

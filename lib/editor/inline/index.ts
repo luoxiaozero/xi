@@ -2,16 +2,16 @@ import VTextNode from "../../vNode/vTextNode"
 import VNode from "../../vNode"
 import Editor from "..";
 
-function inline(text: string) {
-    if (text === "") {
-        return [new VNode("br")]
+function inline(text: string): VNode[]{
+    if (text === '') {
+        return [new VNode('br')]
     }
     let nodes = [], reMatch: RegExpMatchArray, reTrue;
     while(text){
         reTrue = null;
         // 匹配那个规则最符合
         for (let i = 0; i < inlineRules.length; i++) {
-            if(reMatch = text.match(inlineRules[i]["re"])){
+            if(reMatch = text.match(inlineRules[i].re)){
                 if(reMatch.index == 0){
                     reTrue = [reMatch, inlineRules[i]];
                     break;

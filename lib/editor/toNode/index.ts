@@ -83,7 +83,7 @@ function buo(node){
     return node;
 }
 
-function textToNode(text: string){
+function textToNode(text: string): VNode[]{
     if(text == null)
         return null
     let rows = text.split("\n");
