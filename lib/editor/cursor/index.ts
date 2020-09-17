@@ -1,6 +1,7 @@
 import codeTool from "../../tool/codeTool"
 import tableTool from "../../tool/tableTool"
 import Tool from "../../tool";
+import Editor from "..";
 class Location {
     anchorInlineOffset: number;
     focusInlineOffset: number;
@@ -45,15 +46,15 @@ export default class Cursor {
         if (anchorNode && focusNode) {
             let node = anchorNode;
             let len = anchorOffset;
-            if (node == this.editorHtmlDom){
+            if (node == this.editorHtmlDom) {
                 this.location = null;
                 return this.location;
             }
-                
+
             while (node.parentNode != this.editorHtmlDom) {
                 while (node.previousSibling) {
                     node = node.previousSibling;
-                    if(!Tool.hasClass(node as HTMLElement, 'art-shield'))
+                    if (!Tool.hasClass(node as HTMLElement, 'art-shield'))
                         len += node.textContent.length;
                 }
                 node = node.parentNode;
@@ -65,7 +66,7 @@ export default class Cursor {
             while (nodeF.parentNode !== this.editorHtmlDom) {
                 while (nodeF.previousSibling) {
                     nodeF = nodeF.previousSibling;
-                    if(!Tool.hasClass(nodeF as HTMLElement, 'art-shield'))
+                    if (!Tool.hasClass(nodeF as HTMLElement, 'art-shield'))
                         lenF += nodeF.textContent.length;
                 }
                 nodeF = nodeF.parentNode;
@@ -98,16 +99,16 @@ export default class Cursor {
         return this.location;
     }
     private searchNode(node: Node, len: number) {
-        if (node.childNodes.length == 1 && node.childNodes[0].nodeName == '#text'){
+        if (node.childNodes.length == 1 && node.childNodes[0].nodeName == '#text') {
             if (len <= node.childNodes[0].textContent.length)
                 return [node.childNodes[0], len];
             else
                 len -= node.textContent.length;
         }
-            
-        else{
+
+        else {
             for (let i = 0; i < node.childNodes.length; i++) {
-                if(Tool.hasClass(node.childNodes[i] as HTMLElement, 'art-shield'))
+                if (Tool.hasClass(node.childNodes[i] as HTMLElement, 'art-shield'))
                     continue;
                 if (node.childNodes[i].textContent.length < len) {
                     len -= node.childNodes[i].textContent.length;
@@ -118,8 +119,8 @@ export default class Cursor {
                 }
             }
         }
-        
-        if(len == 1 && node.nextSibling){
+
+        if (len == 1 && node.nextSibling) {
             return [node.nextSibling, 0];
         }
         return null
@@ -131,8 +132,8 @@ export default class Cursor {
             (<HTMLElement>tools[i].nextSibling).style.borderColor = '#9990';
         }
 
-        if(Tool.hasClass(alineDom, 'art-shield')){
-            if(Tool.hasClass(alineDom, 'art-toc')){
+        if (Tool.hasClass(alineDom, 'art-shield')) {
+            if (Tool.hasClass(alineDom, 'art-toc')) {
                 if (alineDom.previousSibling && Tool.hasClass(alineDom.previousSibling as HTMLElement, 'art-tocTool')) {
                     (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
                     alineDom.style.borderColor = '#999';
@@ -147,25 +148,27 @@ export default class Cursor {
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
         }
-        
+
         tools = this.editorHtmlDom.getElementsByClassName('art-tableTool');
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
         }
 
-        tools = this.editorHtmlDom.getElementsByClassName('art-flowTool');
-        for (let i = 0; i < tools.length; i++) {
-            (<HTMLElement>tools[i]).style.border = 'inherit';
-            (<HTMLElement>tools[i].previousSibling).style.display = 'none';
+        if (Editor.plugins.flowchart) {
+            tools = this.editorHtmlDom.getElementsByClassName('art-flowTool');
+            for (let i = 0; i < tools.length; i++) {
+                (<HTMLElement>tools[i]).style.border = 'inherit';
+                (<HTMLElement>tools[i].previousSibling).style.display = 'none';
+            }
         }
-        
+
         if (alineDom.nodeName == "PRE") {
             if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeTool")) {
                 (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
             } else {
                 alineDom.parentNode.insertBefore(codeTool(), alineDom);
             }
-            if (Tool.hasClass(alineDom as HTMLElement, "art-pre-flow")) {
+            if (Editor.plugins.flowchart && Tool.hasClass(alineDom as HTMLElement, "art-pre-flow")) {
                 alineDom.style.display = 'inherit';
                 (<HTMLDivElement>alineDom.nextSibling).style.border = '1px solid #999';
             }
@@ -181,11 +184,11 @@ export default class Cursor {
         }
         return false;
     }
-    public setSelection(location: Location=undefined){
+    public setSelection(location: Location = undefined) {
         if (typeof location == undefined || !location) {
             location = this.location;
         }
-        if(!location){
+        if (!location) {
             return false;
         }
 
@@ -204,14 +207,14 @@ export default class Cursor {
             var pLen = this.location.anchorInlineOffset;
             this.setTool(pNode as HTMLElement)
             console.log(this.location)
-            if(pNode.nodeName == 'HR'){
+            if (pNode.nodeName == 'HR') {
                 // 不可调优先度
                 info = [pNode, 0];
-            }else if (this.location.anchorOffset == 0 && (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
+            } else if (this.location.anchorOffset == 0 && (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
                 this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD" || this.location.anchorNode.nodeName === "DIV")) {
                 info = [this.location.anchorNode, 0];
             } else if (this.location.anchorOffset == 0 && this.location.anchorNode.parentNode && ((this.location.anchorNode.parentNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.parentNode.nodeName == 'PRE') || this.location.anchorNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.nodeName == 'PRE')) {
-                info = [this.location.anchorNode, 0] 
+                info = [this.location.anchorNode, 0]
             } else {
                 info = this.searchNode(pNode, pLen);
             }
@@ -259,8 +262,8 @@ export default class Cursor {
             }
         }
     }
-    
-    static setCursor(node: Node, offset: number): void{
+
+    static setCursor(node: Node, offset: number): void {
         let range = Cursor.sel.getRangeAt(0).cloneRange();
         range.setStart(node, offset);
         range.collapse(true);
@@ -268,8 +271,8 @@ export default class Cursor {
         Cursor.sel.addRange(range);
     }
 
-    public moveCursor(direcction): boolean{
-        switch(direcction){
+    public moveCursor(direcction): boolean {
+        switch (direcction) {
             case 'ArrowRight':
                 this.location.anchorOffset++;
                 this.location.focusOffset++;

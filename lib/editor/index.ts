@@ -12,7 +12,7 @@ class Editor{
     static plugins = {hljs: null, katex: null, flowchart: null, Raphael: null};
     static setPlugin(key: string, value: any): void{
         Editor.plugins[key] = value;
-        //ArtText.artTextsRender();
+        ArtText.artTextsRender();
     }
 
     artText: ArtText;
@@ -61,8 +61,8 @@ class Editor{
         if(this.artText.options.flowchart.jsFun){
             Editor.setPlugin('flowchart', this.artText.options.flowchart.jsFun);
         }else if(this.artText.options.flowchart.js){
-            Tool.loadScript(this.artText.options.flowchart.js[0], ()=>{Editor.setPlugin('Raphael', win['Raphael'])})
-            Tool.loadScript(this.artText.options.flowchart.js[1], ()=>{Editor.setPlugin('flowchart', win['flowchart'])})
+            let fun = () => {Tool.loadScript(this.artText.options.flowchart.js[1], ()=>{Editor.setPlugin('flowchart', win['flowchart'])})};
+            Tool.loadScript(this.artText.options.flowchart.js[0], ()=>{Editor.setPlugin('Raphael', win['Raphael']); fun();})
         }
     }
     private createEditor(): void{
@@ -287,7 +287,7 @@ class Editor{
                 return null
             } else if (Tool.hasClass(dom, "art-shield")) {
                 if(Tool.hasClass(dom, "art-flowTool") && Editor.plugins.flowchart && Editor.plugins.Raphael){
-                    /*dom.innerHTML = ''
+                    dom.innerHTML = ''
                     let md = (<HTMLPreElement>dom.previousSibling).innerText;
                     try{
                         let chart = Editor.plugins.flowchart.parse(md);
@@ -300,7 +300,7 @@ class Editor{
                     }catch(error){
                         console.error('flowchart发生错误')
                         console.error(error);
-                    }*/
+                    }
                 }else if(vnode.attr['__dom__'] == 'math' && Editor.plugins.katex){
                     let math = (<HTMLElement>dom.childNodes[0]).getAttribute("art-math")
                     if (math && (<VNode>vnode.childNodes[0]).attr["art-math"] != math) {
@@ -325,12 +325,14 @@ class Editor{
                     }
                 }
                 
+                dom.setAttribute('style', '');
                 for (let key in vnode.attr) {
                     if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
                         dom.setAttribute(key, vnode.attr[key]);
                     }
                 }
             } else {
+                dom.setAttribute('style', '');
                 for (let key in vnode.attr) {
                     if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
                         dom.setAttribute(key, vnode.attr[key]);
