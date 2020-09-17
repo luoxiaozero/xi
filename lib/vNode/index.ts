@@ -4,6 +4,7 @@ import codeTool from "../tool/codeTool"
 import VTextNode from "./vTextNode";
 import VNodeObject from "./vNodeObject";
 import Editor from "../editor"
+import initTocTool from "../tool/tocTool";
 
 class VNode extends VNodeObject{
     attr: {};
@@ -39,6 +40,8 @@ class VNode extends VNodeObject{
                     this.dom.appendChild(imgTool())
                 } else if (this.attr[key] === "codeTool") {
                     this.dom.appendChild(codeTool())
+                } else if (this.attr[key] == 'tocTool') {
+                    initTocTool(this.dom);
                 }
             } else if (key == "art-math") {
                 if(Editor.plugins.katex){
@@ -122,11 +125,11 @@ class VNode extends VNodeObject{
 
     public getMd(model: string='editor'): string{
         let md = '';
-        if(/art-toc/.test(this.attr['class'])){
+        if(/art-toc(\s|$)/.test(this.attr['class'])){
             return '[TOC]\n'
         }else if (this.nodeName == 'a' && this.childNodes.length > 0) {
             md += (<VTextNode>this.childNodes[0]).text;
-        } else if (this.attr['class'] && this.attr['class'] == 'art-shield') {
+        } else if (this.attr['class'] && /art-shield/.test(this.attr['class'])) {
             return '';
         } else if(model == 'read'){
             if (this.nodeName == 'hr') {

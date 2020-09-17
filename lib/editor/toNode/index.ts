@@ -182,6 +182,7 @@ function textToNode(text: string): VNode[]{
             if(i + 1 < len && /^\s*$/.test(rows[i + 1]))
                 i++;            
         } else if(/^\[(TOC)|(toc)\]$/.test(rows[i])){
+            vnodes.push(new VNode('div', {class: 'art-shield art-tocTool', contenteditable: 'false', __dom__: 'tocTool'}));
             vnodes.push(new VNode('div', {class: 'art-shield art-toc', contenteditable: 'false', __dom__: 'toc'}));
             if(i + 1 < len && /^\s*$/.test(rows[i + 1]))
                 i++; 

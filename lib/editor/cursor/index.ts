@@ -1,6 +1,5 @@
 import codeTool from "../../tool/codeTool"
 import tableTool from "../../tool/tableTool"
-import tocTool from '../../tool/tocTool'
 import Tool from "../../tool";
 class Location {
     anchorInlineOffset: number;
@@ -129,16 +128,16 @@ export default class Cursor {
         let tools = this.editorHtmlDom.getElementsByClassName('art-tocTool');
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
-            (<HTMLElement>tools[i].nextSibling).style.border = 'none';
+            (<HTMLElement>tools[i].nextSibling).style.borderColor = '#9990';
         }
 
         if(Tool.hasClass(alineDom, 'art-shield')){
             if(Tool.hasClass(alineDom, 'art-toc')){
                 if (alineDom.previousSibling && Tool.hasClass(alineDom.previousSibling as HTMLElement, 'art-tocTool')) {
                     (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
-                    alineDom.style.border = '1px dashed #999';
+                    alineDom.style.borderColor = '#999';
                 } else {
-                    alineDom.parentNode.insertBefore(tocTool(), alineDom);
+                    //alineDom.parentNode.insertBefore(tocTool(), alineDom);
                 }
                 return true;
             }

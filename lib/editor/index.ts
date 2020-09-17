@@ -6,6 +6,7 @@ import Cursor from "./cursor"
 import VTextNode from "../vNode/vTextNode"
 import inline from "./inline"
 import aline from "./aline"
+import initTocTool from "../tool/tocTool"
 let win = window;
 class Editor{
     static plugins = {hljs: null, katex: null, flowchart: null, Raphael: null};
@@ -115,11 +116,11 @@ class Editor{
         }
         return true;
     }
-    public enterRender(){
+    public enterRender(): boolean{
         let location = this.cursor.getSelection();
         if(location){
-            let vnodes = domToNode(this.htmlNode.dom) as VNode;
-            this.htmlNode.childNodes = vnodes.childNodes;
+            this.htmlNode.replaceAllChild((domToNode(this.htmlNode.dom) as VNode).childNodes);
+
             let md = this.htmlNode.childNodes[location.anchorAlineOffset].getMd();
             let dom = this.htmlNode.dom.childNodes[location.anchorAlineOffset];
             if(/^(\*{3,}$|^\-{3,}$|^\_{3,}$)/.test(md)){
@@ -128,9 +129,16 @@ class Editor{
                 Cursor.setCursor(hr, 0);
                 return false;
             } else if(/^\[(TOC)|(toc)\]$/.test(md)){
-                let div = document.createElement('div'); 
-                div.setAttribute('class', 'art-shield art-toc');
-                div.setAttribute('contenteditable', 'false')
+                // @future vnodes.push(new VNode('div', {class: 'art-shield art-tocTool', contenteditable: 'false', __dom__: 'tocTool'}));
+                // @future vnodes.push(new VNode('div', {class: 'art-shield art-toc', contenteditable: 'false', __dom__: 'toc'}));
+                let toc = document.createElement('div'); 
+                toc.setAttribute('class', 'art-shield art-toc');
+                toc.setAttribute('contenteditable', 'false')
+
+                let tocTool = document.createElement('div'); 
+                tocTool.setAttribute('class', 'art-shield art-tocTool');
+                tocTool.setAttribute('contenteditable', 'false')
+                initTocTool(tocTool);
 
                 let p = document.createElement('p');
                 p.innerHTML = '<br/>';
@@ -139,7 +147,8 @@ class Editor{
                 else
                     dom.parentNode.appendChild(p);
 
-                this.htmlNode.dom.replaceChild(div, dom); 
+                this.htmlNode.dom.replaceChild(toc, dom); 
+                this.htmlNode.dom.insertBefore(tocTool, toc);
                 this.updateToc();
                 Cursor.setCursor(p, 0);
                 return false;
@@ -298,6 +307,8 @@ class Editor{
                         (<HTMLElement>dom.childNodes[0]).innerHTML = Editor.plugins.katex.renderToString((<VNode>vnode.childNodes[0]).attr["art-math"], { throwOnError: false });
                         (<HTMLElement>dom.childNodes[0]).setAttribute("art-math", (<VNode>vnode.childNodes[0]).attr["art-math"]);
                     }
+                } else if(vnode.attr['__dom__'] == 'tocTool'){
+                    initTocTool(dom);
                 }else if(Tool.hasClass(dom, "art-toc")){
                     for (let i = 0, j = 0; i < dom.childNodes.length || j < vnode.childNodes.length; i++, j++) {
                         if (i >= dom.childNodes.length) {
@@ -440,9 +451,7 @@ class Editor{
             return null
         } else {
             // let nodes = textToNode(this.getMd());
-            console.log('else')
             let nodes = aline(vnode.getMd());
-            console.log(nodes, vnode.getMd())
             if(nodes)
                 return nodes;
             else
@@ -473,7 +482,7 @@ class Editor{
                 let a = new VNode('a', {href: '#' + md}, new VTextNode(vnode.getText()))
                 let d = new VNode('p', {class: 'art-toc-' + vnode.nodeName}, a)
                 directory.push(d);
-            }else if(vnode.constructor.name == 'VNode' && (<VNode>vnode).attr['class'] && /art-toc/.test((<VNode>vnode).attr['class'])){
+            }else if(vnode.constructor.name == 'VNode' && (<VNode>vnode).attr['class'] && /art-toc(\s|$)/.test((<VNode>vnode).attr['class'])){
                 tocs.push(vnode);
             }
         }
@@ -484,7 +493,9 @@ class Editor{
     public getMd(){
         let md = '';
         for(let i = 0; i < this.htmlNode.childNodes.length; i++){
-            md += this.htmlNode.childNodes[i].getMd('read') + '\n';
+            let lineMd = this.htmlNode.childNodes[i].getMd('read');
+            if(lineMd)
+                md += lineMd + '\n';
         }
         return md;
     }

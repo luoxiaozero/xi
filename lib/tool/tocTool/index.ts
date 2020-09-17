@@ -1,13 +1,10 @@
 import Tool from '../'
-export default function tocTool(): HTMLDivElement{
-    let root = document.createElement("div"); 
+export default function initTocTool(root: HTMLElement): void{
+    root.innerHTML = '';
     root.style.width = "100%"
-    root.className = "art-tocTool art-shield"
     root.style.fontSize = "14px"
     root.style.position = "relative";
-    root.style.top = '8px';
-    root.style.height = '0';
-    root.setAttribute("contenteditable", "false");
+    root.style.visibility = 'hidden';
 
     let span = document.createElement("span");
     span.style.fontWeight = '600'
@@ -23,7 +20,6 @@ export default function tocTool(): HTMLDivElement{
 
     root.appendChild(span);
     root.appendChild(delSpan);
-    return root;
 }
 function delTOC(e: MouseEvent){
     let div = (<HTMLSpanElement>e.target).parentNode.parentNode; // HTMLSVGElement
