@@ -1,6 +1,6 @@
 import tableTool from "../tool/tableTool"
 import imgTool from "../tool/imgTool"
-import codeTool from "../tool/codeTool"
+import initCodeTool from "../tool/codeTool"
 import VTextNode from "./vTextNode";
 import VNodeObject from "./vNodeObject";
 import Editor from "../editor"
@@ -39,7 +39,7 @@ class VNode extends VNodeObject{
                 } else if (this.attr[key] === "imgTool") {
                     this.dom.appendChild(imgTool())
                 } else if (this.attr[key] === "codeTool") {
-                    this.dom.appendChild(codeTool())
+                    initCodeTool(this.dom, this.attr['__dict__']['codeLang']);
                 } else if (this.attr[key] == 'tocTool') {
                     initTocTool(this.dom);
                 }
@@ -123,6 +123,14 @@ class VNode extends VNodeObject{
        return false;  
     }
 
+    /**是否存在该类名 */
+    public hasClass (cls: string): boolean {
+        if(!this.attr['class']){
+            return false;
+        }
+        return (' ' + this.attr['class'] + ' ').indexOf(' ' + cls + ' ') > -1;
+    }
+
     public getMd(model: string='editor'): string{
         let md = '';
         if(/art-toc(\s|$)/.test(this.attr['class'])){
@@ -188,10 +196,14 @@ class VNode extends VNodeObject{
             } else if (this.nodeName == 'pre') {
                 md += '```'
     
-                let className = (<VNode>this.childNodes[0]).attr['class'];
-                if (className) {
-                    md += ' ' + className.substring(5).split(' ')[0];
+                let className: string = (<VNode>this.childNodes[0]).attr['class'];
+                if(className){
+                    let lang = className.match(/lang-(.*?)(\s|$)/);
+                    if(lang){
+                        md += lang[1];
+                    }
                 }
+                
                 md += '\n';
                 for (let i = 0; i < this.childNodes.length; i++) {
                     md += this.childNodes[i].getMd(model);

@@ -130,15 +130,21 @@ function textToNode(text: string): VNode[]{
             if(_is){
                 i = j;
                 let code;
-                if(lang != undefined && lang != ''){
+                if(lang == undefined || lang == null){
+                    lang = '';
+                }
+                vnodes.push(
+                    new VNode('div', 
+                    {class: 'art-shield art-codeTool', contenteditable: 'false', __dom__: 'codeTool', __dict__: {codeLang: lang}}));
+                if (lang != '') {
                     code = new VNode("code", {"class": "lang-" + lang}, new VTextNode(temp));
-                    vnodes.push(new VNode("pre", {'style': 'margin-top:35px', class: 'art-pre-' + lang}, code));
+                    vnodes.push(new VNode("pre", { class: 'art-pre-' + lang}, code));
                     if(lang == 'flow'){
                         vnodes.push(new VNode("div", {class: 'art-shield art-flowTool', 'contenteditable': 'false'}, []));
                     }
                 }else{
                     code = new VNode("code", {}, new VTextNode(temp));
-                    vnodes.push(new VNode("pre", {'style': 'margin-top:35px'}, code));
+                    vnodes.push(new VNode("pre", {}, code));
                 }    
                 if(i + 1 < len && /^\s*$/.test(rows[i + 1]))
                     i++;

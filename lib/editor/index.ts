@@ -7,6 +7,7 @@ import VTextNode from "../vNode/vTextNode"
 import inline from "./inline"
 import aline from "./aline"
 import initTocTool from "../tool/tocTool"
+import initCodeTool from "../tool/codeTool"
 let win = window;
 class Editor{
     static plugins = {hljs: null, katex: null, flowchart: null, Raphael: null};
@@ -181,6 +182,11 @@ class Editor{
                 let code = document.createElement('code');
                 code.innerHTML = '\n';
                 let lang = md.match(/^```\s*([^\s]*?)\s*$/)[1];
+
+                let tool = document.createElement('div'); 
+                tool.setAttribute('class', 'art-shield art-codeTool');
+                tool.setAttribute('contenteditable', 'false')
+
                 if(lang != undefined && lang != ''){
                     code.setAttribute('class', 'lang-' + lang);
                     pre.setAttribute('class', 'art-pre-' + lang)
@@ -191,10 +197,15 @@ class Editor{
                         div.setAttribute('contenteditable', 'false');
                         this.htmlNode.dom.insertBefore(div, this.htmlNode.dom.childNodes[location.anchorAlineOffset].nextSibling); 
                     }
+                    initCodeTool(tool, lang);
+                } else {
+                    initCodeTool(tool);
                 }
+
                 pre.appendChild(code);
 
-                this.htmlNode.dom.replaceChild(pre, this.htmlNode.dom.childNodes[location.anchorAlineOffset]); 
+                this.htmlNode.dom.replaceChild(pre, this.htmlNode.dom.childNodes[location.anchorAlineOffset]);
+                this.htmlNode.dom.insertBefore(tool, pre); 
                 Cursor.setCursor(code, 0);
                 return false;
             }else if(location.anchorNode.parentNode.nodeName == 'BLOCKQUOTE' && location.anchorOffset == 0 && location.anchorNode.nodeName == 'P'
@@ -284,9 +295,34 @@ class Editor{
     public nodeRender(dom: HTMLElement, vnode: VNode) {
         if (dom.nodeName.toLowerCase() == vnode.nodeName) {
             if (vnode.nodeName == "code") {
+                if(dom.getAttribute('style') && (vnode.attr['style'] == undefined || !vnode.attr['class']))
+                    dom.setAttribute('style', '');
+                for (let key in vnode.attr) {
+                    if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
+                        dom.setAttribute(key, vnode.attr[key]);
+                    }
+                }
+                let md = vnode.getMd();
+                if(Editor.plugins.hljs && vnode.parentNode.nodeName == 'pre'){
+                    let className: string = vnode.attr['class'];
+                    if(!className){
+                        className = '';
+                    }
+                    let lang = className.match(/lang-(.*?)(\s|$)/);
+                    if(lang && Editor.plugins.hljs.getLanguage(lang[1]) != undefined){
+                        md = Editor.plugins.hljs.highlight(lang[1], md).value;
+                    }else{
+                        let code = Editor.plugins.hljs.highlightAuto(md);
+                        md = code.value;
+                        if(!dom.className.match(code.language))
+                            dom.className += ' ' + code.language;
+                    }
+                }
+                dom.innerHTML = md;
                 return null
             } else if (Tool.hasClass(dom, "art-shield")) {
-                if(Tool.hasClass(dom, "art-flowTool") && Editor.plugins.flowchart && Editor.plugins.Raphael){
+                let styleClean = true;
+                if(vnode.hasClass('art-flowTool') && Editor.plugins.flowchart && Editor.plugins.Raphael){
                     dom.innerHTML = ''
                     let md = (<HTMLPreElement>dom.previousSibling).innerText;
                     try{
@@ -296,7 +332,9 @@ class Editor{
                         dom.onclick = function click(){
                             if(Tool.hasClass(this as HTMLDivElement, "art-flowTool")){
                                 (<HTMLPreElement>(<HTMLDivElement>this).previousSibling).style.display = 'inherit';
-                            }}
+                            }
+                            Cursor.setCursor((<HTMLPreElement>(<HTMLDivElement>this).previousSibling), 0);
+                        }
                     }catch(error){
                         console.error('flowchart发生错误')
                         console.error(error);
@@ -309,6 +347,10 @@ class Editor{
                     }
                 } else if(vnode.attr['__dom__'] == 'tocTool'){
                     initTocTool(dom);
+                    styleClean = false;
+                } else if(vnode.attr['__dom__'] == 'codeTool'){
+                    initCodeTool(dom, vnode.attr['__dict__']['codeLang']);
+                    styleClean = false;
                 }else if(Tool.hasClass(dom, "art-toc")){
                     for (let i = 0, j = 0; i < dom.childNodes.length || j < vnode.childNodes.length; i++, j++) {
                         if (i >= dom.childNodes.length) {
@@ -324,15 +366,16 @@ class Editor{
                         }
                     }
                 }
-                
-                dom.setAttribute('style', '');
+                if(styleClean && dom.getAttribute('style') && (vnode.attr['style'] == undefined || !vnode.attr['class']))
+                    dom.setAttribute('style', '');
                 for (let key in vnode.attr) {
                     if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
                         dom.setAttribute(key, vnode.attr[key]);
                     }
                 }
             } else {
-                dom.setAttribute('style', '');
+                if(dom.getAttribute('style') && (vnode.attr['style'] == undefined || !vnode.attr['class']))
+                    dom.setAttribute('style', '');
                 for (let key in vnode.attr) {
                     if (!(/^__[a-zA-Z\d]+__$/.test(key))) {
                         dom.setAttribute(key, vnode.attr[key]);
@@ -468,10 +511,7 @@ class Editor{
         this.updateToc();
 
         this.nodeRender(this.htmlNode.dom, this.htmlNode);
-        if(Editor.plugins.hljs && this.cursor.location && this.htmlNode.dom.childNodes[this.cursor.location.anchorAlineOffset].nodeName == 'PRE'){
-            Editor.plugins.hljs.initHighlighting.called = false;
-            Editor.plugins.hljs.initHighlighting(); 
-        }
+        
         this.cursor.setSelection();
     }
     public updateToc(){

@@ -7,8 +7,9 @@ import {exportMdFileMap} from './defaultPlugin'
 
 let win: any = window;
 class ArtText {
-
     static version: string = '0.0.0';
+
+    static Editor = Editor;
 
     static plugins: any[] = [exportMdFileMap];
     static use (plugin: any, options: {}): void{

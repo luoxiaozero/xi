@@ -1,4 +1,3 @@
-import codeTool from "../../tool/codeTool"
 import tableTool from "../../tool/tableTool"
 import Tool from "../../tool";
 import Editor from "..";
@@ -165,9 +164,7 @@ export default class Cursor {
         if (alineDom.nodeName == "PRE") {
             if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeTool")) {
                 (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
-            } else {
-                alineDom.parentNode.insertBefore(codeTool(), alineDom);
-            }
+            } 
             if (Editor.plugins.flowchart && Tool.hasClass(alineDom as HTMLElement, "art-pre-flow")) {
                 alineDom.style.display = 'inherit';
                 (<HTMLDivElement>alineDom.nextSibling).style.border = '1px solid #999';
@@ -203,10 +200,13 @@ export default class Cursor {
         if (this.location && this.location.anchorInlineOffset == this.location.focusInlineOffset &&
             this.location.anchorAlineOffset == this.location.focusAlineOffset) {
             let info = null;
-            var pNode = this.editorHtmlDom.childNodes[this.location.focusAlineOffset];
+            var pNode = this.editorHtmlDom.childNodes[this.location.focusAlineOffset] as HTMLElement;
             var pLen = this.location.anchorInlineOffset;
             this.setTool(pNode as HTMLElement)
             console.log(this.location)
+            if(/art-shield/.test(pNode.className)){
+                return null;
+            }
             if (pNode.nodeName == 'HR') {
                 // 不可调优先度
                 info = [pNode, 0];
