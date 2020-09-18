@@ -1,4 +1,4 @@
-import tableTool from "../tool/tableTool"
+import initTableTool from "../tool/tableTool"
 import imgTool from "../tool/imgTool"
 import initCodeTool from "../tool/codeTool"
 import VTextNode from "./vTextNode";
@@ -35,7 +35,7 @@ class VNode extends VNodeObject{
         for (let key in this.attr) {
             if (key === "__dom__") {
                 if (this.attr[key] === "tableTool") {
-                    this.dom.appendChild(tableTool())
+                    initTableTool(this.dom)
                 } else if (this.attr[key] === "imgTool") {
                     this.dom.appendChild(imgTool())
                 } else if (this.attr[key] === "codeTool") {

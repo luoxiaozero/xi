@@ -8,6 +8,7 @@ import inline from "./inline"
 import aline from "./aline"
 import initTocTool from "../tool/tocTool"
 import initCodeTool from "../tool/codeTool"
+import initTableTool from "../tool/tableTool"
 let win = window;
 class Editor{
     static plugins = {hljs: null, katex: null, flowchart: null, Raphael: null};
@@ -161,7 +162,6 @@ class Editor{
                 table.appendChild(thead);
                 table.appendChild(tbody);
                 table.style.width = '100%';
-                table.style.marginTop = '35px';
                 let tr1 = document.createElement('tr');
                 let tr2 = document.createElement('tr');
                 let arry = md.split('|');
@@ -173,7 +173,14 @@ class Editor{
                 }
                 thead.appendChild(tr1);
                 tbody.appendChild(tr2);
+
+                let tool = document.createElement('div'); 
+                tool.setAttribute('class', 'art-shield art-tableTool');
+                tool.setAttribute('contenteditable', 'false')
+                initTableTool(tool);
+
                 this.htmlNode.dom.replaceChild(table, this.htmlNode.dom.childNodes[location.anchorAlineOffset]); 
+                this.htmlNode.dom.insertBefore(tool, table);
                 Cursor.setCursor(tr2.childNodes[0], 0);
                 return false;
             }else if(/^```/.test(md)){
@@ -350,6 +357,9 @@ class Editor{
                     styleClean = false;
                 } else if(vnode.attr['__dom__'] == 'codeTool'){
                     initCodeTool(dom, vnode.attr['__dict__']['codeLang']);
+                    styleClean = false;
+                } else if(vnode.attr['__dom__'] == 'tableTool'){
+                    //initTableTool(dom);
                     styleClean = false;
                 }else if(Tool.hasClass(dom, "art-toc")){
                     for (let i = 0, j = 0; i < dom.childNodes.length || j < vnode.childNodes.length; i++, j++) {

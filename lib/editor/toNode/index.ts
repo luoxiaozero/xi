@@ -176,8 +176,10 @@ function textToNode(text: string): VNode[]{
                 }
                 if(!(i < len && /^\s*$/.test(rows[i + 1])))
                     i--;
+                vnodes.push(new VNode('div', 
+                        {class: 'art-shield art-tableTool', contenteditable: 'false', __dom__: 'tableTool'}));
                 child.push(new VNode('tbody', {}, tbodyChild))
-                vnodes.push(new VNode("table", {"style": "width:100%; margin-top:35px"}, child));
+                vnodes.push(new VNode('table', {'style': 'width:100%;'}, child));
             }else{
                 vnodes.push(new VNode("p", {}, inline(rows[i])));
                 if(i + 1 < len && /^\s*$/.test(rows[i + 1]))

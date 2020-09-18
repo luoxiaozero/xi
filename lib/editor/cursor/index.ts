@@ -1,4 +1,3 @@
-import tableTool from "../../tool/tableTool"
 import Tool from "../../tool";
 import Editor from "..";
 class Location {
@@ -174,8 +173,6 @@ export default class Cursor {
         if (alineDom.nodeName == "TABLE") {
             if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-tableTool")) {
                 (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
-            } else {
-                alineDom.parentNode.insertBefore(tableTool(), alineDom);
             }
             return true;
         }
