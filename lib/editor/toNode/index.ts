@@ -4,26 +4,26 @@ import VNode from "../../vNode"
 import VTextNode from "../../vNode/vTextNode"
 import {inlineRules} from '../inline'
 
-function uoDispose(text, nodeName){
+function uoDispose(text: string, nodeName: string): VNode{
     // 处理
     let num = 2;
-    if(nodeName == 'ol'){
+    if (nodeName == 'ol') {
         num = 3;
     }
-    if(text.substring(num) == ""){
-        return new VNode("li", {}, new VNode("br"));
-    }else if(nodeName == 'ul' && /^\[x|X\]\s/.test(text.substring(2))){
-        return new VNode("li", {style: 'list-style:none'}, [new VNode('input', {type: "checkbox", checked:"checked", style: 'position: relative;left: -5px;'}), ...inline(text.substring(6))]);
-    }else if(nodeName == 'ul' && /^\[\s\]\s/.test(text.substring(2))){
-        return new VNode("li", {style: 'list-style:none'}, [new VNode('input', {type: "checkbox", style: 'position: relative;left: -5px;'}), ...inline(text.substring(6))]);   
-    }else if(/^\*\s/.test(text.substring(num))){
-        return new VNode("li", {}, new VNode(nodeName, {}, uoDispose(text.substring(num), nodeName)));
-    }else if(/^\d\.\s/.test(text.substring(num))){
-        return new VNode("li", {}, new VNode(nodeName, {}, uoDispose(text.substring(num), nodeName)));
-    }else if(/^>\s/.test(text.substring(2))){
-        return new VNode("li", {}, new VNode('blockquote', {}, bDispose(text.substring(2))));
-    }else{
-        return new VNode("li", {}, inline(text.substring(num)));
+    if (text.substring(num) == '') {
+        return new VNode('li', {}, new VNode('br'));
+    } else if (nodeName == 'ul' && /^\[x|X\]\s/.test(text.substring(2))) {
+        return new VNode('li', {style: 'list-style:none'}, [new VNode('input', {type: 'checkbox', checked:'checked', style: 'position: relative;left: -5px;'}), ...inline(text.substring(6))]);
+    } else if (nodeName == 'ul' && /^\[\s\]\s/.test(text.substring(2))){
+        return new VNode('li', {style: 'list-style:none'}, [new VNode('input', {type: 'checkbox', style: 'position: relative;left: -5px;'}), ...inline(text.substring(6))]);   
+    } else if (/^\*\s/.test(text.substring(num))){
+        return new VNode('li', {}, new VNode('ul', {}, uoDispose(text.substring(num), 'ul')));
+    } else if (/^\d\.\s/.test(text.substring(num))){
+        return new VNode('li', {}, new VNode('ol', {}, uoDispose(text.substring(num), 'ol')));
+    } else if (/^>\s/.test(text.substring(2))){
+        return new VNode('li', {}, new VNode('blockquote', {}, bDispose(text.substring(2))));
+    } else {
+        return new VNode('li', {}, inline(text.substring(num)));
     }
 }
 
@@ -110,12 +110,17 @@ function textToNode(text: string): VNode[]{
             vnodes.push(buo(new VNode("ul", {}, child)));
         }else if(/^\d\.\s/.test(rows[i])){
             child = [];
-            while (i < len && /^\d\.\s/.test(rows[i])) {
+            while (i < len) {
+                console.log(rows[i], /^\d\.\s/.test(rows[i]), /^\s{3,}\*\s/.test(rows[i]))
+                if(!(/^\d\.\s/.test(rows[i]) || /^\s{3,}\*\s/.test(rows[i]))){
+                    break;
+                }
                 child.push(uoDispose(rows[i], 'ol'));  
                 i++;
             } 
             if(!(i < len && /^\s*$/.test(rows[i + 1])))
                 i--;
+                console.log(child);
             vnodes.push(buo(new VNode("ol", {}, child)));
         }else if(/^```/.test(rows[i])){
             let lang = rows[i].match(/^```\s*([^\s]*?)\s*$/)[1];

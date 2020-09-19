@@ -164,7 +164,13 @@ class VNode extends VNodeObject{
                 }
             } else if (this.nodeName == 'ol') {
                 for (let i = 0; i < this.childNodes.length; i++) {
-                    md += (i + 1).toString() + '. ' + this.childNodes[i].getMd(model) + '\n';
+                    let rows = this.childNodes[i].getMd(model).replace(/\s$/, '').split('\n');
+                    for(let j = 0, len = rows.length; j < len; j++){
+                        if(j == 0)
+                            md += (i + 1).toString() + '. ' + rows[j] + '\n';
+                        else
+                            md +=  '   ' + rows[j] + '\n';
+                    }
                 }
             } else if(this.nodeName == 'li'){
                 for (let i = 0; i < this.childNodes.length; i++) {
