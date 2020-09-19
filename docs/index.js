@@ -1,4 +1,5 @@
 let md = '\
+[TOC]\n\
 2020 0818\n\
 ## markdown 编辑  [百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
 Markdown是一种可以使用普通文本编辑器编写的标记语言，通过简单的标记语法，它可以使普通文本内容具有一定的格式。\n\
@@ -41,6 +42,9 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 #### 有序列表\n\
 1. 有序列表\n\
 2. 有序列表\n\
+   * 无序列表\n\
+   * 无序列表\n\
+4. 有序列表\n\
 #### 引用\n\
 > 引用\n\
 > **引用**\n\
@@ -92,7 +96,7 @@ class bb:\n\
 \n'
 window.onload = function() {
     const container = document.querySelector('#art');
-    const art = new ArtText(container, {'md': md});
+    const art = new ArtText(container, {markdown: md});
 
     art.init();
 }

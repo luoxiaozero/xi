@@ -111,7 +111,6 @@ function textToNode(text: string): VNode[]{
         }else if(/^\d\.\s/.test(rows[i])){
             child = [];
             while (i < len) {
-                console.log(rows[i], /^\d\.\s/.test(rows[i]), /^\s{3,}\*\s/.test(rows[i]))
                 if(!(/^\d\.\s/.test(rows[i]) || /^\s{3,}\*\s/.test(rows[i]))){
                     break;
                 }
@@ -120,7 +119,6 @@ function textToNode(text: string): VNode[]{
             } 
             if(!(i < len && /^\s*$/.test(rows[i + 1])))
                 i--;
-                console.log(child);
             vnodes.push(buo(new VNode("ol", {}, child)));
         }else if(/^```/.test(rows[i])){
             let lang = rows[i].match(/^```\s*([^\s]*?)\s*$/)[1];

@@ -12,9 +12,16 @@ import initTableTool from "../tool/tableTool"
 let win = window;
 class Editor{
     static plugins = {hljs: null, katex: null, flowchart: null, Raphael: null};
-    static setPlugin(key: string, value: any): void{
+    static setPlugin(key: string, value: any, editor: Editor=null): void{
         Editor.plugins[key] = value;
-        ArtText.artTextsRender();
+        if(editor == undefined)
+            return null;
+        if (editor) {
+            editor.cursor.getSelection();
+            editor.render();
+        } else {
+            ArtText.artTextsRender();
+        }
     }
 
     artText: ArtText;
@@ -47,13 +54,13 @@ class Editor{
         if(this.artText.options.code.jsFun){
             Editor.setPlugin('hljs', this.artText.options.code.jsFun);
         }else if(this.artText.options.code.js){
-            Tool.loadScript(this.artText.options.code.js, () => {Editor.setPlugin('hljs', win['hljs'])});
+            Tool.loadScript(this.artText.options.code.js, () => {Editor.setPlugin('hljs', win['hljs'], this)});
         }
 
         if(this.artText.options.math.jsFun != undefined){
             Editor.setPlugin('katex', this.artText.options.math.jsFun);
         }else if(this.artText.options.math.js){
-            Tool.loadScript(this.artText.options.math.js, ()=>{Editor.setPlugin('katex', win['katex'])})
+            Tool.loadScript(this.artText.options.math.js, ()=>{Editor.setPlugin('katex', win['katex'], this)})
         }
 
         if(this.artText.options.math.css){
@@ -63,8 +70,8 @@ class Editor{
         if(this.artText.options.flowchart.jsFun){
             Editor.setPlugin('flowchart', this.artText.options.flowchart.jsFun);
         }else if(this.artText.options.flowchart.js){
-            let fun = () => {Tool.loadScript(this.artText.options.flowchart.js[1], ()=>{Editor.setPlugin('flowchart', win['flowchart'])})};
-            Tool.loadScript(this.artText.options.flowchart.js[0], ()=>{Editor.setPlugin('Raphael', win['Raphael']); fun();})
+            let fun = () => {Tool.loadScript(this.artText.options.flowchart.js[1], ()=>{Editor.setPlugin('flowchart', win['flowchart'], this)})};
+            Tool.loadScript(this.artText.options.flowchart.js[0], ()=>{Editor.setPlugin('Raphael', win['Raphael'], undefined); fun();})
         }
     }
     private createEditor(): void{
@@ -359,7 +366,7 @@ class Editor{
                     initCodeTool(dom, vnode.attr['__dict__']['codeLang']);
                     styleClean = false;
                 } else if(vnode.attr['__dom__'] == 'tableTool'){
-                    //initTableTool(dom);
+                    initTableTool(dom);
                     styleClean = false;
                 }else if(Tool.hasClass(dom, "art-toc")){
                     for (let i = 0, j = 0; i < dom.childNodes.length || j < vnode.childNodes.length; i++, j++) {
@@ -534,7 +541,7 @@ class Editor{
                 let a = new VNode('a', {href: '#' + md}, new VTextNode(vnode.getText()))
                 let d = new VNode('p', {class: 'art-toc-' + vnode.nodeName}, a)
                 directory.push(d);
-            }else if(vnode.constructor.name == 'VNode' && (<VNode>vnode).attr['class'] && /art-toc(\s|$)/.test((<VNode>vnode).attr['class'])){
+            }else if(vnode instanceof VNode && (<VNode>vnode).attr['class'] && /art-toc(\s|$)/.test((<VNode>vnode).attr['class'])){
                 tocs.push(vnode);
             }
         }
