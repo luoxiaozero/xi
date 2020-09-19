@@ -512,12 +512,26 @@ class Editor{
         } else if (vnode.nodeName == "hr") {
             return null
         } else {
+            let md = vnode.getMd();
+            let vnodes = null;
+            if (/^>\s/.test(md)) {
+                (<VNode>vnode.parentNode).replaceChild(new VNode('blockquote', {}, new VNode('p', {}, inline(md.substring(2)))), vnode);
+                this.cursor.location.focusInlineOffset -= 2;
+                this.cursor.location.anchorInlineOffset -= 2;
+            } else if (/^\*\s/.test(md)) {
+                (<VNode>vnode.parentNode).replaceChild(new VNode('ul', {}, new VNode('li', {}, inline(md.substring(2)))), vnode);
+                this.cursor.location.focusInlineOffset -= 2;
+                this.cursor.location.anchorInlineOffset -= 2;
+            } else if (/^\d\.\s/.test(md)) {
+                (<VNode>vnode.parentNode).replaceChild(new VNode('ol', {}, new VNode('li', {}, inline(md.substring(3)))), vnode);
+                this.cursor.location.focusInlineOffset -= 3;
+                this.cursor.location.anchorInlineOffset -= 3;
+            } else if(vnodes = aline(md)) {
             // let nodes = textToNode(this.getMd());
-            let nodes = aline(vnode.getMd());
-            if(nodes)
-                return nodes;
-            else
-                return [new VNode("p", {}, inline(vnode.getMd()))];
+                return vnodes;
+            }else{
+                return [new VNode('p', {}, inline(md))];
+            }
         }
         return null
     }
