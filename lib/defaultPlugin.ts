@@ -24,9 +24,7 @@ function importMdFile(artText: ArtText){
     ele.onchange = () => {
         const reader = new FileReader()
         reader.onload = ()=>{
-            console.log(reader.result.toString())
-            artText.editor.openFile(reader.result.toString(), ele.files[0].name);
-            console.log(artText.editor.htmlNode)
+            artText.editor.openFile(reader.result.toString(), {name: ele.files[0].name.replace(/.md$/, '')});
         }
         reader.readAsText(ele.files[0],'utf8');
     }
@@ -34,7 +32,10 @@ function importMdFile(artText: ArtText){
 }
 function exportMdFileInit(artText: ArtText){
     function fun() {
-        exportMdFile(artText.editor.getMd(), '123.md');
+        let name = artText.editor.fileInfo['name'];
+        if(!name)
+            name = 'ArtText'
+        exportMdFile(artText.editor.getMd(), name + '.md');
     }
     function fun1() {
         importMdFile(artText);

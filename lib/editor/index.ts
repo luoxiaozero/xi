@@ -29,7 +29,7 @@ class Editor{
     htmlNode: VNode;
     mdDom: HTMLTextAreaElement;
     editorDom: HTMLDivElement;
-    fileInfo: {name: string};
+    fileInfo: {};
     
     constructor(artText: ArtText) {
         this.artText = artText; 
@@ -38,7 +38,7 @@ class Editor{
         this.htmlNode = null;
         this.mdDom = null;
 
-        this.fileInfo = {name: null};  
+        this.fileInfo = {};  
         this.cursor = null;
     } 
 
@@ -47,7 +47,6 @@ class Editor{
         this.cursor = new Cursor(this.htmlNode.dom);  
         Tool.addCss(defauleCss.replace('${theme.backgroundColor}', this.artText.options.theme.backgroundColor));
         this.registerPlugin();
-        this.setMd(this.artText.options.markdown)
     }
 
     private registerPlugin(): void{
@@ -577,9 +576,8 @@ class Editor{
         this.updateToc();
         this.nodeRender(this.htmlNode.dom, this.htmlNode);
     }
-    public openFile(md: string, name: string){
-        console.log(`'${md}', '${name}'`);
-        this.fileInfo.name = name;
+    public openFile(md: string, info: {}={}): void{
+        this.fileInfo = Object.assign({name: null, id: null}, info);;
         this.setMd(md);
     }
     public openTextarea(){
@@ -594,6 +592,7 @@ class Editor{
         this.mdDom.style.display = 'none';
     }
     public emptyEditor(){
+        this.fileInfo = {name: null};
         if(this.htmlNode.dom.style.display == 'none'){
             this.mdDom.value = '';
             this.mdDom.style.height = 'auto';

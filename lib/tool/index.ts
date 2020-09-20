@@ -94,32 +94,39 @@ class Tool{
                 this.artText.editor.closeTextarea();
             }
         });
+
+        this.addTool('新建', 
+        ()=>{this.artText.editor.emptyEditor();});
+
         this.addTool('历史', 
         ()=>{ this.versionHistory.open()});
 
         this.addTool('保存', 
         ()=>{
             let art_articles = JSON.parse(localStorage.art_articles);
-            if(this.artText.editor.fileInfo.name && art_articles.hasOwnProperty(this.artText.editor.fileInfo.name)){
-                Tool.message('逻辑无');
-                message(this.artText, '路基');
+            if(this.artText.editor.fileInfo['id'] && art_articles.hasOwnProperty(this.artText.editor.fileInfo['id'])){
+                localStorage[this.artText.editor.fileInfo['id']] = this.artText.editor.getMd();
+                art_articles[this.artText.editor.fileInfo['id']] = this.artText.editor.fileInfo;
+                localStorage.art_articles = JSON.stringify(art_articles);
+                Tool.message('md保存成功', 'success');
             }else{
                 let timestamp=new Date().getTime();
                 let mdId = 'art_md_' + timestamp + '_';
-                if(this.artText.editor.fileInfo.name){
-                    mdId += this.artText.editor.fileInfo.name;
+                let name = mdId;
+                if(this.artText.editor.fileInfo['name']){
+                    mdId += this.artText.editor.fileInfo['name'];
+                    name = this.artText.editor.fileInfo['name'];
                 }
                 localStorage[mdId] = this.artText.editor.getMd();
-                art_articles[mdId] = {ids: [mdId], time: timestamp, name: mdId}
+                art_articles[mdId] = {ids: [mdId], time: timestamp, name: name, id: mdId}
                 localStorage.art_articles = JSON.stringify(art_articles);
+                this.artText.editor.fileInfo = art_articles[mdId];
                 message(this.artText, 'md保存成功', 'success');
             }
             // message(this.artText, 'md保存成功', 'success');
         });
 
-        this.addTool('清空', 
-        ()=>{this.artText.editor.emptyEditor(); message(this.artText, '清空成功', 'success');});
-        this.addTool('<span style="position: absolute;right: 12px;color:#1abc9c" >ATTB</span>', () => {message(this.artText, '点击了一下');}, false)
+        this.addTool('<span style="position: absolute;right: 12px;color:#1abc9c" title="项目地址">Github</span>', () => {window.open('https://github.com/liziqiang9/ArtText');}, false)
     }
     addTool(title: string, event: Function, addDefaultCss: boolean=true): HTMLSpanElement{
         let span = document.createElement('span');

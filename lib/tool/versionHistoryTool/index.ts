@@ -125,7 +125,9 @@ class VersionHistory {
         artText.rootDom.appendChild(this.root);
         artText.rootDom.appendChild(this.maskLayer);
     }
-    open() {
+
+    /**打开历史工具 */
+    public open(): void{
         this.root.style.display = 'flex';
         this.maskLayer.style.display = 'inline';
         this.art_articles = JSON.parse(localStorage.art_articles);
@@ -133,7 +135,8 @@ class VersionHistory {
         this.updateDirectory()
 
     }
-    updateDirectory() {
+    
+    private updateDirectory(): void{
         this.sideDraftHistoryDirectory.innerHTML = '';
         for (let key of Object.keys(this.art_articles).reverse()) {
             let div = document.createElement('div');
@@ -141,15 +144,37 @@ class VersionHistory {
             div.style.padding = '10px 20px 0'
             div.style.cursor = 'pointer';
             let time = new Date(parseInt(this.art_articles[key].time) * 1).toLocaleString().replace(/\//g, '-').substring(0, 16);
-            div.innerHTML = '<div style="font-weight: 500;">' + time + '</div><div style="font-size: 12px;">当前草稿</div>';
-            div.onclick = this.openMd(this, this.art_articles[key]);
+            let name = this.art_articles[key].name;
+            if(this.artText.editor.fileInfo['id'] && this.artText.editor.fileInfo['id'] == key){
+                name = '@当前草稿';
+                let article = this.art_articles[key];
+                let md = localStorage[article['id']];
+                let showNodeList = this.sideDraftHistoryDirectory.getElementsByClassName("art-VersionHistory-selected");
+                for (let i = showNodeList.length - 1; i >= 0; i--) {
+                    let classVal = showNodeList[i].getAttribute("class");
+                    classVal = classVal.replace("art-VersionHistory-selected", '');
+                    showNodeList[i].setAttribute("class", classVal);
+                }
+                div.setAttribute("class", 'art-VersionHistory-selected');
+                (<HTMLPreElement>this.mainArticle.childNodes[0]).innerHTML = md;
+                this.mainFooter.style.display = 'inherit';
+                let vH = this;
+                this.footerDel.onclick = () => { localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']]; vH.updateDirectory(); Tool.message(article['name'] + '已删除', 'success') }
+                this.footerRestore.onclick = () => { vH.artText.editor.openFile(md, article); Tool.message(article['name'] + '已恢复', 'success'); vH.close(); }
+            }
+
+            div.innerHTML = '<div style="font-weight: 500;">' + time + `</div><div style="font-size: 12px;">${name}</div>`;
+            div.onclick = this.openMd(this.art_articles[key]);
             this.sideDraftHistoryDirectory.appendChild(div);
+            
         }
-        (<HTMLPreElement>this.mainArticle.childNodes[0]).innerHTML = '';
-        this.mainFooter.style.display = 'none';
+        //(<HTMLPreElement>this.mainArticle.childNodes[0]).innerHTML = '';
+        //this.mainFooter.style.display = 'none';
     }
-    openMd(vH: VersionHistory, article: {}) {
-        let md = localStorage[article['ids'][0]];
+
+    private openMd(article: {}): any{
+        let md = localStorage[article['id']];
+        let vH = this;
         function c() {
             let showNodeList = vH.sideDraftHistoryDirectory.getElementsByClassName("art-VersionHistory-selected");
             for (let i = showNodeList.length - 1; i >= 0; i--) {
@@ -160,22 +185,18 @@ class VersionHistory {
             this.setAttribute("class", 'art-VersionHistory-selected');
             (<HTMLPreElement>vH.mainArticle.childNodes[0]).innerHTML = md;
             vH.mainFooter.style.display = 'inherit';
-            vH.footerDel.onclick = () => { localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['name']]; vH.updateDirectory(); Tool.message(article['name'] + '已删除', 'success') }
-            vH.footerRestore.onclick = () => { vH.artText.editor.openFile(md, article['name']); Tool.message(article['name'] + '已恢复', 'success'); vH.close(); }
+            vH.footerDel.onclick = () => { localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']]; vH.updateDirectory(); Tool.message(article['name'] + '已删除', 'success') }
+            vH.footerRestore.onclick = () => { vH.artText.editor.openFile(md, article); Tool.message(article['name'] + '已恢复', 'success'); vH.close(); }
         }
         return c;
     }
-    close() {
+    
+    /**关闭历史工具 */
+    public close(): void{
         localStorage.art_articles = JSON.stringify(this.art_articles);
         this.maskLayer.style.display = 'none';
         this.root.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
-    /*setDialog(header, body, footer=''){
-        footer;
-        this.dialogTool.style.display = 'block';
-        (<HTMLDivElement>this.dialogTool.childNodes[0]).innerHTML = header;
-        this.dialogTool.childNodes[1].appendChild(body);
-    }*/
 }
 export default VersionHistory

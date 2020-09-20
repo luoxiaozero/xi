@@ -46,6 +46,7 @@ class ArtText {
         this.eventCenter.init();
         if(this.options.runModel != 'editor')
             this.changeRunModel(this.options.runModel);
+        this.editor.openFile(this.options.markdown, {name: '演示版本'});
     }
 
     private registerPlugin(): void{
