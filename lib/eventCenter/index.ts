@@ -52,6 +52,8 @@ class EventCenter {
     @executeFutureEvent('EventCenter')
     init(): void {
         this.editorHtmlDom = this.artText.editor.htmlNode.dom;
+        this.addEventListener('art-event-openMore', this.eventOpenMore)
+
         this.addEventListener('keydown', this.keydown);
         this.addEventListener('keyup', this.keyup);
 
@@ -110,7 +112,8 @@ class EventCenter {
         let _this = this;
         function closure(e) {
             _this.artText.editor.cursor.getSelection();
-            fun(e, _this);
+            _this.executeFutureEvent('EventCenter-event');
+            return fun(e, _this);
         }
         this.editorHtmlDom.addEventListener(eventName, closure, useCapture);
         this.eventListeners.push([eventName, closure, useCapture])
@@ -126,6 +129,11 @@ class EventCenter {
         }
     }
 
+    private eventOpenMore(e: CustomEvent, _this: EventCenter){
+        _this.artText.tool.tableMoreTool.open(e.detail.xy, e.detail.table);
+        _this.addFutureEvent('EventCenter-event', () => {_this.artText.tool.tableMoreTool.close();});
+        return false;
+    }
     keydown(e: KeyboardEvent, _this: EventCenter): boolean {
         let key: string = e.key;
         if (!_this.shortcutKey(e, _this.artText)) {

@@ -260,7 +260,9 @@ export default class Cursor {
         }
     }
 
-    static setCursor(node: Node, offset: number): void {
+    static setCursor(node: Node, offset: number): boolean {
+        if(node == undefined && !node)
+            return false;
         let range = Cursor.sel.getRangeAt(0).cloneRange();
         range.setStart(node, offset);
         range.collapse(true);

@@ -75,7 +75,7 @@ class Editor{
     }
     private createEditor(): void{
         this.editorDom = document.createElement('div');
-        this.editorDom.setAttribute('class', 'art-editor');
+        this.editorDom.setAttribute('class', 'art-editor markdown-body');
 
         this.htmlNode = new VNode('div', 
                 {__root__: true, contenteditable: 'true', class: 'art-editor-html', style: 'outline:none;white-space:pre-wrap;word-break:break-all'}, 

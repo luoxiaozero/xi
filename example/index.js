@@ -1,5 +1,4 @@
 import ArtText from '../lib/index.ts'
-import "./markdown.css"
 import katexCss from"../external/css/katex.min.css"
 import katex from "../external/js/katex.min.js"
 import hljs from "../external/js/highlight.min.js"

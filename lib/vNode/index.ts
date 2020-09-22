@@ -184,16 +184,30 @@ class VNode extends VNodeObject{
             } else if (this.nodeName == 'table') {
                 for (let k = 0; k < this.childNodes.length; k++) {
                     for (let i = 0; i < (<VNode>this.childNodes[k]).childNodes.length; i++) {
+                        let tr = (<VNode>this.childNodes[k]).childNodes[i] as VNode;
+
                         md += '|';
-                        let j;
-                        for (j = 0; j < (<VNode>(<VNode>this.childNodes[k]).childNodes[i]).childNodes.length; j++) {
-                            md += (<VNode>(<VNode>this.childNodes[k]).childNodes[i]).childNodes[j].getMd(model) + '|';
+                        for (let j = 0; j < tr.childNodes.length; j++) {
+                            md += tr.childNodes[j].getMd(model) + '|';
                         }
                         md += '\n';
+
                         if (k == 0) {
                             md += '|'
-                            while (j--) {
-                                md += '---|'
+                            for (let j = 0; j < tr.childNodes.length; j++) {
+                                let th = tr.childNodes[j] as VNode;
+                                let mat;
+                                if(th.attr['style'] && (mat = th.attr['style'].match(/text-align:\s*?(left|center|right)/))){
+                                    switch(mat[1]){
+                                        case 'center': md += ':---:|'; break;
+                                        case 'left': md += ':---|'; break;
+                                        case 'right': md += '---:|'; break;
+                                        default: md += ':---:'; break;
+                                    }
+                                } else {
+                                    md += '---|';
+                                }
+                                
                             }
                             md += '\n';
                         }

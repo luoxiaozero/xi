@@ -5,6 +5,7 @@ import ArtText from '../index';
 import * as defaultFun from './default'
 import {toolbarTool} from './toolbarTool'
 import VersionHistory from './versionHistoryTool';
+import { TableMoreTool} from './tableTool/tableMoreTool';
 
 class Tool{
     static loadScript = defaultFun.loadScript;
@@ -20,11 +21,13 @@ class Tool{
     floatToolbar: HTMLDivElement;
     versionHistory: VersionHistory;
     mdHtml: HTMLSpanElement;
+    tableMoreTool: TableMoreTool;
 
     constructor(artText: ArtText){
         this.artText = artText;
 
         this.versionHistory = new VersionHistory(artText);
+        this.tableMoreTool = new TableMoreTool();
         this.toolbar = null;
         this.floatAuxiliaryTool = null;
         this.floatToolbar = null;
@@ -47,6 +50,8 @@ class Tool{
         this.floatToolbar.style.backgroundColor = this.artText.options.theme.backgroundColor;
         let floatToolbar_span = '.art-floatToolbar-span{padding: 8px 10px;cursor: pointer;}.art-floatToolbar-span:hover{color:' + this.artText.options.theme.color + '}';
         this.rooDom.appendChild(this.floatToolbar);
+
+        this.rooDom.appendChild(this.tableMoreTool.createDom());
 
         this.addDefaultTool();
         let toolbar_span = '.art-toolbar-span{padding:5px 5px;margin-right: 9px} .art-toolbar-span:hover{color:#1abc9c;}';
@@ -141,5 +146,7 @@ class Tool{
 }
 let css = '.art-VersionHistory-selected{color: #1aba9c}\n\
 .art-toc{padding: 6px 15px;margin: 0 0 15px;font-weight:500;border: 1px dashed #9990;}.art-toc p{margin-bottom: 2px}.art-toc a{border-bottom: none;color: #4183c4}.art-toc-h2{margin-left:2em}.art-toc-h3{margin-left:4em}.art-toc-h4{margin-left:6em}.art-toc-h5{margin-left:8em}.art-toc-h6{margin-left:10em}\n\
-.art-flowTool{width:100%;text-align: center;}'
+.art-flowTool{width:100%;text-align: center;}\n\
+.art-tableTool-button{font-size:13px;font-weight:600;margin-left:4px;cursor:pointer;border: none;outline: none;padding: 0px 4px;border: 1px solid #9a9a9a00;background:#fff;}.art-tableTool-button:hover{border-color:#aaaa;background:#efefef;}\n\
+.art-tableTool-more{width:180px;list-style: none;position: fixed;top: 10px;left: 10px;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;background:#fff;font-size: 14px;padding:8px 0 6px}.art-tableTool-more-li{padding: 4px 25px;cursor: pointer;}.art-tableTool-more li:hover{background-color: #f0f0f0;}.art-divider{margin: 4px 0;background: #e5e5e5;padding: 1px 0 0;}'
 export default Tool

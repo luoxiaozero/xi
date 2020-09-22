@@ -157,24 +157,50 @@ function textToNode(text: string): VNode[]{
                     i++;
             }       
         }else if(/^\|.*\|/.test(rows[i])){
-            let arry, j, jlen;
-            let _val = [], tbodyChild;
-            if(i + 1 < len && /^\|(\s*-{3,}\s*\|)+/.test(rows[i+1])){
-                child = []
-                arry = rows[i].split('|');
+            if(i + 1 < len && /^\|(\s*:?-{3,}:?\s*\|)+/.test(rows[i+1])){
+                let arry: string[], j: number, jlen: number, trChild: VNode[], tbodyChild: VNode[], align: string[], attr;
+
+                arry = rows[i + 1].split('|');
+                align = [];
                 for (j = 1, jlen = arry.length - 1; j < jlen; j++) {
-                    _val.push(new VNode("th", {}, inline(arry[j])));
+                    let str:string = arry[j].replace(/(^\s*)|(\s*$)/g, '');
+                    if(str[0] == ':' && str[str.length - 1] == ':'){
+                        align.push('center');
+                    } else if(str[0] == ':'){
+                        align.push('left');
+                    } else if(str[str.length - 1] == ':'){
+                        align.push('right');
+                    } else {
+                        align.push('');
+                    }
                 }
-                child.push(new VNode('thead', {}, new VNode("tr",{}, _val)));
+
+                child = []
+
+                arry = rows[i].split('|');
+                trChild = []
+                for (j = 1, jlen = arry.length - 1; j < jlen; j++) {
+                    attr = {}
+                    if(align[j - 1]){
+                        attr['style'] = 'text-align:' + align[j - 1];
+                    }
+                    trChild.push(new VNode("th", attr, inline(arry[j])));
+                }
+                child.push(new VNode('thead', {}, new VNode("tr",{}, trChild)));
                 i += 2;
+
                 tbodyChild = []
                 while (i < len && /^\|.*\|/.test(rows[i])) {
                     arry = rows[i].split('|');
-                    _val = []
+                    trChild = []
                     for (j = 1, jlen = arry.length - 1; j < jlen; j++) {
-                        _val.push(new VNode("td", {}, inline(arry[j])));
+                        attr = {}
+                        if(align[j - 1]){
+                            attr['style'] = 'text-align:' + align[j - 1];
+                        }
+                        trChild.push(new VNode("td", attr, inline(arry[j])));
                     }
-                    tbodyChild.push(new VNode("tr",{}, _val));
+                    tbodyChild.push(new VNode("tr",{}, trChild));
                     i++;
                 }
                 if(!(i < len && /^\s*$/.test(rows[i + 1])))
