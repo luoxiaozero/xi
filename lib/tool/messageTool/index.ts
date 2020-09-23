@@ -46,7 +46,7 @@ export function message(artText: ArtText, message: string, type: string='null'){
         root.style.borderColor = '#e1f3d8';
         root.style.color = '#F56C6C';
     }else{
-        root.style.backgroundColor = artText.options.theme.backgroundColor;
+        root.style.backgroundColor = ArtText.theme.backgroundColor;
         root.style.color = '#676767';
     }
 

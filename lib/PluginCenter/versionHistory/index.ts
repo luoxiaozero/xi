@@ -1,6 +1,63 @@
+import { _Object_ } from "..";
 import ArtText from "../..";
-import Tool from "..";
-class VersionHistory {
+import Tool from "../../tool";
+
+export class OpenVersionHistory {
+    static codeDescribe = 'Toolbar.addTool';
+
+    _object_: _Object_;
+    text: string;
+    constructor(_object_) {
+        this._object_ = _object_;
+        this.text = '历史'
+    }
+
+    click() {
+        this._object_.parentPlugin.open();
+    }
+}
+
+export class SaveMdFile {
+    static codeDescribe = 'Toolbar.addTool';
+
+    _object_: _Object_;
+    text: string;
+    constructor(_object_) {
+        this._object_ = _object_;
+        this.text = '保存';
+    }
+
+    click() {
+        let [md, fileInfo] = this._object_.getFile();
+        let art_articles = JSON.parse(localStorage.art_articles);
+        if (fileInfo['id'] && art_articles.hasOwnProperty(fileInfo['id'])) {
+            localStorage[fileInfo['id']] = md;
+            art_articles[fileInfo['id']] = fileInfo;
+            localStorage.art_articles = JSON.stringify(art_articles);
+            Tool.message('md保存成功', 'success');
+        } else {
+            let timestamp = new Date().getTime();
+            let mdId = 'art_md_' + timestamp + '_';
+            let name = mdId;
+            if (fileInfo['name']) {
+                mdId += fileInfo['name'];
+                name = fileInfo['name'];
+            }
+            localStorage[mdId] = md;
+            art_articles[mdId] = { ids: [mdId], time: timestamp, name: name, id: mdId }
+            localStorage.art_articles = JSON.stringify(art_articles);
+            this._object_.openFile(md, art_articles[mdId]);
+            Tool.message('md保存成功', 'success');
+        }
+    }
+}
+
+export default class VersionHistory {
+    static codeDescribe = 'rootDom.appendChild';
+    static Plugins: {} = { OpenVersionHistory, SaveMdFile };
+
+    _object_: _Object_;
+
     root: HTMLDivElement;
     maskLayer: HTMLDivElement;
     art_articles: {};
@@ -11,8 +68,11 @@ class VersionHistory {
     footerTag: HTMLSpanElement;
     mainFooter: HTMLDivElement;
     artText: ArtText;
-    constructor(artText: ArtText) {
-        this.artText = artText;
+    constructor(_object_: _Object_) {
+        this._object_ = _object_;
+    }
+
+    public getRootDomChilds(): Node[] {
         this.root = document.createElement("div");
         this.root.style.position = 'fixed';
         this.root.style.zIndex = '10';
@@ -122,22 +182,22 @@ class VersionHistory {
         this.root.appendChild(closeSpan);
         this.root.appendChild(dialogSide);
         this.root.appendChild(dialogMain);
-        artText.rootDom.appendChild(this.root);
-        artText.rootDom.appendChild(this.maskLayer);
+        return [this.root, this.maskLayer];
     }
 
     /**打开历史工具 */
-    public open(): void{
+    public open(): void {
         this.root.style.display = 'flex';
         this.maskLayer.style.display = 'inline';
         this.art_articles = JSON.parse(localStorage.art_articles);
         document.body.style.overflow = 'hidden';
-        this.updateDirectory()
-
+        this.updateDirectory();
     }
-    
-    private updateDirectory(): void{
+
+    private updateDirectory(): void {
         this.sideDraftHistoryDirectory.innerHTML = '';
+        let fileInfo = this._object_.getFile('fileInfo');
+        console.log(fileInfo);
         for (let key of Object.keys(this.art_articles).reverse()) {
             let div = document.createElement('div');
             div.style.height = '60px'
@@ -145,7 +205,7 @@ class VersionHistory {
             div.style.cursor = 'pointer';
             let time = new Date(parseInt(this.art_articles[key].time) * 1).toLocaleString().replace(/\//g, '-').substring(0, 16);
             let name = this.art_articles[key].name;
-            if(this.artText.editor.fileInfo['id'] && this.artText.editor.fileInfo['id'] == key){
+            if (fileInfo['id'] && fileInfo['id'] == key) {
                 name = '@当前草稿';
                 let article = this.art_articles[key];
                 let md = localStorage[article['id']];
@@ -164,15 +224,12 @@ class VersionHistory {
             }
 
             div.innerHTML = '<div style="font-weight: 500;">' + time + `</div><div style="font-size: 12px;">${name}</div>`;
-            div.onclick = this.openMd(this.art_articles[key]);
+            div.onclick = this.restoreMdFile(this.art_articles[key]);
             this.sideDraftHistoryDirectory.appendChild(div);
-            
         }
-        //(<HTMLPreElement>this.mainArticle.childNodes[0]).innerHTML = '';
-        //this.mainFooter.style.display = 'none';
     }
 
-    private openMd(article: {}): any{
+    private restoreMdFile(article: {}): any {
         let md = localStorage[article['id']];
         let vH = this;
         function c() {
@@ -190,13 +247,12 @@ class VersionHistory {
         }
         return c;
     }
-    
+
     /**关闭历史工具 */
-    public close(): void{
+    public close(): void {
         localStorage.art_articles = JSON.stringify(this.art_articles);
         this.maskLayer.style.display = 'none';
         this.root.style.display = 'none';
         document.body.style.overflow = 'auto';
     }
 }
-export default VersionHistory
