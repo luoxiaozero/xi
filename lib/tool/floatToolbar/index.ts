@@ -17,6 +17,7 @@ export default function floatToolbar(artText: ArtText): HTMLDivElement{
     box.style.border ='1px solid #e6e6e6';
     box.style.display = 'none';
     // box.style.display = 'none';
+    // Tool.DEFAULT_CSS += '.art-floatToolbar-span{padding: 8px 10px;cursor: pointer;}.art-floatToolbar-span:hover{color:' + ArtText.theme.color + '}';
 
     function closure(fun: Function): Function{
         // 实现闭包

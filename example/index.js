@@ -1,5 +1,5 @@
 import ArtText from '../lib/index.ts'
-import katexCss from"../external/css/katex.min.css"
+import katexCss from "../external/css/katex.min.css"
 import katex from "../external/js/katex.min.js"
 import hljs from "../external/js/highlight.min.js"
 import './tu.jpg'
@@ -99,11 +99,8 @@ class bb:\n\
         dir(self)\n\
 ```\n\
 \n'
-function uploadImg(img){
-    return 'https://dss1.bdstatic.com/6OF1bjeh1BF3odCf/it/u=1583317410,1374114198&fm=74&app=80&f=PNG?w=200&h=200';
-}
-ArtText.use(uploadImg, {main: 'uploadImg'})
+
 const container = document.querySelector('#art');
-const art = new ArtText(container, {markdown: md, code:{jsFun: hljs}});
+const art = new ArtText(container, { markdown: md, fileInfo: { name: '演示版本' }, code: { jsFun: hljs } });
 window.art = art;
 art.init();

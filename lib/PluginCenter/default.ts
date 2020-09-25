@@ -1,7 +1,7 @@
 import { _Object_ } from ".";
 
 export class exportMdFile { 
-    static codeDescribe = 'Toolbar.addTool';
+    static codeDescribe = 'Toolbar.add';
 
     _object_: _Object_;
     text: string;
@@ -30,7 +30,7 @@ export class exportMdFile {
 }
 
 export class importMdFile {
-    static codeDescribe = 'Toolbar.addTool';
+    static codeDescribe = 'Toolbar.add';
 
     _object_: _Object_;
     text: string;
@@ -62,7 +62,7 @@ export class importMdFile {
 }
 
 export class newMdFile {
-    static codeDescribe = 'Toolbar.addTool';
+    static codeDescribe = 'Toolbar.add';
 
     _object_: _Object_;
     text: string;
@@ -77,7 +77,7 @@ export class newMdFile {
 }
 
 export class Github { 
-    static codeDescribe = 'Toolbar.addTool';
+    static codeDescribe = 'Toolbar.add';
 
     _object_: _Object_;
     text: string;

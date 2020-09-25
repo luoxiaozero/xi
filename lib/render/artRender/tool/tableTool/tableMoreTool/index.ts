@@ -1,4 +1,4 @@
-import Cursor from "../../../editor/cursor";
+import Cursor from "../../../../../editor/cursor";
 
 export class TableMoreTool {
     moreDom: HTMLUListElement;
@@ -11,7 +11,7 @@ export class TableMoreTool {
 
     private createLi(text: string, fun: Function) {
         let li = document.createElement('li');
-        li.className = 'art-tableTool-more-li';
+        li.className = 'art-floatTool-li';
         li.innerHTML = text;
 
         let _this = this;
@@ -23,10 +23,11 @@ export class TableMoreTool {
 
         this.moreDom.appendChild(li);
     }
+
     public createDom(): HTMLUListElement {
         this.moreDom = document.createElement('ul');
         this.moreDom.style.display = 'none';
-        this.moreDom.setAttribute('class', 'art-tableTool-more');
+        this.moreDom.setAttribute('class', 'art-floatTool');
 
         this.createLi('上方插入一行', this.insertUpLine);
         this.createLi('下方插入一行', this.insertDownLine);

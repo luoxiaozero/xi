@@ -7,7 +7,7 @@ exports.default = {
   resolve: {
     extensions: ['.ts', '.js'],
     alias: {
-      '@': path.resolve(__dirname, '../lib'),
+      'lib': path.resolve(__dirname, '../lib'),
     }
   },
 

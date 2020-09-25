@@ -1,10 +1,10 @@
-import initTableTool from "../tool/tableTool"
-import imgTool from "../tool/imgTool"
-import initCodeTool from "../tool/codeTool"
+import initTableTool from "../render/artRender/tool/tableTool"
 import VTextNode from "./vTextNode";
 import VNodeObject from "./vNodeObject";
 import Editor from "../editor"
-import initTocTool from "../tool/tocTool";
+import imgTool from "lib/render/artRender/tool/imgTool";
+import initCodeTool from "lib/render/artRender/tool/codeTool";
+import initTocTool from "lib/render/artRender/tool/tocTool";
 
 class VNode extends VNodeObject{
     attr: {};

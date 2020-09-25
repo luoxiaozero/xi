@@ -58,8 +58,11 @@ export function mark(artText: ArtText) {
     model(artText, '==');
 }
 function model(artText: ArtText, str: string) {
-    let location = artText.editor.cursor.getSelection();
-    if(location.focusNode.nodeName == '#text'){
+    artText;
+    str;
+    return null;
+    //let location = artText.editor.cursor.getSelection();
+    /*if(location.focusNode.nodeName == '#text'){
         let nodeValue = location.focusNode.nodeValue;
         nodeValue = nodeValue.substring(0, location.focusOffset) + str + nodeValue.substring(location.focusOffset)
         location.focusNode.nodeValue = nodeValue;
@@ -79,8 +82,8 @@ function model(artText: ArtText, str: string) {
         (<HTMLElement>location.anchorNode).innerText = nodeValue;
     }
     
-    artText.editor.render();
-    location.focusInlineOffset += str.length * 2;
-    location.anchorInlineOffset = location.focusInlineOffset;
-    artText.editor.cursor.setSelection(location);
+    //artText.editor.render();
+    //location.focusInlineOffset += str.length * 2;
+    //location.anchorInlineOffset = location.focusInlineOffset;
+    //artText.editor.cursor.setSelection(location);*/
 }

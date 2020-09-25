@@ -1,9 +1,8 @@
 import ArtText from '..';
-import { exportMdFile, importMdFile, newMdFile, Github} from './default';
+import { exportMdFile, importMdFile, newMdFile, Github } from './default';
 import VersionHistory from './versionHistory';
 
 export interface _Object_ {
-    newFile: Function;
     openFile: Function;
     getFile: Function;
     pluginChilds: any[];
@@ -11,7 +10,7 @@ export interface _Object_ {
 }
 
 export default class PluginCenter {
-    static Plugins: {} = { importMdFile, exportMdFile, newMdFile , VersionHistory, Github};
+    static Plugins: {} = { importMdFile, exportMdFile, VersionHistory, newMdFile, Github };
     static corePlugins: any[] = [];
     static use(plugin: any): void {
         let codeName = plugin.name;
@@ -29,9 +28,8 @@ export default class PluginCenter {
         this.registerPlugins = [];
 
         this._object_ = {
-            newFile: () => { return this.artText.editor.newFile(); },
-            openFile: (...args) => { return this.artText.editor.openFile(args[0], args[1]); },
-            getFile: (...args) => { return artText.editor.getFile(...args); },
+            openFile: (...args) => { return artText.editor.openFile(args[0], args[1]); },
+            getFile: (key = null) => { return artText.editor.getFile(key); },
             pluginChilds: [],
             parentPlugin: null
         }
@@ -47,22 +45,18 @@ export default class PluginCenter {
         let codeDescribe = Plugin.codeDescribe;
         let plugin;
         switch (codeDescribe) {
-            case 'Toolbar.addTool':
+            case 'Toolbar.add':
                 let artText = this.artText;
                 plugin = new Plugin(this._object_);
-                if(plugin.addDefaultClass != undefined){
-                    this.artText.eventCenter.addFutureEvent('-end-init', () => {
-                        artText.tool.toolbar.addTool(plugin.text, () => { plugin.click(); }, plugin.addDefaultClass);
-                    });
-                }else{
-                    this.artText.eventCenter.addFutureEvent('-end-init', () => {
-                        artText.tool.toolbar.addTool(plugin.text, () => { plugin.click(); });
-                    });
+                if (plugin.addDefaultClass != undefined) {
+                    artText.tool.toolbar.addTool(plugin.text, () => { plugin.click(); }, plugin.addDefaultClass);
+                } else {
+                    artText.tool.toolbar.addTool(plugin.text, () => { plugin.click(); });
                 }
-                
+
                 this.registerPlugins.push(plugin);
                 break;
-            case 'rootDom.appendChild':
+            case 'Tool.add':
                 plugin = new Plugin(this._object_);
                 plugin._object_.pluginChilds = this.registerPluginChild(Plugin, plugin);
 
@@ -76,18 +70,18 @@ export default class PluginCenter {
         return plugin;
     }
 
-    private registerPluginChild(Plugin, parentPlugin=null): any[] {
+    private registerPluginChild(Plugin, parentPlugin = null): any[] {
         if (!Plugin.Plugins)
             return null;
         let pluginChild = []
 
         let p;
         for (let key in Plugin.Plugins) {
-            if(p = this.registerPlugin(Plugin.Plugins[key])){
+            if (p = this.registerPlugin(Plugin.Plugins[key])) {
                 p._object_.parentPlugin = parentPlugin;
                 pluginChild.push(p);
             }
-                
+
         }
         return pluginChild;
     }

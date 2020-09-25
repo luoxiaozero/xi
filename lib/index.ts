@@ -2,7 +2,7 @@ import Editor from './editor'
 import { ART_DEFAULT_OPTIONS, ArtOptions, RunModel, ART_THEME, ART_DEFAULT_CSS } from './config'
 import Tool from './tool'
 import EventCenter from './eventCenter';
-import { executeFutureEvent } from './eventCenter';
+import { emitFutureEvent } from './eventCenter';
 import PluginCenter from './PluginCenter';
 
 let win: any = window;
@@ -30,12 +30,12 @@ class ArtText {
         this.container.appendChild(this.rootDom);
 
         this.options = Object.assign({}, ART_DEFAULT_OPTIONS, options);
-        this.editor = new Editor(this);
         this.tool = new Tool(this);
+        this.editor = new Editor(this);
         this.eventCenter = new EventCenter(this);
         this.pluginCenter = new PluginCenter(this);
         this.id = ArtText.ID++;
-        this.addDefaultCss();
+        
     }
 
     private addDefaultCss() {
@@ -50,15 +50,15 @@ class ArtText {
         Tool.addCss(css);
     }
 
-    @executeFutureEvent()
+    @emitFutureEvent()
     public init(): void {
         this.pluginCenter.register();
         this.editor.init();
-        this.tool.init();
-        this.eventCenter.init();
+        this.addDefaultCss();
         if (this.options.runModel != RunModel.editor)
             this.changeRunModel(this.options.runModel);
-        this.editor.openFile(this.options.markdown, { name: '演示版本' });
+
+        this.editor.openFile(this.options.markdown, this.options.fileInfo);
     }
 
     public changeRunModel(runModel: RunModel) {
@@ -68,24 +68,20 @@ class ArtText {
             this.rootDom.childNodes.forEach((node) => {
                 (<HTMLElement>node).style.display = 'none';
             })
-            this.editor.editorDom.style.display = 'inherit';
-            this.editor.editorDom.setAttribute('class', 'art-editor-noStyle')
-            this.editor.editorDom.childNodes.forEach((node) => {
-                (<HTMLElement>node).style.display = 'none';
-            })
-            this.editor.htmlNode.dom.style.display = 'inherit';
-            this.editor.htmlNode.dom.setAttribute('contenteditable', 'false');
-            this.eventCenter.removeAllEventListener();
+            this.editor.dom.style.display = 'inherit';
+            this.editor.dom.setAttribute('class', 'art-editor-noStyle')
+            
+            this.editor.openEditor(runModel);
         } else if (oldRunModel != RunModel.editor) {
             this.rootDom.childNodes.forEach((node) => {
                 (<HTMLElement>node).style.display = 'inherit';
             })
-            this.editor.editorDom.setAttribute('class', 'art-editor')
-            this.editor.editorDom.childNodes.forEach((node) => {
+            this.editor.dom.setAttribute('class', 'art-editor')
+            this.editor.dom.childNodes.forEach((node) => {
                 (<HTMLElement>node).style.display = 'inherit';
             })
-            this.editor.htmlNode.dom.setAttribute('contenteditable', 'true');
-            this.eventCenter.init();
+
+            this.editor.openEditor(runModel);
         }
 
         this.options.runModel = runModel;

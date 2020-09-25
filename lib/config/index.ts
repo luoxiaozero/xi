@@ -11,6 +11,7 @@ export enum SecurityLevel {
 
 export interface ArtOptions {
     markdown: string,
+    fileInfo: {},
     runModel: RunModel,
     securityLevel: SecurityLevel,
     math: { name: string, js: string, css: string, jsFun: Function },
@@ -20,6 +21,7 @@ export interface ArtOptions {
 
 export const ART_DEFAULT_OPTIONS: ArtOptions = {
     markdown: '',
+    fileInfo: {},
     runModel: RunModel.editor,
     securityLevel: SecurityLevel.strict,
     math: { name: 'katex', js: 'https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.js', css: 'https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css', jsFun: null },
