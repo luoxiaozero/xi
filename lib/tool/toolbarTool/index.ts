@@ -26,7 +26,6 @@ export default class ToolbarTool {
             while(level > 0 && this.levelPointer[--level] == undefined){
 
             }
-            console.log(level, this.levelPointer)
             if(level == 0 && this.levelPointer[level] == undefined)
                 this.toolbarDom.appendChild(span);
             else

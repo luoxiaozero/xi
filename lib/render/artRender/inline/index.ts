@@ -1,6 +1,6 @@
-import VTextNode from "../../vNode/vTextNode"
-import VNode from "../../vNode"
-import Editor from "..";
+import VTextNode from "../vNode/vTextNode"
+import VNode from '../vNode'
+import Editor from 'lib/editor';
 
 function inline(text: string): VNode[]{
     if (text === '') {
@@ -52,7 +52,7 @@ const mark = {tag: 'mark', "left": "==", "right": "==", "re": /\={2}[^\=].*?\={2
 const del = {tag: 'del', "left": "~~", "right": "~~", "re": /~{2}.*?~{2}/, "fun":delFun}
 const ins = {tag: 'ins', "left": "__", "right": "__", "re": /_{2}.*?_{2}/, "fun":insFun}
 const sup = {tag: 'sup', "left": "^", "right": "^", "re": /\^[^\^]+\^/, "fun":supFun}
-const sub = {tag: 'sub', "left": "~", "right": "~", "re": /~[^~]+~/, "fun":subFun}
+const sub = {tag: 'sub', "left": "~", "right": "~", "re": /~[^~\s]+~/, "fun":subFun}
 const html_tag = {tag: 'html_tag', left: 'null', right: 'null', 're': /(<!--[\s\S]*?-->|(<([a-zA-Z]{1}[a-zA-Z\d-]*) *[^\n<>]* *(?:\/)?>)(?:([\s\S]*?)(<\/\3 *>))?)/, fun: htmlTagFun}
 export const inlineRules = [bi, bold, mark, inline_code, italic, img, a, math, del, ins, sup, sub, html_tag]
 

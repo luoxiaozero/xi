@@ -1,4 +1,4 @@
-import Cursor from "../../../../../editor/cursor";
+import Cursor from '../../../cursor';
 
 export class TableMoreTool {
     moreDom: HTMLUListElement;

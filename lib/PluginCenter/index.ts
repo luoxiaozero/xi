@@ -1,4 +1,4 @@
-import ArtText from '..';
+import ArtText from 'lib';
 import { exportMdFile, importMdFile, newMdFile, Github } from './default';
 import VersionHistory from './versionHistory';
 

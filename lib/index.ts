@@ -2,7 +2,6 @@ import Editor from './editor'
 import { ART_DEFAULT_OPTIONS, ArtOptions, RunModel, ART_THEME, ART_DEFAULT_CSS } from './config'
 import Tool from './tool'
 import EventCenter from './eventCenter';
-import { emitFutureEvent } from './eventCenter';
 import PluginCenter from './PluginCenter';
 
 let win: any = window;
@@ -50,7 +49,6 @@ class ArtText {
         Tool.addCss(css);
     }
 
-    @emitFutureEvent()
     public init(): void {
         this.pluginCenter.register();
         this.editor.init();
@@ -71,7 +69,8 @@ class ArtText {
             this.editor.dom.style.display = 'inherit';
             this.editor.dom.setAttribute('class', 'art-editor-noStyle')
             
-            this.editor.openEditor(runModel);
+            this.editor.openEditor('ArtRender');
+            this.editor.editorRender.dom.setAttribute('contenteditable', 'false');
         } else if (oldRunModel != RunModel.editor) {
             this.rootDom.childNodes.forEach((node) => {
                 (<HTMLElement>node).style.display = 'inherit';
@@ -81,7 +80,8 @@ class ArtText {
                 (<HTMLElement>node).style.display = 'inherit';
             })
 
-            this.editor.openEditor(runModel);
+            this.editor.openEditor('ArtRender');
+            this.editor.editorRender.dom.setAttribute('contenteditable', 'true');
         }
 
         this.options.runModel = runModel;

@@ -1,7 +1,7 @@
-import inline from "../inline/index"
-import aline from "../aline/index"
-import VNode from "../../vNode"
-import VTextNode from "../../vNode/vTextNode"
+import inline from '../inline'
+import aline from '../aline'
+import VNode from '../vNode';
+import VTextNode from '../vNode/vTextNode';
 import {inlineRules} from '../inline'
 
 function uoDispose(text: string, nodeName: string): VNode{

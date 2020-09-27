@@ -1,9 +1,6 @@
 import Tool from 'lib/tool'
 export default function initTocTool(root: HTMLElement): void{
     root.innerHTML = '';
-    root.style.width = "100%"
-    root.style.fontSize = "14px"
-    root.style.position = "relative";
     root.style.visibility = 'hidden';
 
     let span = document.createElement("span");

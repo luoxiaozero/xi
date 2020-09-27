@@ -1,5 +1,5 @@
-import Tool from "../../tool";
-import Editor from "..";
+import Tool from 'lib/tool';
+import Editor from 'lib/editor';
 class Location {
     anchorInlineOffset: number;
     focusInlineOffset: number;

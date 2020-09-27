@@ -1,6 +1,6 @@
 import { _Object_ } from "..";
-import ArtText from "../..";
-import Tool from "../../tool";
+import ArtText from 'lib';
+import Tool from 'lib/tool';
 
 export class OpenVersionHistory {
     static codeDescribe = 'Toolbar.add';
@@ -67,7 +67,6 @@ export default class VersionHistory {
     footerRestore: HTMLSpanElement;
     footerTag: HTMLSpanElement;
     mainFooter: HTMLDivElement;
-    artText: ArtText;
     constructor(_object_: _Object_) {
         this._object_ = _object_;
         ArtText.DEFAULT_CSS += '.art-VersionHistoryTool{position: fixed;z-index:10;width:60vw;right:20vw;height:92vh;top:4vh;background-color:#fff;box-shadow:0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);border-radius: 2px}\n\
@@ -208,7 +207,7 @@ export default class VersionHistory {
                 this.mainFooter.style.display = 'inherit';
                 let vH = this;
                 this.footerDel.onclick = () => { localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']]; vH.updateDirectory(); Tool.message(article['name'] + '已删除', 'success') }
-                this.footerRestore.onclick = () => { vH.artText.editor.openFile(md, article); Tool.message(article['name'] + '已恢复', 'success'); vH.close(); }
+                this.footerRestore.onclick = () => { vH._object_.openFile(md, article); Tool.message(article['name'] + '已恢复', 'success'); vH.close(); }
             }
 
             div.innerHTML = `<div style="font-weight: 500;">${time}</div><div style="font-size: 12px;color: #555;">${name}</div>`;
@@ -219,7 +218,7 @@ export default class VersionHistory {
 
     private restoreMdFile(article: {}): any {
         let md = localStorage[article['id']];
-        let vH = this;
+        let vH: VersionHistory = this;
         function c() {
             let showNodeList = vH.sideDraftHistoryDirectory.getElementsByClassName("art-VersionHistoryTool-selected");
             for (let i = showNodeList.length - 1; i >= 0; i--) {
@@ -231,7 +230,7 @@ export default class VersionHistory {
             (<HTMLPreElement>vH.mainArticle.childNodes[0]).innerHTML = md;
             vH.mainFooter.style.display = 'inherit';
             vH.footerDel.onclick = () => { localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']]; vH.updateDirectory(); Tool.message(article['name'] + '已删除', 'success') }
-            vH.footerRestore.onclick = () => { vH.artText.editor.openFile(md, article); Tool.message(article['name'] + '已恢复', 'success'); vH.close(); }
+            vH.footerRestore.onclick = () => { vH._object_.openFile(md, article); Tool.message(article['name'] + '已恢复', 'success'); vH.close(); }
         }
         return c;
     }

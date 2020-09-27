@@ -1,29 +1,20 @@
-import ArtText from "../index";
+import ArtText from 'lib';
 
-export function emitFutureEvent(range: string = '') {
-    function closure(target, name, descriptor) {
+export function elapsedTime(target, name, descriptor) {
         target;
         let oldValue = descriptor.value;
 
         descriptor.value = function () {
-            let art: ArtText = null;
-            if (this instanceof ArtText) {
-                art = this;
-            } else if (this['artText'] != undefined && this['artText']) {
-                art = this['artText'];
-            }
-            if (art) {
-                art.eventCenter.emit(range + '-start-' + name)
-            }
-            oldValue.apply(this, arguments)
-            if (art) {
-                art.eventCenter.emit(range + '-end-' + name)
-            }
+            let start_time = new Date().getTime()
+
+            oldValue.apply(arguments)
+            
+            let end_time = new Date().getTime()
+            console.log(`${name}的runTime: ${end_time - start_time}`)
         };
         return descriptor;
-    }
-    return closure;
 }
+
 export default class EventCenter {
 
 

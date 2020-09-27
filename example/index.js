@@ -3,6 +3,7 @@ import katexCss from "../external/css/katex.min.css"
 import katex from "../external/js/katex.min.js"
 import hljs from "../external/js/highlight.min.js"
 import './tu.jpg'
+import './markdown.css';
 let md = '\
 [TOC]\n\
 2020 0818\n\

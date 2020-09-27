@@ -1,5 +1,5 @@
-import ArtText from "../../lib"
-import Tool from "../tool"
+import ArtText from 'lib'
+import Tool from 'lib/tool'
 import ArtRender from "lib/render/artRender"
 import TextareaRender from "lib/render/textareaRender"
 
@@ -50,7 +50,7 @@ class Editor {
     .art-hide{display: inline-block;width: 0;height: 0;overflow: hidden;vertical-align: middle;}\n\
     .art-show{color: #ccc;}\n\
     .art-editor-html pre code{white-space: pre-wrap;}\n\
-    .art-show-math{position: absolute;padding: 13px 25px;background: #fff;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;}\n\
+    .art-show-math{z-index: 5;position: absolute;padding: 13px 25px;background: #fff;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;}\n\
     .art-editor{box-shadow:0 2px 12px 0 rgba(0, 0, 0, 0.1);padding:30px 25px;border-radius:4px;background-color:${theme.backgroundColor};}'
 
     artText: ArtText;

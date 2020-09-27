@@ -2,8 +2,6 @@ import {message} from './messageTool'
 import ArtText from '../index';
 import * as defaultFun from './default'
 import ToolbarTool from './toolbarTool'
-import { TableMoreTool} from '../render/artRender/tool/tableTool/tableMoreTool';
-
 
 class Tool{
     static loadScript = defaultFun.loadScript;
@@ -18,13 +16,10 @@ class Tool{
     artText: ArtText;
     toolbar: ToolbarTool;
     floatToolbar: HTMLDivElement;
-    tableMoreTool: TableMoreTool;
 
     constructor(artText: ArtText){
         this.artText = artText;
 
-        //this.versionHistory = new VersionHistory(artText);
-        this.tableMoreTool = new TableMoreTool();
         this.toolbar = new ToolbarTool();
 
         this.artText.rootDom.insertBefore(this.toolbar.createDom(), this.artText.rootDom.childNodes[0]);

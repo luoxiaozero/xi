@@ -1,4 +1,4 @@
-import Cursor from "lib/editor/cursor";
+import Cursor from '../../cursor';
 
 export default function initTableTool(root: HTMLElement): TableTool {
     return new TableTool(root);

@@ -2,15 +2,15 @@ import ArtText from "lib";
 import Tool from "lib/tool";
 import initTableTool from "lib/render/artRender/tool/tableTool";
 import initTocTool from "./tool/tocTool";
-import VTextNode from "lib/vNode/vTextNode";
+import VTextNode from "./vNode/vTextNode";
 import Render from "..";
-import Cursor from "lib/editor/cursor";
-import VNode from "lib/vNode";
-import { domToNode, textToNode } from "lib/editor/toNode";
+import Cursor from "lib/render/artRender/cursor";
+import VNode from "lib/render/artRender/vNode";
+import { domToNode, textToNode } from "lib/render/artRender/toNode";
 import initCodeTool from "./tool/codeTool";
 import Editor from "lib/editor";
-import inline from "lib/editor/inline";
-import aline from "lib/editor/aline";
+import inline from './inline';
+import aline from "lib/render/artRender/aline";
 import { TableMoreTool } from "./tool/tableTool/tableMoreTool";
 import ArtRenderEvent from "./renderEvent";
 import FloatAuxiliaryTool from "./tool/floatAuxiliaryTool";
@@ -40,6 +40,7 @@ export default class ArtRender implements Render {
         this.renderEvent = new ArtRenderEvent(this);
         ArtText.DEFAULT_CSS += '.art-editor-html{outline:none;white-space:pre-wrap;word-break:break-all}\n\
         .art-toc{padding: 6px 15px;margin: 0 0 15px;font-weight:500;border: 1px dashed #9990;}.art-toc p{margin-bottom: 2px}.art-toc a{border-bottom: none;color: #4183c4}.art-toc-h2{margin-left:2em}.art-toc-h3{margin-left:4em}.art-toc-h4{margin-left:6em}.art-toc-h5{margin-left:8em}.art-toc-h6{margin-left:10em}\n\
+        .art-tocTool{width:100%;font-size:14px;position:relative;}\n\
         .art-buttonTool-hover{font-size:13px;font-weight:600;margin-left:4px;cursor:pointer;border: none;outline: none;padding: 0px 4px;border: 1px solid #9a9a9a00;background:#fff;}.art-buttonTool-hover:hover{border-color:#aaaa;background:#efefef;}\n\
         .art-flowTool{width:100%;text-align: center;}'
         
@@ -364,7 +365,7 @@ export default class ArtRender implements Render {
                                     dom.childNodes[i].nodeValue = (<VTextNode>vnode.childNodes[j]).text;
                                 }
                             } else {
-                                dom.parentNode.replaceChild(vnode.newDom(), dom);
+                                dom.replaceChild(vnode.childNodes[j].newDom(), dom.childNodes[i]);
                             }
                         } else {
                             this.nodeRender(dom.childNodes[i] as HTMLElement, <VNode>vnode.childNodes[j]);

@@ -1,5 +1,5 @@
-import VNode from "../../vNode"
-import VTextNode from "../../vNode/vTextNode";
+import VNode from '../vNode';
+import VTextNode from '../vNode/vTextNode';
 import inline from "../inline";
 
 function aline(text: string): any[]{ 

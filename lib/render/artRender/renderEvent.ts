@@ -1,5 +1,5 @@
 import ArtText from "lib";
-import { htmlToMd } from "lib/editor/toNode";
+import { htmlToMd } from "lib/render/artRender/toNode";
 import Tool from "lib/tool";
 import { blod, del, ins, italic, mark, sub, sup } from "lib/tool/default";
 import ArtRender from ".";
