@@ -1,38 +1,403 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-    <head>
-        <title>ArtText</title>
-        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <style>
-            html, body{
-              margin: 0;
-              padding: 0;
-              background-color: #f5f5f5;
-            }
-            .box{
-                
-                width: 800px;
-                margin: 0 auto;
-                padding: 30px 0 40px;
-            }
 
-            @media screen and (max-width: 800px){
-                .box{
-                    width: 100%;
-                    padding: 20px 0;
-                }
-            }
+<head>
+  <title>ArtText</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
 
-            @media screen and (max-width: 500px){
-                .box{
-                    width: 100%;
-                    padding: 10px 0;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="box"  id="art"></div>
-    </body>
+    .box {
+
+      width: 800px;
+      margin: 0 auto;
+      padding: 30px 0 40px;
+    }
+
+    @media screen and (max-width: 800px) {
+      .box {
+        width: 100%;
+        padding: 20px 0;
+      }
+    }
+
+    @media screen and (max-width: 500px) {
+      .box {
+        width: 100%;
+        padding: 10px 0;
+      }
+    }
+  </style>
+  <style>
+    .markdown-body {
+      font-size: 16px;
+      color: #333;
+      text-rendering: optimizelegibility;
+      font: 300 1em/1.8 "PingFang SC", "Lantinghei SC", "Microsoft Yahei", "Hiragino Sans GB", "Microsoft Sans Serif", "WenQuanYi Micro Hei", "sans-serif";
+    }
+
+    /* 要注意表单元素并不继承父级 font 的问题 */
+    .markdown-body body,
+    .markdown-body button,
+    .markdown-body input,
+    .markdown-body select,
+    .markdown-body textarea {
+      font: 300 1em/1.8 "PingFang SC", "Lantinghei SC", "Microsoft Yahei", "Hiragino Sans GB", "Microsoft Sans Serif", "WenQuanYi Micro Hei", "sans-serif";
+    }
+
+    .markdown-body * {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 统一上标和下标 */
+    .markdown-body sub,
+    .markdown-body sup {
+      font-size: 75%;
+      line-height: 0;
+      position: relative;
+    }
+
+    .markdown-body sup {
+      top: -0.5em;
+    }
+
+    .markdown-body sub {
+      bottom: -0.25em;
+    }
+
+
+    .markdown-body h1,
+    .markdown-body h2,
+    .markdown-body h3,
+    .markdown-body h4,
+    .markdown-body h5,
+    .markdown-body h6 {
+      font-weight: 500;
+      color: #000;
+      margin-top: 0.8em;
+      margin-bottom: 0.4em;
+      line-height: 1.35;
+    }
+
+    .markdown-body h1 {
+      font-size: 2em;
+    }
+
+    .markdown-body h2 {
+      font-size: 1.8em;
+    }
+
+    .markdown-body h3 {
+      font-size: 1.6em;
+    }
+
+    .markdown-body h4 {
+      font-size: 1.4em;
+    }
+
+    .markdown-body h5 {
+      font-size: 1.2em;
+    }
+
+    .markdown-body h6 {
+      font-size: 1.1em;
+    }
+
+    .markdown-body blockquote {
+      position: relative;
+      color: #999;
+      font-weight: 400;
+      border-left: 4px solid #ccc;
+      padding-left: 1em;
+      margin: 1em 2em 1em 0.6em;
+    }
+
+    .markdown-body p,
+    .markdown-body pre,
+    .markdown-body ul,
+    .markdown-body ol,
+    .markdown-body dl,
+    .markdown-body form,
+    .markdown-body hr,
+    .markdown-body table,
+    .markdown-body figure,
+    .markdown-body blockquote {
+      margin-bottom: 0.6em;
+    }
+
+    .markdown-body li>p {
+      margin-bottom: 0.2em;
+    }
+
+    .markdown-body ul {
+      margin-left: 1.3em;
+      list-style: disc;
+    }
+
+    .markdown-body ol {
+      list-style: decimal;
+      margin-left: 1.6em;
+    }
+
+    .markdown-body li ul,
+    .markdown-body li ol {
+      margin-bottom: 0.8em;
+      margin-left: 1.8em;
+    }
+
+    .markdown-body li ul {
+      list-style: circle;
+    }
+
+    .markdown-body a {
+      text-decoration: none;
+      color: #4183c4;
+      border-bottom: 1px solid #4183c4;
+    }
+
+    .markdown-body a:hover {
+      border-bottom-color: #555;
+      color: #555;
+    }
+
+    .markdown-body img {
+      max-width: 100%;
+    }
+
+    .markdown-body strong,
+    .markdown-body b {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .markdown-body hr {
+      border: none;
+      border-bottom: 1px solid #cfcfcf;
+      margin-bottom: 0.8em;
+      height: 10px;
+    }
+
+    /* 去掉各Table cell 的边距并让其边重合 */
+    .markdown-body table {
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    .markdown-body table caption {
+      border-bottom: none;
+    }
+
+    .markdown-body table th,
+    .markdown-body table td {
+      border: 1px solid #ddd;
+      padding: 0.4em 0.8em;
+      color: #666;
+    }
+
+    .markdown-body table thead th {
+      background: #f5f5f5;
+      color: #5b5b5b;
+    }
+
+    .markdown-body table tbody tr {
+      background: #fff;
+    }
+
+    .markdown-body table tbody tr:nth-child(2n) {
+      background: #f5f5f5;
+    }
+
+    .markdown-body acronym,
+    .markdown-body abbr {
+      border-bottom: 1px dotted;
+      font-variant: normal;
+      text-decoration: none;
+    }
+
+    .markdown-body mark {
+      background: #fffdd1;
+      border-bottom: 1px solid #ffedce;
+      padding: 2px;
+    }
+
+
+    .markdown-body code {
+      /*color: #d63200;默认*/
+      background-color: #f1f1f1;
+      color: #525252;
+      padding: 3px 5px;
+      margin: 0 2px;
+      border-radius: 2px;
+    }
+
+    .markdown-body pre {
+      background-color: #f6f8fa;
+      padding: 1em 1.5em;
+      border-radius: 2px;
+      font-size: 14px;
+      position: relative;
+    }
+
+    .markdown-body pre code {
+      background-color: #f6f8fa;
+      line-height: 1.6rem;
+      padding: 0px;
+      margin: 0px;
+    }
+
+    pre code.lang-c::before,
+    pre code.lang-python::before,
+    pre code.lang-html::before,
+    pre code.lang-javascript::before,
+    pre code.hljs.bash::before,
+    pre code.hljs.css::before {
+      font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+      position: absolute;
+      top: 0;
+      right: 0;
+      color: #ccc;
+      text-align: right;
+      font-size: 0.9em;
+      padding: 5px 10px 0;
+      line-height: 15px;
+      height: 15px;
+    }
+
+    pre code.lang-c::before {
+      content: "C";
+    }
+
+    pre code.lang-python::before {
+      content: "Python";
+    }
+
+    pre code.lang-html::before {
+      content: "HTML";
+    }
+
+    pre code.lang-javascript::before {
+      content: "JS";
+    }
+
+    pre code.hljs.bash::before {
+      content: "Shell";
+    }
+
+    pre code.hljs.css::before {
+      content: "CSS";
+    }
+
+    pre code .hljs-tag,
+    pre code .hljs-tag pre code .hljs-title,
+    pre code .hljs-change,
+    pre code .hljs-winutils,
+    pre code .hljs-flow,
+    pre code .hljs-tex pre code .hljs-special {
+      color: #2973b7;
+    }
+
+    pre code .hljs-symbol,
+    pre code .hljs-symbol pre code .hljs-string,
+    pre code .hljs-value,
+    pre code .hljs-regexp,
+    pre code .hljs-string,
+    pre code .hljs-subst,
+    pre code .hljs-haskell pre code .hljs-type,
+    pre code .hljs-preprocessor,
+    pre code .hljs-ruby pre code .hljs-class pre code .hljs-parent,
+    pre code .hljs-built_in,
+    pre code .hljs-sql pre code .hljs-aggregate,
+    pre code .hljs-django pre code .hljs-template_tag,
+    pre code .hljs-django pre code .hljs-variable,
+    pre code .hljs-smalltalk pre code .hljs-class,
+    pre code .hljs-javadoc,
+    pre code .hljs-django pre code .hljs-filter pre code .hljs-argument,
+    pre code .hljs-smalltalk pre code .hljs-localvars,
+    pre code .hljs-smalltalk pre code .hljs-array,
+    pre code .hljs-attr_selector,
+    pre code .hljs-pseudo,
+    pre code .hljs-addition,
+    pre code .hljs-stream,
+    pre code .hljs-envvar,
+    pre code .hljs-apache pre code .hljs-tag,
+    pre code .hljs-apache pre code .hljs-cbracket,
+    pre code .hljs-tex pre code .hljs-command,
+    pre code .hljs-prompt {
+      color: #42b983;
+    }
+
+    pre code .hljs-function pre code .hljs-keyword,
+    pre code .hljs-constant {
+      color: #0092db;
+    }
+
+    pre code .hljs-keyword,
+    pre code .hljs-attribute {
+      color: #d63200;
+    }
+
+    pre code .hljs-meta,
+    pre code .hljs-number,
+    pre code .hljs-literal {
+      color: #a32eff;
+    }
+
+    pre code .hljs-meta-string {
+      color: #9a9a9a;
+    }
+
+    pre code .hljs-class pre code .hljs-title {
+      color: #fff;
+    }
+
+    pre code .hljs-function .hljs-title {
+      color: #d6bc00;
+    }
+
+    pre code .hljs-class .hljs-title {
+      color: #0483de;
+    }
+
+    pre code .hljs-title {
+      color: #a6e22e;
+    }
+
+    pre code .hljs-tag pre code .hljs-value,
+    pre code .hljs-comment,
+    pre code .hljs-java pre code .hljs-annotation,
+    pre code .hljs-python pre code .hljs-decorator,
+    pre code .hljs-template_comment,
+    pre code .hljs-pi,
+    pre code .hljs-doctype,
+    pre code .hljs-deletion,
+    pre code .hljs-shebang,
+    pre code .hljs-apache pre code .hljs-sqbracket,
+    pre code .hljs-tex pre code .hljs-formula {
+      color: #707070;
+    }
+
+    pre code .hljs-coffeescript pre code .hljs-javascript,
+    pre code .hljs-javascript pre code .hljs-xml,
+    pre code .hljs-tex pre code .hljs-formula,
+    pre code .hljs-xml pre code .hljs-javascript,
+    pre code .hljs-xml pre code .hljs-vbscript,
+    pre code .hljs-xml pre code .hljs-css,
+    pre code .hljs-xml pre code .hljs-cdata {
+      opacity: 0.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box" id="art"></div>
+  <div class="box" id="art2"></div>
+</body>
+
 </html>
