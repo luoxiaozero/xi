@@ -6,13 +6,13 @@ import { domToMd } from '../artRenderRender/grammer';
 /**
  * 渲染器的事件类
  */
-export default class ArtRenderEvent{
+export default class ArtRenderEvent {
 
     artRender: ArtRender;
     /**是否连续输入，如中文输入时，多个摁键代表一个中文 */
     isComposition: boolean;
     uploadImg: Function;
-    constructor(artRender: ArtRender){
+    constructor(artRender: ArtRender) {
         this.artRender = artRender;
         this.isComposition = false;
     }
@@ -208,22 +208,25 @@ export default class ArtRenderEvent{
 
     }
 
-    /** */
+    /**
+     * 拖事件
+     */
     private drop(e: DragEvent, _this: ArtRenderEvent) {
         e.preventDefault();
-        for (var i = 0, len = e.dataTransfer.files.length; i < len; i++) {
-            var f0 = e.dataTransfer.files[i];
-            //创建一个文件内容读取器——FileReader
-            var fr = new FileReader();
-            console.log(fr, f0);
+        for (let i = 0, len = e.dataTransfer.files.length; i < len; i++) {
+            let f0 = e.dataTransfer.files[i];
+            let fr = new FileReader();
+
             if (/.*\.md$/.test(f0.name) || f0.type == 'text/plain') {
-                fr.onload = function () {
+                // 加载文本
+                fr.onload = () => {
                     if (fr.result) {
-                        _this.artRender.artText.$editor.openFile(fr.result.toString(), f0.name);
+                        _this.artRender.artText.$editor.openFile({ defaultMd: fr.result.toString(), name: f0.name });
                     }
                 };
                 fr.readAsText(f0);
             } else if (/^image\/(png|jpe?g)$/.test(f0.type)) {
+                // 加载图片
                 fr.onload = function () {
                     let url = null;
                     if (_this.uploadImg) {
@@ -232,21 +235,22 @@ export default class ArtRenderEvent{
                         url = fr.result;
                     }
 
-                    var img = new Image();
-                    img.src = url; //dataURL
-                    console.log(img);
+                    let img = new Image();
+                    img.src = url;
+
                     let span = document.createElement('span');
                     span.setAttribute('class', 'art-hide');
                     let text = document.createTextNode('![' + f0.name + '](' + url + ')');
                     span.appendChild(text);
                     const target = e.target as HTMLElement;
+
                     target.appendChild(span);
                     target.appendChild(img);
                 }
                 //读取文件中的内容 —— DataURL：一种特殊的URL地址，本身包含着所有的数据
                 fr.readAsDataURL(f0);
             } else {
-                // Tool.message('不支持该文件类型', 'error');
+                _this.artRender.artText.$pluginCenter.emit('Message', '不支持该文件类型', 'error');
             }
         }
     }
