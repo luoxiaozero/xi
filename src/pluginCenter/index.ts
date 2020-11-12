@@ -39,7 +39,6 @@ export default class PluginCenter {
         PluginCenter.use(Github);
 
         PluginCenter.use(VersionHistory);
-        console.log(PluginCenter.plugins);
     }
 
     artText: ArtText;
