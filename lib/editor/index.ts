@@ -49,6 +49,7 @@ class Editor {
     static DEFAULT_CSS = '\n\
     .art-hide{display: inline-block;width: 0;height: 0;overflow: hidden;vertical-align: middle;}\n\
     .art-show{color: #ccc;}\n\
+    .art-editor li>input{position: absolute;margin-left: -1.15em;margin-top: 0.45em;}\n\
     .art-editor-html pre code{white-space: pre-wrap;}\n\
     .art-show-math{z-index: 5;position: absolute;padding: 13px 25px;background: #fff;box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;}\n\
     .art-editor{box-shadow:0 2px 12px 0 rgba(0, 0, 0, 0.1);padding:30px 25px;border-radius:4px;background-color:${theme.backgroundColor};}'

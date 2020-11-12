@@ -4,26 +4,28 @@ import VNode from '../vNode';
 import VTextNode from '../vNode/vTextNode';
 import {inlineRules} from '../inline'
 
-function uoDispose(text: string, nodeName: string): VNode{
-    // 处理
+/**处理 */
+function uoDispose(text: string, nodeName: string, match: string): VNode{
     let num = 2;
     if (nodeName == 'ol') {
         num = 3;
     }
     if (text.substring(num) == '') {
-        return new VNode('li', {}, new VNode('br'));
+        return new VNode('li', {__match__: match}, new VNode('p', {}, new VNode('br')));
     } else if (nodeName == 'ul' && /^\[x|X\]\s/.test(text.substring(2))) {
-        return new VNode('li', {style: 'list-style:none'}, [new VNode('input', {type: 'checkbox', checked:'checked', style: 'position: relative;left: -5px;'}), ...inline(text.substring(6))]);
+        return new VNode('li', {__match__: match, style: 'list-style:none'}, [new VNode('input', {type: 'checkbox', checked:'checked'}), new VNode('p', {}, inline(text.substring(6)))]);
     } else if (nodeName == 'ul' && /^\[\s\]\s/.test(text.substring(2))){
-        return new VNode('li', {style: 'list-style:none'}, [new VNode('input', {type: 'checkbox', style: 'position: relative;left: -5px;'}), ...inline(text.substring(6))]);   
+        return new VNode('li', {__match__: match, style: 'list-style:none'}, [new VNode('input', {type: 'checkbox'}), new VNode('p', {}, inline(text.substring(6)))]);   
     } else if (/^\*\s/.test(text.substring(num))){
-        return new VNode('li', {}, new VNode('ul', {}, uoDispose(text.substring(num), 'ul')));
+        return new VNode('li', {__match__: match}, new VNode('ul', {}, uoDispose(text.substring(num), 'ul', '*')));
+    } else if (/^\s{2}\*\s/.test(text.substring(num))){
+        return new VNode('li', {__match__: match}, new VNode('ul', {}, uoDispose(text.substring(num), 'ul', ' ')));
     } else if (/^\d\.\s/.test(text.substring(num))){
-        return new VNode('li', {}, new VNode('ol', {}, uoDispose(text.substring(num), 'ol')));
+        return new VNode('li', {__match__: match}, new VNode('ol', {}, uoDispose(text.substring(num), 'ol', 'd.')));
     } else if (/^>\s/.test(text.substring(2))){
-        return new VNode('li', {}, new VNode('blockquote', {}, bDispose(text.substring(2))));
+        return new VNode('li', {__match__: match}, new VNode('blockquote', {}, bDispose(text.substring(2))));
     } else {
-        return new VNode('li', {}, inline(text.substring(num)));
+        return new VNode('li', {__match__: match}, new VNode('p', {}, inline(text.substring(num))));
     }
 }
 
@@ -34,47 +36,61 @@ function bDispose(text){
     }else if(/^>\s/.test(text.substring(2))){
         return new VNode('blockquote', {}, bDispose(text.substring(2)));
     }else if(/^\*\s/.test(text.substring(2))){
-        return new VNode('ul', {}, uoDispose(text.substring(2), 'ul'));
+        return new VNode('ul', {}, uoDispose(text.substring(2), 'ul', '*'));
     }else if(/^\d\.\s/.test(text.substring(2))){
-        return new VNode('ol', {}, uoDispose(text.substring(2), 'ol'));
+        return new VNode('ol', {}, uoDispose(text.substring(2), 'ol', 'd.'));
     }else{
         return new VNode("p", {}, inline(text.substring(2)));
     } 
 }
 
-function buo(node){
-    // 整合
-    let child = node.childNodes;
-    let newChild  = [];
+/**整合 */
+function buo(node: VNode): VNode{
+    let child = node.childNodes as VNode[];
+    let newChild: VNode[] = [];
     for(let i = 0; i < child.length; i++){
+        /**合并blockquote */
         if(child[i].nodeName == 'blockquote' && newChild.length > 0 && newChild[newChild.length - 1].nodeName == 'blockquote'){
             newChild[newChild.length - 1].childNodes.push(child[i].childNodes[0]);
+        /**合并ul */
         }else if(child[i].nodeName == 'ul' && newChild.length > 0 && newChild[newChild.length - 1].nodeName == 'ul'){
             newChild[newChild.length - 1].childNodes.push(child[i].childNodes[0]);
+        /**合并ol */
         }else if(child[i].nodeName == 'ol' && newChild.length > 0 && newChild[newChild.length - 1].nodeName == 'ol'){
             newChild[newChild.length - 1].childNodes.push(child[i].childNodes[0]);
         }else if(child[i].childNodes[0].nodeName == 'ul' && newChild.length > 0 && newChild[newChild.length - 1].childNodes[0].nodeName == 'ul'){
-            newChild[newChild.length - 1].childNodes[0].childNodes.push(child[i].childNodes[0].childNodes[0]);
+            (<VNode>newChild[newChild.length - 1].childNodes[0]).childNodes.push((<VNode>child[i].childNodes[0]).childNodes[0]);
         }else if(child[i].childNodes[0].nodeName == 'ol' && newChild.length > 0 && newChild[newChild.length - 1].childNodes[0].nodeName == 'ol'){
-            newChild[newChild.length - 1].childNodes[0].childNodes.push(child[i].childNodes[0].childNodes[0]);
+            (<VNode>newChild[newChild.length - 1].childNodes[0]).childNodes.push((<VNode>child[i].childNodes[0]).childNodes[0]);
         }else{
             if(newChild.length > 0){
                 if(newChild[newChild.length - 1].nodeName == 'blockquote'){
                     newChild[newChild.length - 1] = buo(newChild[newChild.length - 1]);
                 }else if('ul ol'.indexOf(newChild[newChild.length - 1].childNodes[0].nodeName) >= 0){
-                    newChild[newChild.length - 1].childNodes[0] = buo(newChild[newChild.length - 1].childNodes[0]);
+                    newChild[newChild.length - 1].childNodes[0] = buo(newChild[newChild.length - 1].childNodes[0] as VNode);
                 }else if('ul ol'.indexOf(newChild[newChild.length - 1].nodeName) >= 0){
                     newChild[newChild.length - 1] = buo(newChild[newChild.length - 1]);
                 }
             }
-            newChild.push(child[i]);
+            if(newChild.length > 0 && newChild[newChild.length - 1].nodeName == 'li' && child[i].nodeName == 'li' && child[i].attr['__match__'] == ' ' 
+                        && child[i].childNodes[0].nodeName == 'ul'){
+                if(newChild[newChild.length - 1].childNodes.length > 1){
+                    (<VNode>newChild[newChild.length - 1].childNodes[newChild[newChild.length - 1].childNodes.length - 1])
+                            .appendChild((<VNode>child[i].childNodes[0]).childNodes[0]);
+                } else{
+                    newChild[newChild.length - 1].appendChild(child[i].childNodes[0]);
+                }
+                
+            } else{
+                newChild.push(child[i]);
+            }
         }
     }
     if(newChild.length > 0){
         if(newChild[newChild.length - 1].nodeName == 'blockquote'){
             newChild[newChild.length - 1] = buo(newChild[newChild.length - 1]);
         }else if('ul ol'.indexOf(newChild[newChild.length - 1].childNodes[0].nodeName) >= 0){
-            newChild[newChild.length - 1].childNodes[0] = buo(newChild[newChild.length - 1].childNodes[0]);
+            newChild[newChild.length - 1].childNodes[0] = buo(newChild[newChild.length - 1].childNodes[0] as VNode);
         }else if('ul ol'.indexOf(newChild[newChild.length - 1].nodeName) >= 0){
             newChild[newChild.length - 1] = buo(newChild[newChild.length - 1]);
         }
@@ -101,21 +117,32 @@ function textToNode(text: string): VNode[]{
             vnodes.push(buo(new VNode("blockquote", {}, child)))
         }else if(/^\*\s/.test(rows[i])){
             child = [];
-            while (i < len && /^\*\s/.test(rows[i])) {
-                child.push(uoDispose(rows[i], 'ul'));  
-                i++;
-            } 
+            while (i < len) {
+                if(/^\*\s/.test(rows[i])){
+                    child.push(uoDispose(rows[i], 'ul', '*'));  
+                    i++;
+                } else if (/^\s{2,}\*\s/.test(rows[i])){
+                    child.push(uoDispose(rows[i], 'ul', ' '));  
+                    i++;
+                } else{
+                    break;
+                }
+            }
             if(!(i < len && /^\s*$/.test(rows[i + 1])))
                 i--;
             vnodes.push(buo(new VNode("ul", {}, child)));
         }else if(/^\d\.\s/.test(rows[i])){
             child = [];
             while (i < len) {
-                if(!(/^\d\.\s/.test(rows[i]) || /^\s{3,}\*\s/.test(rows[i]))){
+                if(/^\d\.\s/.test(rows[i])){
+                    child.push(uoDispose(rows[i], 'ol', 'd.'));  
+                    i++;
+                } else if (/^\s{3,}\*\s/.test(rows[i])){
+                    child.push(uoDispose(rows[i], 'ol', ' '));  
+                    i++;
+                } else{
                     break;
                 }
-                child.push(uoDispose(rows[i], 'ol'));  
-                i++;
             } 
             if(!(i < len && /^\s*$/.test(rows[i + 1])))
                 i--;

@@ -195,13 +195,14 @@ export class TableMoreTool {
     private deleteLine(_this: TableMoreTool) {
         let refTr = _this.thtdDom.parentNode;
         let cell = -1, row = -1;
+        /**查找所在列 */
         for (let j = 0; j < refTr.childNodes.length; j++) {
             if (refTr.childNodes[j] == _this.thtdDom) {
                 cell = j;
                 break;
             }
         }
-
+        /**查找所在行 */
         for (let j = 0; j < _this.tableDom.rows.length; j++) {
             if(_this.tableDom.rows[j] == refTr){
                 row = j;
@@ -209,6 +210,24 @@ export class TableMoreTool {
             }   
         }
         refTr.parentNode.removeChild(refTr);
+        if (row == 0) {
+            console.log('删除th行')
+            let thTr = document.createElement('tr');
+            for (let j = 0; j < _this.tableDom.rows[0].cells.length; j++) {
+                let th = document.createElement('th');
+                let style = _this.tableDom.rows[0].cells[j].getAttribute('style');
+                if (style) {
+                    th.setAttribute('style', style);
+                }
+                th.innerHTML = _this.tableDom.rows[0].cells[j].innerHTML;
+                thTr.appendChild(th);   
+            }
+
+            _this.tableDom.tHead.appendChild(thTr);
+
+            _this.tableDom.rows[1].parentNode.removeChild(_this.tableDom.rows[1]);
+        }
+        
         Cursor.setCursor(_this.tableDom.rows[row].cells[cell], 0);
     }
 

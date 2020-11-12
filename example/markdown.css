@@ -72,6 +72,9 @@
 .markdown-body hr, .markdown-body table, .markdown-body figure, .markdown-body blockquote {
   margin-bottom: 0.6em;
 }
+.markdown-body li>p{
+  margin-bottom: 0.2em;
+}
 
 .markdown-body ul{
   margin-left: 1.3em;

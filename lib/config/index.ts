@@ -5,8 +5,8 @@ export enum RunModel {
 }
 
 export enum SecurityLevel {
-    strict = 'strict',
-    loose = 'loose',
+    strict = 'strict', // 严格
+    loose = 'loose', // 宽松
 }
 
 export interface ArtOptions {

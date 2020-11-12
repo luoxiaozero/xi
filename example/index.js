@@ -5,6 +5,13 @@ import hljs from "../external/js/highlight.min.js"
 import './tu.jpg'
 import './markdown.css';
 let md = '\
+* 无序列表3\n\
+  * 无序列表4\n\
+  * 无序列表5\n\
+\n\
+* 无序列表1\n\
+* * 给岁月以文明，而不是给文明以岁月。2\n\
+  * 无序列表3\n\
 [TOC]\n\
 2020 0818\n\
 ## markdown 编辑  [百度百科](https://baike.baidu.com/item/markdown/3245829?fr=aladdin)\n\
@@ -102,6 +109,7 @@ class bb:\n\
 \n'
 
 const container = document.querySelector('#art');
-const art = new ArtText(container, { markdown: md, fileInfo: { name: '演示版本' }, code: { jsFun: hljs } });
+const art = new ArtText(container, { markdown: md, fileInfo: { name: '演示版本' }, code: { jsFun: hljs }});
 window.art = art;
+art.use()
 art.init();

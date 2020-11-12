@@ -382,13 +382,7 @@ export default class ArtRender implements Render {
 
     public dispose(vnode: VNode, text: string = null): VNode[] {
         if (text != null) {
-            let childNodes = textToNode(text);
-            if (childNodes) {
-                vnode.childNodes = [];
-                for (let i = 0; i < childNodes.length; i++) {
-                    vnode.appendChild(childNodes[i]);
-                }
-            }
+            vnode.replaceAllChild(textToNode(text));
             return null;
         } else if (vnode.attr['__root__'] == true) {
             for (let i = vnode.childNodes.length - 1; i >= 0; i--) {
@@ -435,16 +429,14 @@ export default class ArtRender implements Render {
                     (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode("ul", {}, new VNode("li", {}, new VNode('br')))]);
                 } else if (/^\d\.\s/.test(vnode.childNodes[i].getMd())) {
                     (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode("ol", {}, new VNode("li", {}, new VNode('br')))]);
+                } else if ((<VNode>vnode.childNodes[i]).childNodes[0].nodeName == 'input') {
+                    (<VNode>vnode.childNodes[i]).replaceAllChild([(<VNode>vnode.childNodes[i]).childNodes[0], ...inline(vnode.childNodes[i].getMd())]);
+                } else if (/^\[x|X\]\s/.test(vnode.childNodes[i].getMd())) {
+                    (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode('input', { type: "checkbox", checked: "checked" }), ...inline(vnode.childNodes[i].getMd().substring(4))]);
+                } else if (/^\[\s\]\s/.test(vnode.childNodes[i].getMd())) {
+                    (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode('input', { type: "checkbox" }), ...inline(vnode.childNodes[i].getMd().substring(4))]);
                 } else {
-                    if ((<VNode>vnode.childNodes[i]).childNodes[0].nodeName == 'input') {
-                        (<VNode>vnode.childNodes[i]).replaceAllChild([(<VNode>vnode.childNodes[i]).childNodes[0], ...inline(vnode.childNodes[i].getMd())]);
-                    } else if (/^\[x|X\]\s/.test(vnode.childNodes[i].getMd())) {
-                        (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode('input', { type: "checkbox", checked: "checked" }), ...inline(vnode.childNodes[i].getMd().substring(4))]);
-                    } else if (/^\[\s\]\s/.test(vnode.childNodes[i].getMd())) {
-                        (<VNode>vnode.childNodes[i]).replaceAllChild([new VNode('input', { type: "checkbox" }), ...inline(vnode.childNodes[i].getMd().substring(4))]);
-                    } else {
-                        (<VNode>vnode.childNodes[i]).replaceAllChild(inline(vnode.childNodes[i].getMd()));
-                    }
+                    (<VNode>vnode.childNodes[i]).replaceAllChild(inline((<VNode>vnode.childNodes[i]).childNodes[0].getMd()));
                 }
             }
         } else if (vnode.nodeName == "table") {
@@ -489,6 +481,7 @@ export default class ArtRender implements Render {
     }
 
     public render(key: string, type: string): boolean {
+        //return false;
         this.cursor.getSelection();
         if (key == 'Backspace' && type == 'keydown') {
             return this.backRender();
