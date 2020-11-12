@@ -37,7 +37,7 @@ export default class ArtText extends CorePlugin {
         this.dom.setAttribute('class', 'art-main');
         this.options = Object.assign({}, ART_DEFAULT_OPTIONS, options);
 
-        Core.artText(this, 'create');
+        Core.registerArtText(this);
     }
 
     /**
@@ -47,7 +47,7 @@ export default class ArtText extends CorePlugin {
     public mount(rootContainer: string): ArtText {
         this.rootContainer = document.querySelector(rootContainer);
         this.rootContainer.appendChild(this.dom);
-        Core.artText(this, 'mount');
+        Core.initArtText(this);
         return this;
     }
 
@@ -73,6 +73,6 @@ export default class ArtText extends CorePlugin {
      * 卸载 
      */
     public unmount() {
-        Core.artText(this, 'unmount');
+        Core.unmountArtText(this);
     }
 }

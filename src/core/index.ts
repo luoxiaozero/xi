@@ -18,50 +18,36 @@ export default class Core {
     /**
      * 文件加载时, 执行的钩子
      */
-    static loaded() {
+    public static loaded() {
         PluginCenter.loaded();
-    }
-
-    /**
-     * art
-     * @param artText 
-     * @param mode 
-     */
-    static artText(artText: ArtText, mode: string): void {
-        if (!Core.core)
-            Core.core = new Core();
-        if (mode == 'create')
-            Core.core.registerArtText(artText);
-        else if (mode == 'mount')
-            Core.core.initArtText(artText);
-        else if (mode == 'unmount')
-            Core.core.unmountArtText(artText);
     }
 
     /**
      * 注册artText 
      */
-    public registerArtText(artText: ArtText) {
+    public static registerArtText(artText: ArtText): void{
         artText.nameId = 'artText-' + Core.artTextId++;
 
         artText.$tool = new Tool(artText);
         artText.$editor = new Editor(artText);
         artText.$eventCenter = new EventCenter(artText);
         artText.$pluginCenter = new PluginCenter(artText);
-        artText.exportAPI('switchRunModel', (model: RunModel) => {this.switchRunModel(artText, model)});
+        artText.exportAPI('switchRunModel', (model: RunModel) => {Core.switchRunModel(artText, model)});
+
+        Core.artTexts.push(artText);
     }
 
     /**
-     * 
+     * 初始化artText 
      */
-    public initArtText(artText: ArtText): void {
+    public static initArtText(artText: ArtText): void {
         artText.$editor.init();
     }
 
     /**
-     * 
+     * 卸载artText 
      */
-    public unmountArtText(artText: ArtText) {
+    public static unmountArtText(artText: ArtText) {
 
     }
 
@@ -70,7 +56,7 @@ export default class Core {
      * @param artText 
      * @param model 
      */
-    public switchRunModel(artText: ArtText, model: RunModel) {
+    private static switchRunModel(artText: ArtText, model: RunModel) {
         let oldModel = artText.options.runModel;
 
         switch (model) {
