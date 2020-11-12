@@ -38,7 +38,7 @@ export class SaveMdFile {
             localStorage[fileInfo['id']] = fileInfo.markdown;
             art_articles[fileInfo['id']] = fileInfo;
             localStorage.art_articles = JSON.stringify(art_articles);
-            this._object_.emit('message', 'md保存成功', 'success');
+            this._object_.emit('Message.create', '保存成功', 'success');
         } else {
             let timestamp = new Date().getTime();
             let mdId = 'art_md_' + timestamp + '_';
@@ -53,7 +53,7 @@ export class SaveMdFile {
             let article = art_articles[mdId];
             article['defaultMd'] = fileInfo.markdown;
             this._object_.openFile(article);
-            this._object_.emit('md保存成功', 'success');
+            this._object_.emit('Message.create', '保存成功', 'success');
         }
     }
 }
@@ -221,11 +221,11 @@ export default class VersionHistory {
                 this.footerDel.onclick = () => {
                     localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']];
                     vH.updateDirectory();
-                    vH._object_.emit('message', article['name'] + '已删除', 'success')
+                    vH._object_.emit('Message.create', article['name'] + '已删除', 'success')
                 }
                 this.footerRestore.onclick = () => {
                     vH._object_.openFile(md, article);
-                    vH._object_.emit('message', article['name'] + '已恢复', 'success'); vH.close();
+                    vH._object_.emit('Message.create', article['name'] + '已恢复', 'success'); vH.close();
                 }
             }
 
@@ -250,12 +250,12 @@ export default class VersionHistory {
             vH.mainFooter.style.display = 'inherit';
             vH.footerDel.onclick = () => {
                 localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']];
-                vH.updateDirectory(); vH._object_.emit('message', article['name'] + '已删除', 'success')
+                vH.updateDirectory(); vH._object_.emit('Message.create', article['name'] + '已删除', 'success')
             }
             vH.footerRestore.onclick = () => {
                 article['defaultMd'] = md;
                 vH._object_.openFile(article);
-                vH._object_.emit('message', article['name'] + '已恢复', 'success'); vH.close();
+                vH._object_.emit('Message.create', article['name'] + '已恢复', 'success'); vH.close();
             }
         }
         return c;
