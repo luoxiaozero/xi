@@ -10,7 +10,11 @@ module.exports = {
   devServer: {
     contentBase: './dist',
   },
-  'src': path.resolve(__dirname, 'src'),
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './example/index.html'
+    }),
+  ],
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),

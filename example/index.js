@@ -111,5 +111,4 @@ class bb:\n\
 const container = document.querySelector('#art');
 const art = new ArtText(container, { markdown: md, fileInfo: { name: '演示版本' }, code: { jsFun: hljs }});
 window.art = art;
-art.use()
 art.init();
