@@ -10,7 +10,8 @@ import { VNode } from "../../vObject";
  * 回车渲染
  */
 export default function enterRender(artRenderRender: ArtRenderRender): boolean {
-    let location = artRenderRender.artRender.cursor.getSelection();
+    let location = artRenderRender.artRender.cursor.location;
+    let { anchorNode, anchorOffset } = artRenderRender.artRender.cursor.location;
     console.log('enter')
     if (location) {
         artRenderRender.rootNode.replaceAllChild((domToNode(artRenderRender.rootNode.dom) as VNode).childNodes);
@@ -107,77 +108,78 @@ export default function enterRender(artRenderRender: ArtRenderRender): boolean {
             artRenderRender.rootNode.dom.insertBefore(tool, pre);
             Cursor.setCursor(code, 0);
             return false;
-        } else if (location.anchorNode.parentNode.nodeName == 'BLOCKQUOTE' && location.anchorOffset == 0 && location.anchorNode.nodeName == 'P'
-            && location.anchorNode.childNodes.length == 1 && location.anchorNode.childNodes[0].nodeName == 'BR') {
+        } else if (anchorNode.parentNode.nodeName == 'BLOCKQUOTE' && anchorOffset == 0 && anchorNode.nodeName == 'P'
+            && anchorNode.childNodes.length == 1 && anchorNode.childNodes[0].nodeName == 'BR') {
             // blockquote 退出
-            let dom = location.anchorNode;
             let p = document.createElement('p');
             p.innerHTML = '<br/>';
-            if (dom.parentNode.nextSibling)
-                dom.parentNode.parentNode.insertBefore(p, dom.parentNode.nextSibling);
-            else
-                dom.parentNode.parentNode.appendChild(p);
-            dom.parentNode.removeChild(dom);
 
-            Cursor.setCursor(p, 0)
+            if (anchorNode.parentNode.nextSibling)
+                anchorNode.parentNode.parentNode.insertBefore(p, anchorNode.parentNode.nextSibling);
+            else
+                anchorNode.parentNode.parentNode.appendChild(p);
+            anchorNode.parentNode.removeChild(anchorNode);
+
+            Cursor.setCursor(p, 0);
+            artRenderRender.artRender.cursor.getSelection();
             return false;
-        } else if (location.anchorNode.parentNode.parentNode.nodeName == 'BLOCKQUOTE' && location.anchorNode.nextSibling == null
-            && location.anchorOffset == (<Text>location.anchorNode).length) {
+        } else if (anchorNode.parentNode.parentNode.nodeName == 'BLOCKQUOTE' && anchorNode.nextSibling == null
+            && anchorOffset == (<Text>anchorNode).length) {
             // ul ol中的blockquote添加新行
-            let dom = location.anchorNode;
             let p = document.createElement('p');
             p.innerHTML = '<br/>';
 
-            if (dom.parentNode.nextSibling)
-                dom.parentNode.parentNode.insertBefore(p, dom.parentNode.nextSibling);
+            if (anchorNode.parentNode.nextSibling)
+                anchorNode.parentNode.parentNode.insertBefore(p, anchorNode.parentNode.nextSibling);
             else
-                dom.parentNode.parentNode.appendChild(p);
-
-            Cursor.setCursor(p, 0)
-            return false;
-        } else if (location.anchorOffset == 0 && location.anchorNode.nodeName == 'LI' && location.anchorNode.childNodes.length == 1
-            && location.anchorNode.childNodes[0].nodeName == 'BR') {
-            // li 退出
-            let dom = location.anchorNode;
-            let p = document.createElement('p');
-            p.innerHTML = '<br/>';
-            if (dom.parentNode.nextSibling)
-                dom.parentNode.parentNode.insertBefore(p, dom.parentNode.nextSibling);
-            else
-                dom.parentNode.parentNode.appendChild(p);
-            dom.parentNode.removeChild(dom);
+                anchorNode.parentNode.parentNode.appendChild(p);
 
             Cursor.setCursor(p, 0);
+            artRenderRender.artRender.cursor.getSelection();
             return false;
-        } else if (location.anchorNode.parentNode.nodeName == 'P' && location.anchorNode.parentNode.parentNode.nodeName == 'LI') {
-            // li 中新建一行
-            console.log('0000 new', location)
-            let dom = location.anchorNode;
+        } else if (anchorOffset == 0 && anchorNode.nodeName == 'LI' && anchorNode.childNodes.length == 1
+            && anchorNode.childNodes[0].nodeName == 'BR') {
+            // li 退回到root
             let p = document.createElement('p');
             p.innerHTML = '<br/>';
 
-            if (dom.parentNode.parentNode.childNodes.length == 1) {
-                
-            }
-            if (dom.parentNode.nextSibling)
-                dom.parentNode.parentNode.insertBefore(p, dom.parentNode.nextSibling);
+            if (anchorNode.parentNode.nextSibling)
+                anchorNode.parentNode.parentNode.insertBefore(p, anchorNode.parentNode.nextSibling);
             else
-                dom.parentNode.parentNode.appendChild(p);
+                anchorNode.parentNode.parentNode.appendChild(p);
+            anchorNode.parentNode.removeChild(anchorNode);
+
             Cursor.setCursor(p, 0);
+            artRenderRender.artRender.cursor.getSelection();
             return false;
-        } else if (location.anchorNode.nodeName == 'P' && location.anchorNode.parentNode.nodeName == 'LI'
-            && location.anchorNode.childNodes.length == 1 && location.anchorNode.childNodes[0].nodeName == 'BR') {
+        } else if (anchorNode.nodeName == 'LI') {
+            // li [ul, ol]返回到li 新建一行p
+            let p = document.createElement('p');
+            p.innerHTML = '<br/>';
+
+            if (anchorNode.parentNode.nextSibling)
+                anchorNode.parentNode.parentNode.insertBefore(p, anchorNode);
+            else
+                anchorNode.parentNode.parentNode.appendChild(p);
+            anchorNode.parentNode.removeChild(anchorNode);
+
+            Cursor.setCursor(p, 0);
+            artRenderRender.artRender.cursor.getSelection();
+            return false;
+        } else if (anchorNode.nodeName == 'P' && anchorNode.parentNode.nodeName == 'LI'
+            && anchorNode.childNodes.length == 1 && anchorNode.childNodes[0].nodeName == 'BR') {
             // 从li中的p退到li中 
-            let dom = location.anchorNode;
             let li = document.createElement('li');
-            li.innerHTML = '<br/>';
+            li.innerHTML = '<p><br/></p>';
 
-            if (dom.parentNode.nextSibling)
-                dom.parentNode.parentNode.insertBefore(li, dom.parentNode.nextSibling);
+            if (anchorNode.parentNode.nextSibling)
+                anchorNode.parentNode.parentNode.insertBefore(li, anchorNode.parentNode.nextSibling);
             else
-                dom.parentNode.parentNode.appendChild(li);
-            dom.parentNode.removeChild(dom);
+                anchorNode.parentNode.parentNode.appendChild(li);
+            anchorNode.parentNode.removeChild(anchorNode);
+
             Cursor.setCursor(li, 0);
+            artRenderRender.artRender.cursor.getSelection();
             return false;
         } else if (dom.nodeName == 'PRE') {
             let text = '\n\r';
@@ -186,9 +188,9 @@ export default function enterRender(artRenderRender: ArtRenderRender): boolean {
             data = data.substring(0, location.anchorOffset) + text + data.substring(location.anchorOffset)
             location.anchorNode.nodeValue = data;
             Cursor.setCursor(location.anchorNode, location.anchorOffset + 1);
+            artRenderRender.artRender.cursor.getSelection();
             return false;
         } else {
-            console.log('enter-no')
             console.log("无执行", location)
         }
     }

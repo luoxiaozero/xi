@@ -36,8 +36,10 @@ let md =
 * 已完成\n\
 * 未完成\n\
 \n\
-1. [x] 已完成\n\
-2. [ ] 未完成\n\
+* 已完成\n\
+* 未完成\n\
+* * dasdd\n\
+  * \n\
 '
 window.onload = function () {
     const art: ArtText = new ArtText({ defaultMd: md }).mount('#art');
