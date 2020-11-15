@@ -33,12 +33,11 @@ let md =
 * [x] 已完成\n\
 * [ ] 未完成\n\
 #### 引用\n\
+* 已完成\n\
+* 未完成\n\
 \n\
-> 引用\n\
-> > 1. 引用\n\
-> > 2. 引用\n\
-> > > * 引用\n\
-> > > * 引用\n\
+1. [x] 已完成\n\
+2. [ ] 未完成\n\
 '
 window.onload = function () {
     const art: ArtText = new ArtText({ defaultMd: md }).mount('#art');

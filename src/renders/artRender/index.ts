@@ -7,7 +7,8 @@ import { TableMoreTool } from "./tool/tableTool/tableMoreTool";
 import Tool from '../../tool';
 import './index.css'
 import ArtRenderRender from './artRenderRender';
-import { vnodeRender } from './artRenderRender/eventRender';
+import { keyupRender } from './artRenderRender/eventRender';
+import vnodeRender from './artRenderRender/vnodeRender';
 
 const win = window;
 /**
@@ -111,6 +112,7 @@ export default class ArtRender implements Render {
     }
 
     public getMd(): string {
+        keyupRender(this.renderRender); // 更新
         let md = '';
         for (let i = 0; i < this.renderRender.rootNode.childNodes.length; i++) {
             let lineMd = this.renderRender.rootNode.childNodes[i].getMd('read');
@@ -121,8 +123,7 @@ export default class ArtRender implements Render {
     }
 
     public setMd(md: string): void {
-        this.renderRender.dispose(this.renderRender.rootNode, md);
-        this.renderRender.updateToc();
+        this.renderRender.vnodeDispose(this.renderRender.rootNode, md);
         vnodeRender(this.renderRender.rootNode.dom, this.renderRender.rootNode);
     }
 }

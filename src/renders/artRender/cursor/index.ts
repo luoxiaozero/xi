@@ -47,6 +47,9 @@ export default class Cursor {
         this.location = null;
     }
 
+    /**
+     * 获取光标位置
+     */
     public getSelection(): Location {
         let { anchorNode, anchorOffset, focusNode, focusOffset } = Cursor.sel;
         if (anchorNode && focusNode) {

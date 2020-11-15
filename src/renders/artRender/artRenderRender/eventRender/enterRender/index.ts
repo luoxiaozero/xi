@@ -2,6 +2,7 @@ import Cursor from "@/renders/artRender/cursor";
 import { initCodeTool, initTableTool, initTocTool } from "@/renders/artRender/tool";
 import ArtRenderRender from "../..";
 import { domToNode } from "../../grammer";
+import { updateToc } from "../../vnodeDispose";
 import { VNode } from "../../vObject";
 
 
@@ -10,6 +11,7 @@ import { VNode } from "../../vObject";
  */
 export default function enterRender(artRenderRender: ArtRenderRender): boolean {
     let location = artRenderRender.artRender.cursor.getSelection();
+    console.log('enter')
     if (location) {
         artRenderRender.rootNode.replaceAllChild((domToNode(artRenderRender.rootNode.dom) as VNode).childNodes);
 
@@ -41,7 +43,7 @@ export default function enterRender(artRenderRender: ArtRenderRender): boolean {
 
             artRenderRender.rootNode.dom.replaceChild(toc, dom);
             artRenderRender.rootNode.dom.insertBefore(tocTool, toc);
-            artRenderRender.updateToc();
+            updateToc(artRenderRender.rootNode);
             Cursor.setCursor(p, 0);
             return false;
         } else if (/^\|.*\|/.test(md)) {
@@ -149,10 +151,14 @@ export default function enterRender(artRenderRender: ArtRenderRender): boolean {
             return false;
         } else if (location.anchorNode.parentNode.nodeName == 'P' && location.anchorNode.parentNode.parentNode.nodeName == 'LI') {
             // li 中新建一行
+            console.log('0000 new', location)
             let dom = location.anchorNode;
             let p = document.createElement('p');
             p.innerHTML = '<br/>';
 
+            if (dom.parentNode.parentNode.childNodes.length == 1) {
+                
+            }
             if (dom.parentNode.nextSibling)
                 dom.parentNode.parentNode.insertBefore(p, dom.parentNode.nextSibling);
             else
@@ -182,6 +188,7 @@ export default function enterRender(artRenderRender: ArtRenderRender): boolean {
             Cursor.setCursor(location.anchorNode, location.anchorOffset + 1);
             return false;
         } else {
+            console.log('enter-no')
             console.log("无执行", location)
         }
     }

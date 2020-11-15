@@ -2,7 +2,7 @@ import ArtRender from "@/renders/artRender";
 import Cursor from "@/renders/artRender/cursor";
 import { initCodeTool, initTableTool, initTocTool } from "@/renders/artRender/tool";
 import Tool from "@/tool";
-import { VNode, VText } from "../../vObject";
+import { VNode, VText } from "../vObject";
 
 /**
  * 虚拟节点渲染到节点上

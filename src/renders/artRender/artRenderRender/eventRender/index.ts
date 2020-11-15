@@ -1,4 +1,5 @@
+import backRender from './backRender'
 import enterRender from './enterRender'
-import vnodeRender from './vnodeRender'
+import keyupRender from './keyupRender'
 
-export { enterRender, vnodeRender }
+export { enterRender, backRender, keyupRender}

@@ -39,7 +39,12 @@ export class SwitchRender {
             }
             this.title = this.abbrNames[index];
             this.spanElement.innerHTML = this.abbrNames[index];
-            this.editor.switchRender(this.renderNames[index]);
+            try{
+                this.editor.switchRender(this.renderNames[index]);
+            } catch (err) {
+                console.error(err);
+                this.editor.artText.$pluginCenter.emit('Message.create', '切换渲染器失败', 'error');
+            }
         }
     }
 }
