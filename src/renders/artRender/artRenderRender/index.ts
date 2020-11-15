@@ -22,16 +22,24 @@ export default class ArtRenderRender {
      * @param type 摁键行为
      */
     public render(key: string, type: string): boolean {
+        let state: boolean = false;
         this.artRender.cursor.getSelection();
-        if (key == 'Backspace' && type == 'keydown') {
-            return backRender(this);
-        } else if (key == 'Enter' && type == 'keydown') {
-            return enterRender(this);
+
+        if (type == 'keydown') {
+            switch (key) {
+                case 'Backspace':
+                    state = backRender(this);
+                    break;
+                case 'Enter':
+                    state = enterRender(this);
+                    break;
+            }
         } else if (type == 'keyup') {
-            return keyupRender(this);
+            state = keyupRender(this);
         }
+
         this.artRender.cursor.setSelection();
-        return false;
+        return state;
     }
 
     /**
@@ -97,6 +105,10 @@ export default class ArtRenderRender {
         }
     }
 
+    /**
+     * 更新根节点
+     * @param vnode 
+     */
     public updateRoot(vnode: VNode) {
         for (let i = vnode.childNodes.length - 1; i >= 0; i--) {
             let nodes = this.vnodeDispose(<VNode>vnode.childNodes[i]);
@@ -112,6 +124,7 @@ export default class ArtRenderRender {
         }
         updateToc(vnode);
     }
+
     /**
      * 处理节点或处理文本到该节点上
      * @param vnode 节点
