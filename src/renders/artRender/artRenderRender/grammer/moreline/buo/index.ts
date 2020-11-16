@@ -1,5 +1,5 @@
 import { inline } from "../..";
-import { VNode } from "../../../vObject";
+import { VNode, VText } from "../../../vObject";
 
 /**ul和ol的处理 */
 export function uoDispose(text: string, nodeName: string, match: string): VNode {
@@ -48,6 +48,10 @@ export function buoMerge(node: VNode): VNode {
     newChilds.push(childs[0]);
 
     for (let i = 1; i < childs.length; i++) {
+        if (childs[i] instanceof VText) {
+            newChilds.push(childs[i]);
+            continue;
+        }
         let childNode0 = childs[i].childNodes[0];
         let newChildNodes_1 = newChilds[newChilds.length - 1].childNodes[0];
         if (childs[i].attr['__match__'] == ' ' && childNode0.nodeName == 'ul'
