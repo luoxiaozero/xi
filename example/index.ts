@@ -1,6 +1,6 @@
 import ArtText from '../src'
 import './imgs/tu.jpg'
-
+import sample from './md/sample'
 '\n\
 1. 无序列表3\n\
    2. 无序列表4\n\
@@ -42,6 +42,7 @@ let md =
   * \n\
 '
 window.onload = function () {
-    const art: ArtText = new ArtText({ defaultMd: md }).mount('#art');
+   console.log(sample);
+    const art: ArtText = new ArtText({ defaultMd: sample }).mount('#art');
     window['art'] = art;
 }
