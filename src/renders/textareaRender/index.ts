@@ -1,13 +1,16 @@
+import ArtText from "@/artText";
 import Render from "..";
 
 export default class TextareaRender implements Render{
     static DEFAULT_CSS: string = '.art-editor-md{width:100%;min-height:200px;border:none;outline:none;resize:none;display:none}'
     static Name = 'TextareaRender';
 
+    abbrName: string = 'Text';
+    artText: ArtText;
     dom: HTMLTextAreaElement;
-    abbrName: string;
-    constructor(){
-        this.abbrName = 'Text'
+    DOMEvents: string[] = [];
+    constructor(artText: ArtText){
+        this.artText = artText;
     }
 
     public createDom(): HTMLTextAreaElement{
@@ -35,4 +38,17 @@ export default class TextareaRender implements Render{
         this.dom.value = md;
         this.dom.style.height = this.dom.scrollHeight + 5 + 'px';
     }
+
+    public attachAllEvent(): void {
+        const dom = this.dom;
+        let id = this.artText.$eventCenter.attachDOMEvent(this.dom, 'input', 
+            e => (<HTMLHtmlElement>e.target).style.height = dom.scrollHeight + 'px');
+        this.DOMEvents.push(id);
+    }
+
+    public detachAllEvent(): void {
+        for (let id of this.DOMEvents) {
+            this.artText.$eventCenter.detachDOMEvent(id);
+        }
+    } 
 }

@@ -76,9 +76,6 @@ export default class ArtRender implements Render {
         }
     }
 
-    /**
-     * 创建根节点
-     */
     public createDom(): HTMLDivElement {
         this.artText.$tool.add({ dom: this.tableMoreTool.createDom() });
         this.artText.$tool.add({ dom: this.floatAuxiliaryTool.createDom() });
@@ -90,13 +87,11 @@ export default class ArtRender implements Render {
 
     public open(): void {
         this.dom.style.display = 'inherit';
-        this.dom.setAttribute('contenteditable', 'true');
         this.renderEvent.attachAllEvent();
     }
 
     public close(): void {
         this.renderEvent.detachAllEvent();
-        this.dom.setAttribute('contenteditable', 'false');
         this.dom.style.display = 'none';
     }
 
@@ -115,4 +110,13 @@ export default class ArtRender implements Render {
         this.renderRender.vnodeDispose(this.renderRender.rootNode, md);
         vnodeRender(this.renderRender.rootNode.dom, this.renderRender.rootNode);
     }
+
+    public attachAllEvent(): void {
+        this.renderEvent.attachAllEvent();
+    }
+
+    public detachAllEvent(): void {
+        console.log('sdad', this)
+        this.renderEvent.detachAllEvent();
+    } 
 }

@@ -20,8 +20,9 @@ export default class ArtRenderEvent {
 
     /**添加所有事件 */
     public attachAllEvent() {
+        this.artRender.dom.setAttribute('contenteditable', 'true');
+
         const artRenderEvent = this;
-        ;
         this.addCustomizeEvent('MoreTableTool.open', detail => {
             artRenderEvent.artRender.tableMoreTool.open(detail['xy'], detail['table']);
             return false;
@@ -58,6 +59,9 @@ export default class ArtRenderEvent {
         for (let id of this.DOMEvents) {
             this.artRender.artText.$eventCenter.detachDOMEvent(id);
         }
+        this.customizeEvents = [];
+        this.DOMEvents = [];
+        this.artRender.dom.setAttribute('contenteditable', 'false');
     }
 
     /**添加dom事件 */

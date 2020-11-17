@@ -3,14 +3,11 @@ import ArtText from '../artText';
 export default class EventCenter {
 
     artText: ArtText;
-    eventListeners: any[];
     listeners: {};
     events: Map<string, { target: HTMLElement, type: string, listener: Function, options: {} }>;
     domID: number;
     constructor(artText: ArtText) {
         this.artText = artText;
-
-        this.eventListeners = [];
         this.events = new Map();
         this.listeners = {};
         this.domID = 0;
@@ -55,6 +52,7 @@ export default class EventCenter {
         if (removeEvent != undefined) {
             const { target, type, listener, options } = removeEvent;
             target.removeEventListener(type, listener as EventListenerOrEventListenerObject, options);
+            this.events.delete(eventId);
         }
         return true;
     }
@@ -116,7 +114,7 @@ export default class EventCenter {
     public off(type: string, listener: Function): void  {
         let index: number;
         const listeners = this.listeners[type];
-        if (Array.isArray(listeners) && (index = listeners.findIndex(l => l.listener === listener))) {
+        if (Array.isArray(listeners) && -1 != (index = listeners.findIndex(l => l.listener === listener))) {
             listeners.splice(index, 1);
         }
     }

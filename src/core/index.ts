@@ -57,7 +57,7 @@ export default class Core {
      * @param model 
      */
     private static switchRunModel(artText: ArtText, model: RunModel) {
-        let oldModel = artText.options.runModel;
+        let className;
 
         switch (model) {
             case RunModel.read_noStyle:
@@ -65,20 +65,27 @@ export default class Core {
                     (<HTMLElement>node).style.display = 'none';
                 })
                 artText.$editor.dom.style.display = 'inherit';
-                artText.$editor.dom.setAttribute('class', 'art-editor-noStyle')
+                className = artText.$editor.dom.getAttribute('class');
+                className = className.replace('art-editor', 'art-editor-noStyle');
+                artText.$editor.dom.setAttribute('class', className);
                 
                 artText.$editor.switchRender('ArtRender');
+                artText.$editor.runRender.detachAllEvent();
+                console.log(artText.$eventCenter)
                 break;
             case RunModel.editor:
                 artText.dom.childNodes.forEach((node) => {
                     (<HTMLElement>node).style.display = 'inherit';
                 })
-                artText.$editor.dom.setAttribute('class', 'art-editor')
+                className = artText.$editor.dom.getAttribute('class');
+                className = className.replace('art-editor-noStyle', 'art-editor');
+                artText.$editor.dom.setAttribute('class', className);
                 artText.$editor.dom.childNodes.forEach((node) => {
                     (<HTMLElement>node).style.display = 'inherit';
                 })
     
                 artText.$editor.switchRender('ArtRender');
+                artText.$editor.runRender.attachAllEvent();
         }
 
         artText.options.runModel = model;

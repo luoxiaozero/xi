@@ -16,4 +16,8 @@ export default interface Render{
      * @param md markdown文本
      */
     setMd: (md: string) => void;
+    /**添加所有事件 */
+    attachAllEvent: () => void;
+    /**移除所有事件 */
+    detachAllEvent: () => void;
 }
