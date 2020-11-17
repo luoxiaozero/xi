@@ -18,10 +18,6 @@ export default class TextareaRender implements Render{
         })
         return this.dom;
     }
-    
-    public init(){
-        
-    }
 
     public open(): void {
         this.dom.style.display = 'inherit';

@@ -10,57 +10,72 @@ export default class ArtRenderEvent {
 
     artRender: ArtRender;
     /**是否连续输入，如中文输入时，多个摁键代表一个中文 */
-    isComposition: boolean;
+    isComposition: boolean = false;
     uploadImg: Function;
+    DOMEvents: string[] = [];
+    customizeEvents: [string, Function][] = [];
     constructor(artRender: ArtRender) {
         this.artRender = artRender;
-        this.isComposition = false;
     }
 
-    /**
-     * 初始化，注册各种事件
-     */
-    public init(): void {
+    /**添加所有事件 */
+    public attachAllEvent() {
         const artRenderEvent = this;
-        this.artRender.artText.$eventCenter.on('MoreTableTool.open', detail => this.eventOpenMore(detail, artRenderEvent));
+        ;
+        this.addCustomizeEvent('MoreTableTool.open', detail => {
+            artRenderEvent.artRender.tableMoreTool.open(detail['xy'], detail['table']);
+            return false;
+        })
+        this.addCustomizeEvent('DOM.click', () => { artRenderEvent.artRender.floatAuxiliaryTool.close(); artRenderEvent.artRender.tableMoreTool.close() })
+        this.addCustomizeEvent('DOM.mousewheel', () => { artRenderEvent.artRender.floatAuxiliaryTool.close(); artRenderEvent.artRender.tableMoreTool.close() });
 
-        this.addEvent('keydown', this.keydown);
-        this.addEvent('keyup', this.keyup);
+        this.addDOMEvent('keydown', this.keydown);
+        this.addDOMEvent('keyup', this.keyup);
 
-        // this.onfocus      
-        // this.onblur
+        // 连续输开始
+        this.addDOMEvent('compositionstart', (e: CompositionEvent, _this: ArtRenderEvent) => _this.isComposition = true);
+        // 连续输结束
+        this.addDOMEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) =>  _this.isComposition = false);
 
-        this.addEvent('compositionstart', (e: CompositionEvent, _this: ArtRenderEvent) => { e; _this.isComposition = true; });
-        this.addEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) => { e; _this.isComposition = false; });
-
-        this.addEvent('click', this.click);
-        this.addEvent('contextmenu', this.contextmenu);
+        this.addDOMEvent('click', this.click);
+        this.addDOMEvent('contextmenu', this.contextmenu);
 
         const eventCenter = this.artRender.artText.$eventCenter;
-        this.artRender.artText.$eventCenter.attachDOMEvent(document.body, 'mousewheel', e => eventCenter.emit('DOM-' + e.type));
+        this.artRender.artText.$eventCenter.attachDOMEvent(document.body, 'mousewheel', e => eventCenter.emit('DOM.' + e.type));
 
-        // 贴贴事件
-        this.addEvent('paste', this.paste);
+        this.addDOMEvent('paste', this.paste);
 
-        // 拖拽事件
-        this.addEvent('drop', this.drop);
+        this.addDOMEvent('drop', this.drop);
         // this.ondrag
-
     }
 
-    private addEvent(type: string, fun: Function): void {
-        const _this = this;
-        function closure(e) {
-            _this.artRender.artText.$eventCenter.emit('DOM-' + e.type);
-            fun(e, _this);
+    /**移除所有事件 */
+    public detachAllEvent() {
+        for (let customize of this.customizeEvents) {
+            this.artRender.artText.$eventCenter.off(...customize);
         }
 
-        this.artRender.artText.$eventCenter.attachDOMEvent(this.artRender.dom, type, closure);
+        for (let id of this.DOMEvents) {
+            this.artRender.artText.$eventCenter.detachDOMEvent(id);
+        }
     }
 
-    private eventOpenMore(detail: {}, artRenderEvent: ArtRenderEvent) {
-        artRenderEvent.artRender.tableMoreTool.open(detail['xy'], detail['table']);
-        return false;
+    /**添加dom事件 */
+    private addDOMEvent(type: string, fun: Function): void {
+        const _this = this;
+        function closure(e) {
+            _this.artRender.artText.$eventCenter.emit('DOM.' + e.type);
+            return fun(e, _this);
+        }
+
+        let id = this.artRender.artText.$eventCenter.attachDOMEvent(this.artRender.dom, type, closure);
+        this.DOMEvents.push(id);
+    }
+
+    /**添加自定义事件 */
+    private addCustomizeEvent(type: string, listener: Function): void {
+        this.artRender.artText.$eventCenter.on(type, listener);
+        this.customizeEvents.push([type, listener]);
     }
 
     /**摁键摁下行为 */
@@ -88,6 +103,7 @@ export default class ArtRenderEvent {
         return true;
     }
 
+    // 快捷键
     private shortcutKey(e: KeyboardEvent, artText: ArtText): boolean {
         if (e.ctrlKey && e.keyCode == 66) {
             // ctrl + b 粗体

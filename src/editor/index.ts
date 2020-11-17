@@ -91,7 +91,6 @@ export default class Editor {
     public init(): void {
         for (let key in this.renders) {
             this.dom.appendChild(this.renders[key].createDom());
-            this.renders[key].init();
         }
         this.switchRenderButton.emit();
         this.runRender.open();

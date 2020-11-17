@@ -84,29 +84,18 @@ export default class ArtRender implements Render {
         this.artText.$tool.add({ dom: this.floatAuxiliaryTool.createDom() });
 
         this.dom = this.renderRender.rootNode.newDom();
+        this.cursor = new Cursor(this.renderRender.rootNode.dom);
         return this.dom;
     }
-
-    /**
-     * 初始化
-     */
-    public init(): void {
-        this.cursor = new Cursor(this.renderRender.rootNode.dom);
-        const artRender = this;
-        this.artText.$eventCenter.on('DOM-click', () => { artRender.floatAuxiliaryTool.close(); artRender.tableMoreTool.close() });
-        this.artText.$eventCenter.on('DOM-mousewheel', () => { artRender.floatAuxiliaryTool.close(); artRender.tableMoreTool.close() });
-
-        this.renderEvent.init();
-    }
-
-
 
     public open(): void {
         this.dom.style.display = 'inherit';
         this.dom.setAttribute('contenteditable', 'true');
+        this.renderEvent.attachAllEvent();
     }
 
     public close(): void {
+        this.renderEvent.detachAllEvent();
         this.dom.setAttribute('contenteditable', 'false');
         this.dom.style.display = 'none';
     }
