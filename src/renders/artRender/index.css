@@ -1,0 +1,135 @@
+.art-render-art {
+    outline: none;
+    white-space: pre-wrap;
+    word-break: break-all
+}
+
+.art-hide {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    vertical-align: middle;
+}
+
+.art-show {
+    color: #ccc;
+}
+
+.art-show-math {
+    z-index: 5;
+    position: absolute;
+    padding: 13px 25px;
+    background: #fff;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+}
+.art-editor li>p>input {
+    position: absolute;
+    margin-left: -1.15em;
+    margin-top: 0.45em;
+}
+.art-toc {
+    padding: 6px 15px;
+    margin: 0 0 15px;
+    font-weight: 500;
+    border: 1px dashed #9990;
+}
+
+.art-toc p {
+    margin-bottom: 2px
+}
+
+.art-toc a {
+    border-bottom: none;
+    color: #4183c4
+}
+
+.art-toc-h2 {
+    margin-left: 2em
+}
+
+.art-toc-h3 {
+    margin-left: 4em
+}
+
+.art-toc-h4 {
+    margin-left: 6em
+}
+
+.art-toc-h5 {
+    margin-left: 8em
+}
+
+.art-toc-h6 {
+    margin-left: 10em
+}
+
+.art-tocTool {
+    width: 100%;
+    font-size: 14px;
+    position: relative;
+}
+
+.art-buttonTool-hover {
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 4px;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    padding: 0px 4px;
+    border: 1px solid #9a9a9a00;
+    background: #fff;
+}
+
+.art-buttonTool-hover:hover {
+    border-color: #aaaa;
+    background: #efefef;
+}
+
+.art-flowTool {
+    width: 100%;
+    text-align: center;
+}
+
+.art-toc {
+    padding: 6px 15px;
+    margin: 0 0 15px;
+    font-weight: 500;
+    border: 1px dashed #9990;
+}
+
+.art-toc p {
+    margin-bottom: 2px
+}
+
+.art-toc a {
+    border-bottom: none;
+    color: #4183c4
+}
+
+.art-toc-h2 {
+    margin-left: 2em
+}
+
+.art-toc-h3 {
+    margin-left: 4em
+}
+
+.art-toc-h4 {
+    margin-left: 6em
+}
+
+.art-toc-h5 {
+    margin-left: 8em
+}
+
+.art-toc-h6 {
+    margin-left: 10em
+}
+
+.art-tocTool {
+    width: 100%;
+    font-size: 14px;
+    position: relative;
+}

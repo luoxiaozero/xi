@@ -28,7 +28,7 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 #### 链接 \n\
 [Title](URL)\n\
 #### 图片\n\
-![ad](imgs/tu--example.jpg)\n\
+![ad](imgs/tu--imgs.jpg)\n\
 #### 无序列表\n\
 * [x] 已完成\n\
 * [ ] 未完成\n\
@@ -95,8 +95,5 @@ class bb:\n\
 ```\n\
 \n'
 window.onload = function() {
-    const container = document.querySelector('#art');
-    const art = new ArtText(container, {markdown: md});
-
-    art.init();
+    const art = new ArtText({ defaultMd: md }).mount('#art');
 }

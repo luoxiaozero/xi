@@ -12,7 +12,7 @@ module.exports = {
   entry: path.resolve(__dirname, '../src/index.ts'),
   output: {
     filename: 'arttext.min.js',
-    path: path.resolve(__dirname, '../dist'),
+    path: path.resolve(__dirname, '../docs/dist'),
   },
   plugins: [
     new MiniCssExtractPlugin({
