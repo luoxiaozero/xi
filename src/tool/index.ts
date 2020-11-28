@@ -1,4 +1,5 @@
-import ArtText from '../artText';
+import Editor from '@/editor';
+import ArtText from '@/artText';
 import './index.css'
 
 /**工具类, 存放基本库 */
@@ -90,10 +91,10 @@ export default class Tool {
     private insertDom(dom: HTMLElement, place: string) {
         switch (place) {
             case 'Editor.before':
-                this.artText.dom.insertBefore(dom, this.artText.$editor.dom);
+                this.artText.dom.insertBefore(dom, this.artText.get<Editor>('$editor').dom);
                 break;
             case 'Editor.after':
-                Tool.insertAfter(this.artText.dom, dom, this.artText.$editor.dom);
+                Tool.insertAfter(this.artText.dom, dom, this.artText.get<Editor>('$editor').dom);
                 break;
             default:
                 this.artText.dom.appendChild(dom);
@@ -102,4 +103,11 @@ export default class Tool {
     }
 }
 
-
+export let ToolExport = {
+    install: function (Art, options) {
+        // options['container'].bind('$tool', Tool, null);
+    },
+    created: function (art , options) {
+        art.set('$tool', new Tool(art));
+    }
+}

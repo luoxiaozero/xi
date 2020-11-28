@@ -1,4 +1,4 @@
-import { ArtOptions, ART_DEFAULT_OPTIONS } from '../config'
+import { ArtOptions, ART_DEFAULT_OPTIONS } from '@/config'
 import { Art, Core } from '@/core'
 
 /** 入口类 */
