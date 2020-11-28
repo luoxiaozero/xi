@@ -1,3 +1,4 @@
+import PluginCenter from '@/pluginCenter';
 import Render from '@/renders';
 import Tool from '@/tool';
 import ArtText from '../artText'
@@ -27,7 +28,7 @@ export class SwitchRender {
         if (this.abbrNames.length > 0)
             this.title = this.abbrNames[0];
  
-        this.spanElement = this.editor.artText.$pluginCenter.emit('Toolbar.add', this);
+        this.spanElement = this.editor.artText.get<PluginCenter>('$pluginCenter').emit('Toolbar.add', this);
     }
 
     public click(): void {
@@ -43,7 +44,7 @@ export class SwitchRender {
                 this.editor.switchRender(this.renderNames[index]);
             } catch (err) {
                 console.error(err);
-                this.editor.artText.$pluginCenter.emit('Message.create', '切换渲染器失败', 'error');
+                this.editor.artText.get<PluginCenter>('$pluginCenter').emit('Message.create', '切换渲染器失败', 'error');
             }
         }
     }
@@ -161,5 +162,14 @@ export default class Editor {
         render.setMd(md);
 
         this.runRender = render;
+    }
+}
+
+export let EditorExport = {
+    install: function (Art, options) {
+        // options['container'].bind('$tool', Tool, null);
+    },
+    created: function (art , options) {
+        art.set('$editor', new Editor(art));
     }
 }
