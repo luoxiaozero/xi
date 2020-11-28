@@ -5,7 +5,7 @@ const commonConfig = require('./webpack.common');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const EncodingPlugin = require('webpack-encoding-plugin');
 
-
+process.env.ART_VERSION = JSON.stringify(pkg.version)
 module.exports = {
   ...commonConfig.default,
   mode: 'production',
