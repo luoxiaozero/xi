@@ -1,4 +1,5 @@
 import ArtText from "@/artText";
+import EventCenter from "@/eventCenter";
 import Render from "..";
 
 export default class TextareaRender implements Render{
@@ -41,14 +42,14 @@ export default class TextareaRender implements Render{
 
     public attachAllEvent(): void {
         const dom = this.dom;
-        let id = this.artText.$eventCenter.attachDOMEvent(this.dom, 'input', 
+        let id = this.artText.get<EventCenter>('$eventCenter').attachDOMEvent(this.dom, 'input', 
             e => (<HTMLHtmlElement>e.target).style.height = dom.scrollHeight + 'px');
         this.DOMEvents.push(id);
     }
 
     public detachAllEvent(): void {
         for (let id of this.DOMEvents) {
-            this.artText.$eventCenter.detachDOMEvent(id);
+            this.artText.get<EventCenter>('$eventCenter').detachDOMEvent(id);
         }
     } 
 }

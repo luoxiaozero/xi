@@ -15,21 +15,24 @@ export default class Core {
     /**构造时期执行 */
     static createdArt(art: any) {
         for (let p of Core.plugins) {
-            p.created(art, {});
+            if (p['created'])
+                p.created(art, {});
         }
     }
 
     /**挂载时期执行 */
     static mountArt(art: any) {
         for (let p of Core.plugins) {
-            p.mount(art, {});
+            if (p['mount'])
+                p.mount(art, {});
         }
     }
 
     /**卸载时期执行 */
     static unmountArt(art: any) {
         for (let p of Core.plugins) {
-            p.unmount(art, {});
+            if (p['unmount'])
+                p.unmount(art, {});
         }
     }
 }

@@ -27,21 +27,6 @@ export default class PluginCenter {
         PluginCenter.plugins[plugin.Name] = { plugin, options };
     }
 
-    /**
-     * 文件加载完成时
-     */
-    static loaded() {
-        PluginCenter.use(Toolbar);
-        PluginCenter.use(Message);
-
-        PluginCenter.use(ExportMdFile);
-        PluginCenter.use(ImportMdFile);
-        PluginCenter.use(NewMdFile);
-        PluginCenter.use(Github);
-
-        PluginCenter.use(VersionHistory);
-    }
-
     artText: ArtText;
     /**保存artText插件 */
     plugins: {};
@@ -169,7 +154,15 @@ export default class PluginCenter {
 
 export let PluginCenterExport = {
     install: function (Art, options) {
-        // options['container'].bind('$tool', Tool, null);
+        PluginCenter.use(Toolbar);
+        PluginCenter.use(Message);
+
+        PluginCenter.use(ExportMdFile);
+        PluginCenter.use(ImportMdFile);
+        PluginCenter.use(NewMdFile);
+        PluginCenter.use(Github);
+
+        PluginCenter.use(VersionHistory);
     },
     created: function (art , options) {
         art.set('$pluginCenter', new PluginCenter(art));

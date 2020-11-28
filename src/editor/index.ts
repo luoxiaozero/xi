@@ -1,3 +1,4 @@
+import { Art } from '@/core';
 import PluginCenter from '@/pluginCenter';
 import Render from '@/renders';
 import Tool from '@/tool';
@@ -171,5 +172,8 @@ export let EditorExport = {
     },
     created: function (art , options) {
         art.set('$editor', new Editor(art));
+    },
+    mount: function(art: Art, options) {
+        art.get<Editor>('$editor').init();
     }
 }

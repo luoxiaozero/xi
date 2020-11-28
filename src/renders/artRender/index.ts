@@ -77,8 +77,8 @@ export default class ArtRender implements Render {
     }
 
     public createDom(): HTMLDivElement {
-        this.artText.$tool.add({ dom: this.tableMoreTool.createDom() });
-        this.artText.$tool.add({ dom: this.floatAuxiliaryTool.createDom() });
+        this.artText.get<Tool>('$tool').add({ dom: this.tableMoreTool.createDom() });
+        this.artText.get<Tool>('$tool').add({ dom: this.floatAuxiliaryTool.createDom() });
 
         this.dom = this.renderRender.rootNode.newDom();
         this.cursor = new Cursor(this.renderRender.rootNode.dom);

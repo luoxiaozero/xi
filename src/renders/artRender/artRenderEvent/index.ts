@@ -2,6 +2,9 @@ import ArtText from '@/artText';
 import { blod, del, ins, italic, mark, sub, sup } from '../tool/default';
 import ArtRender from '..';
 import { domToMd } from '../artRenderRender/grammer';
+import EventCenter from '@/eventCenter';
+import Editor from '@/editor';
+import PluginCenter from '@/pluginCenter';
 
 /**
  * 渲染器的事件类
@@ -41,8 +44,8 @@ export default class ArtRenderEvent {
         this.addDOMEvent('click', this.click);
         this.addDOMEvent('contextmenu', this.contextmenu);
 
-        const eventCenter = this.artRender.artText.$eventCenter;
-        this.artRender.artText.$eventCenter.attachDOMEvent(document.body, 'mousewheel', e => eventCenter.emit('DOM.' + e.type));
+        const eventCenter = this.artRender.artText.get<EventCenter>('$eventCenter');
+        this.artRender.artText.get<EventCenter>('$eventCenter').attachDOMEvent(document.body, 'mousewheel', e => eventCenter.emit('DOM.' + e.type));
 
         this.addDOMEvent('paste', this.paste);
 
@@ -53,11 +56,11 @@ export default class ArtRenderEvent {
     /**移除所有事件 */
     public detachAllEvent() {
         for (let customize of this.customizeEvents) {
-            this.artRender.artText.$eventCenter.off(...customize);
+            this.artRender.artText.get<EventCenter>('$eventCenter').off(...customize);
         }
 
         for (let id of this.DOMEvents) {
-            this.artRender.artText.$eventCenter.detachDOMEvent(id);
+            this.artRender.artText.get<EventCenter>('$eventCenter').detachDOMEvent(id);
         }
         this.customizeEvents = [];
         this.DOMEvents = [];
@@ -68,17 +71,17 @@ export default class ArtRenderEvent {
     private addDOMEvent(type: string, fun: Function): void {
         const _this = this;
         function closure(e) {
-            _this.artRender.artText.$eventCenter.emit('DOM.' + e.type);
+            _this.artRender.artText.get<EventCenter>('$eventCenter').emit('DOM.' + e.type);
             return fun(e, _this);
         }
 
-        let id = this.artRender.artText.$eventCenter.attachDOMEvent(this.artRender.dom, type, closure);
+        let id = this.artRender.artText.get<EventCenter>('$eventCenter').attachDOMEvent(this.artRender.dom, type, closure);
         this.DOMEvents.push(id);
     }
 
     /**添加自定义事件 */
     private addCustomizeEvent(type: string, listener: Function): void {
-        this.artRender.artText.$eventCenter.on(type, listener);
+        this.artRender.artText.get<EventCenter>('$eventCenter').on(type, listener);
         this.customizeEvents.push([type, listener]);
     }
 
@@ -241,7 +244,7 @@ export default class ArtRenderEvent {
                 // 加载文本
                 fr.onload = () => {
                     if (fr.result) {
-                        _this.artRender.artText.$editor.openFile({ defaultMd: fr.result.toString(), name: f0.name });
+                        _this.artRender.artText.get<Editor>('$editor').openFile({ defaultMd: fr.result.toString(), name: f0.name });
                     }
                 };
                 fr.readAsText(f0);
@@ -270,7 +273,7 @@ export default class ArtRenderEvent {
                 //读取文件中的内容 —— DataURL：一种特殊的URL地址，本身包含着所有的数据
                 fr.readAsDataURL(f0);
             } else {
-                _this.artRender.artText.$pluginCenter.emit('Message', '不支持该文件类型', 'error');
+                _this.artRender.artText.get<PluginCenter>('$pluginCenter').emit('Message', '不支持该文件类型', 'error');
             }
         }
     }
