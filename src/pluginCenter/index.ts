@@ -1,3 +1,4 @@
+import Editor from '@/editor';
 import Tool from '@/tool';
 import ArtText from '../artText';
 import Message from "./plugins/message";
@@ -53,8 +54,8 @@ export default class PluginCenter {
         this.registeredPlugins = {};
         let _this = this;
         this._object_ = {
-            openFile: (...args) => { return artText.$editor.openFile(args[0], args[1]); },
-            getFile: (key = null) => { return artText.$editor.getFile(key); },
+            openFile: (...args) => { return artText.get<Editor>('$editor').openFile(args[0], args[1]); },
+            getFile: (key = null) => { return artText.get<Editor>('$editor').getFile(key); },
             emit: (type: string, ...data) => { return _this.emit(type, ...data) },
             pluginChilds: [],
             parentPlugin: null,
@@ -120,7 +121,7 @@ export default class PluginCenter {
             this.registeredPlugins[Plugin.Name] = plugin;
             if (plugin.createDoms) {
                 let nodes: [] = plugin.createDoms();
-                this.artText.$tool.add(nodes);
+                this.artText.get<Tool>('$tool').add(nodes);
             }
             if (Plugin.DEFAULT_CSS != undefined && Plugin.DEFAULT_CSS) {
                 PluginCenter.DEFAULT_CSS += Plugin.DEFAULT_CSS;
@@ -162,5 +163,15 @@ export default class PluginCenter {
 
         }
         return pluginChild;
+    }
+}
+
+
+export let PluginCenterExport = {
+    install: function (Art, options) {
+        // options['container'].bind('$tool', Tool, null);
+    },
+    created: function (art , options) {
+        art.set('$pluginCenter', new PluginCenter(art));
     }
 }
