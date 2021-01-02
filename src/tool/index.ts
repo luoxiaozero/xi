@@ -105,9 +105,9 @@ export default class Tool {
 
 export let ToolExport = {
     install: function (Art, options) {
-        // options['container'].bind('$tool', Tool, null);
+        options['container'].bind('$tool', Tool, [{'get': 'art'}], true);
     },
     created: function (art , options) {
-        art.set('$tool', new Tool(art));
+        art.get('$tool');
     }
 }

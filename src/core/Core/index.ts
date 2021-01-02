@@ -8,7 +8,7 @@ export default class Core {
 
     /**添加插件 */
     static use(plugin: any) {
-        plugin.install(Art, {});
+        plugin.install(Art, {'container': Core.container});
         Core.plugins.push(plugin);
     }
 
@@ -16,7 +16,7 @@ export default class Core {
     static createdArt(art: any) {
         for (let p of Core.plugins) {
             if (p['created'])
-                p.created(art, {});
+                p.created(art, {'container': Core.container});
         }
     }
 
@@ -24,7 +24,7 @@ export default class Core {
     static mountArt(art: any) {
         for (let p of Core.plugins) {
             if (p['mount'])
-                p.mount(art, {});
+                p.mount(art, {'container': Core.container});
         }
     }
 
@@ -32,7 +32,7 @@ export default class Core {
     static unmountArt(art: any) {
         for (let p of Core.plugins) {
             if (p['unmount'])
-                p.unmount(art, {});
+                p.unmount(art, {'container': Core.container});
         }
     }
 }

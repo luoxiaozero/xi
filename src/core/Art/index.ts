@@ -10,7 +10,7 @@ export default class Art {
     /**获取值 */
     public get<T>(key: any): T{
         if (this[key] == undefined)
-            this[key] = Core.container.get(key);
+            this[key] = Core.container.get(key, this);
         
         return this[key];
     }
@@ -18,7 +18,7 @@ export default class Art {
     /**设置值 */
     public set(key: any, value?: any): void{
         if (this[key] == undefined && Core.container.has(key)) 
-            this[key] = Core.container.get(key);
+            this[key] = Core.container.get(key, this);
     
         this[key] = value;
     }

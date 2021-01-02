@@ -122,9 +122,9 @@ export default class EventCenter {
 
 export let EventCenterExport = {
     install: function (Art, options) {
-        // options['container'].bind('$tool', Tool, null);
+        options['container'].bind('$eventCenter', EventCenter, [{'get': 'art'}], true);
     },
     created: function (art , options) {
-        art.set('$eventCenter', new EventCenter(art));
+        art.get('$eventCenter');
     }
 }
