@@ -10,7 +10,8 @@ export default class Core {
 
     /**添加插件 */
     public static use(plugin: any): void{
-        plugin.install(Art, Core.options);
+        if (plugin['install'])
+            plugin.install(Art, Core.options);
         Core.plugins.push(plugin);
     }
 
