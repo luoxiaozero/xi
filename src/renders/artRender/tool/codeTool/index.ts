@@ -1,6 +1,6 @@
 export default function initCodeTool(root: HTMLElement, lang: string = ''): void {
     root.innerHTML = '';
-    root.setAttribute('style', 'width:100%;font-weight: 600;visibility:hidden;display:flex;font-size:13px;')
+    root.setAttribute('style', 'visibility:hidden;')
 
     let prompt = document.createElement('span');
     prompt.style.letterSpacing = '4px';

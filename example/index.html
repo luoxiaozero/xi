@@ -36,223 +36,173 @@
   </style>
   <style>
     .markdown-body {
-      font-size: 16px;
-      color: #333;
-      text-rendering: optimizelegibility;
-      font: 300 1em/1.8 "PingFang SC", "Lantinghei SC", "Microsoft Yahei", "Hiragino Sans GB", "Microsoft Sans Serif", "WenQuanYi Micro Hei", "sans-serif";
-    }
+  font-family: Helvetica Neue,Luxi Sans,DejaVu Sans,Hiragino Sans GB,Microsoft Yahei,sans-serif,Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,Segoe UI Symbol,Android Emoji,EmojiSymbols;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #24292e;
+  text-rendering: optimizelegibility;
+}
 
-    /* 要注意表单元素并不继承父级 font 的问题 */
-    .markdown-body body,
-    .markdown-body button,
-    .markdown-body input,
-    .markdown-body select,
-    .markdown-body textarea {
-      font: 300 1em/1.8 "PingFang SC", "Lantinghei SC", "Microsoft Yahei", "Hiragino Sans GB", "Microsoft Sans Serif", "WenQuanYi Micro Hei", "sans-serif";
-    }
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+}
 
-    .markdown-body * {
-      margin: 0;
-      padding: 0;
-    }
+.markdown-body h1 {
+  font-size: 1.75em
+}
 
-    /* 统一上标和下标 */
-    .markdown-body sub,
-    .markdown-body sup {
-      font-size: 75%;
-      line-height: 0;
-      position: relative;
-    }
+.markdown-body h2 {
+  font-size: 1.55em
+}
 
-    .markdown-body sup {
-      top: -0.5em;
-    }
+.markdown-body h3 {
+  font-size: 1.38em
+}
 
-    .markdown-body sub {
-      bottom: -0.25em;
-    }
+.markdown-body h4 {
+  font-size: 1.25em
+}
 
+.markdown-body h5 {
+  font-size: 1.13em
+}
 
-    .markdown-body h1,
-    .markdown-body h2,
-    .markdown-body h3,
-    .markdown-body h4,
-    .markdown-body h5,
-    .markdown-body h6 {
-      font-weight: 500;
-      color: #000;
-      margin-top: 0.8em;
-      margin-bottom: 0.4em;
-      line-height: 1.35;
-    }
+.markdown-body h6 {
+  font-size: 1em
+}
 
-    .markdown-body h1 {
-      font-size: 2em;
-    }
+.markdown-body h1, .markdown-body h2 {
+  padding-bottom: .3em;
+  border-bottom: 1px solid #eaecef;
+}
 
-    .markdown-body h2 {
-      font-size: 1.8em;
-    }
+.markdown-body p {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
 
-    .markdown-body h3 {
-      font-size: 1.6em;
-    }
+.markdown-body hr {
+  height: 2px;
+  padding: 0;
+  margin: 24px 0;
+  background-color: #eaecef;
+  border: 0
+}
 
-    .markdown-body h4 {
-      font-size: 1.4em;
-    }
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: #6a737d;
+  border-left: .25em solid #eaecef;
+  margin: 0 0 16px
+}
 
-    .markdown-body h5 {
-      font-size: 1.2em;
-    }
+.markdown-body a {
+  text-decoration: none;
+  color: #1abc9c;
+  font-weight: 600;
+}
 
-    .markdown-body h6 {
-      font-size: 1.1em;
-    }
-
-    .markdown-body blockquote {
-      position: relative;
-      color: #999;
-      font-weight: 400;
-      border-left: 4px solid #ccc;
-      padding-left: 1em;
-      margin: 1em 2em 1em 0.6em;
-    }
-
-    .markdown-body p,
-    .markdown-body pre,
-    .markdown-body ul,
-    .markdown-body ol,
-    .markdown-body dl,
-    .markdown-body form,
-    .markdown-body hr,
-    .markdown-body table,
-    .markdown-body figure,
-    .markdown-body blockquote {
-      margin-bottom: 0.6em;
-    }
-
-    .markdown-body li>p {
-      margin-bottom: 0.2em;
-    }
-
-    .markdown-body ul {
-      margin-left: 1.3em;
-      list-style: disc;
-    }
-
-    .markdown-body ol {
-      list-style: decimal;
-      margin-left: 1.6em;
-    }
-
-    .markdown-body li ul,
-    .markdown-body li ol {
-      margin-bottom: 0.8em;
-      margin-left: 1.8em;
-    }
-
-    .markdown-body li ul {
-      list-style: circle;
-    }
-
-    .markdown-body a {
-      text-decoration: none;
-      color: #4183c4;
-      border-bottom: 1px solid #4183c4;
-    }
-
-    .markdown-body a:hover {
-      border-bottom-color: #555;
-      color: #555;
-    }
-
-    .markdown-body img {
-      max-width: 100%;
-    }
-
-    .markdown-body strong,
-    .markdown-body b {
-      font-weight: bold;
-      color: #000;
-    }
-
-    .markdown-body hr {
-      border: none;
-      border-bottom: 1px solid #cfcfcf;
-      margin-bottom: 0.8em;
-      height: 10px;
-    }
-
-    /* 去掉各Table cell 的边距并让其边重合 */
-    .markdown-body table {
-      border-collapse: collapse;
-      border-spacing: 0;
-    }
-
-    .markdown-body table caption {
-      border-bottom: none;
-    }
-
-    .markdown-body table th,
-    .markdown-body table td {
-      border: 1px solid #ddd;
-      padding: 0.4em 0.8em;
-      color: #666;
-    }
-
-    .markdown-body table thead th {
-      background: #f5f5f5;
-      color: #5b5b5b;
-    }
-
-    .markdown-body table tbody tr {
-      background: #fff;
-    }
-
-    .markdown-body table tbody tr:nth-child(2n) {
-      background: #f5f5f5;
-    }
-
-    .markdown-body acronym,
-    .markdown-body abbr {
-      border-bottom: 1px dotted;
-      font-variant: normal;
-      text-decoration: none;
-    }
-
-    .markdown-body mark {
-      background: #fffdd1;
-      border-bottom: 1px solid #ffedce;
-      padding: 2px;
-    }
+.markdown-body a:hover {
+  color: #304455;
+}
 
 
-    .markdown-body code {
-      /*color: #d63200;默认*/
-      background-color: #f1f1f1;
-      color: #525252;
-      padding: 3px 5px;
-      margin: 0 2px;
-      border-radius: 2px;
-    }
+.markdown-body table {
+  border-collapse: collapse;
+  empty-cells: show;
+  margin-bottom: 16px;
+  overflow: auto;
+  border-spacing: 0
+}
 
-    .markdown-body pre {
-      background-color: #f6f8fa;
-      padding: 1em 1.5em;
-      border-radius: 2px;
-      font-size: 14px;
-      position: relative;
-    }
+.markdown-body table tr {
+  background-color: #fafbfc;
+  border-top: 1px solid #c6cbd1
+}
 
-    .markdown-body pre code {
-      background-color: #f6f8fa;
-      line-height: 1.6rem;
-      padding: 0px;
-      margin: 0px;
-    }
+.markdown-body table td, .markdown-body table th {
+  padding: 6px 13px;
+  border: 1px solid #dfe2e5;
+  word-break: normal
+}
 
-    pre code.lang-c::before,
+.markdown-body table th {
+  font-weight: 600
+}
+
+.markdown-body table thead th {
+  background: #f5f5f5;
+  color: #5b5b5b;
+}
+
+.markdown-body table tbody tr:nth-child(2n) {
+  background-color: #fff
+}
+
+.markdown-body table tbody tr:nth-child(2n){ 
+  background: #f5f5f5;
+}
+
+.markdown-body code {
+  background-color: #f1f1f1;
+  padding: 3px 5px;
+  margin: 0 2px;
+  border-radius: 2px;
+  font-size: 14px;
+}
+
+.markdown-body pre {
+  background-color: #f6f8fa;
+  padding: 1em 1.5em;
+  margin: 0 0 1em 0;
+  border-radius: 2px;
+  font-size: 14px;
+  position: relative;
+}
+
+.markdown-body pre code {
+  background-color: #f6f8fa;
+  overflow-x: auto;
+  color: #525252;
+  white-space: pre;
+  font-size: 0.85rem;
+  line-height: 1.6rem;
+  display: block;
+}
+
+.markdown-body ul {
+  margin: 0;
+  padding: 0;
+  margin-left: 1.3em;
+  list-style: disc;
+}
+
+.markdown-body ol {
+  margin: 0;
+  padding: 0;
+  list-style: decimal;
+  margin-left: 1.6em;
+}
+
+.markdown-body li ul, .markdown-body li ol {
+  margin-bottom: 0.8em;
+  margin-left: 1.8em;
+}
+
+.markdown-body li ul {
+  list-style: circle;
+}
+
+.markdown-body mark {
+  background: #fffdd1;
+  border-bottom: 1px solid #ffedce;
+  padding: 2px;
+}
+
+pre code.lang-c::before,
     pre code.lang-python::before,
     pre code.lang-html::before,
     pre code.lang-javascript::before,

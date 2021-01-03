@@ -3,7 +3,7 @@ import { Art, Core } from '@/core'
 
 /** 入口类 */
 export default class ArtText extends Art {
-    static version: string = typeof process.env.ART_VERSION === 'undefined' ? 'dev' : process.env.ART_VERSION;
+    static readonly version: string = typeof process.env.ART_VERSION === 'undefined' ? 'dev' : process.env.ART_VERSION;
     static use = Core.use;
 
     /**绑定的根节点 */

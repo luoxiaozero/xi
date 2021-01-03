@@ -28,47 +28,6 @@
     margin-left: -1.15em;
     margin-top: 0.45em;
 }
-.art-toc {
-    padding: 6px 15px;
-    margin: 0 0 15px;
-    font-weight: 500;
-    border: 1px dashed #9990;
-}
-
-.art-toc p {
-    margin-bottom: 2px
-}
-
-.art-toc a {
-    border-bottom: none;
-    color: #4183c4
-}
-
-.art-toc-h2 {
-    margin-left: 2em
-}
-
-.art-toc-h3 {
-    margin-left: 4em
-}
-
-.art-toc-h4 {
-    margin-left: 6em
-}
-
-.art-toc-h5 {
-    margin-left: 8em
-}
-
-.art-toc-h6 {
-    margin-left: 10em
-}
-
-.art-tocTool {
-    width: 100%;
-    font-size: 14px;
-    position: relative;
-}
 
 .art-buttonTool-hover {
     font-size: 13px;
@@ -92,10 +51,17 @@
     text-align: center;
 }
 
+.art-codeTool {
+    width: 100%;
+    font-weight: 600;
+    visibility: visible;
+    display: flex;
+}
+
 .art-toc {
     padding: 6px 15px;
     margin: 0 0 15px;
-    font-weight: 500;
+    font-weight: 400;
     border: 1px dashed #9990;
 }
 
@@ -130,6 +96,43 @@
 
 .art-tocTool {
     width: 100%;
-    font-size: 14px;
     position: relative;
+}
+
+.markdown-body h1::before,
+.markdown-body h2::before,
+.markdown-body h3::before,
+.markdown-body h4::before,
+.markdown-body h5::before,
+.markdown-body h6::before {
+    position: absolute;
+    color: rgba(88, 96, 105, 0.36);
+    font-weight: 400;
+    font-size: 10px;
+    margin-left: -2em;
+    margin-top: 0.em;
+}
+
+.markdown-body h1::before {
+    content: "H1";
+}
+
+.markdown-body h2::before {
+    content: "H2";
+}
+
+.markdown-body h3::before {
+    content: "H3";
+}
+
+.markdown-body h4::before {
+    content: "H4";
+}
+
+.markdown-body h5::before {
+    content: "H5";
+}
+
+.markdown-body h6::before {
+    content: "H6";
 }
