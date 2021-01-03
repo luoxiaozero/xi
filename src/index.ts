@@ -5,6 +5,7 @@ import { EditorExport } from '@/editor';
 import { EventCenterExport } from '@/eventCenter';
 import { PluginCenterExport } from '@/pluginCenter';
 import { ToolbarExport } from './plugins/toolbar';
+import { MessageExport } from './plugins/message';
 
 export default ArtText;
 
@@ -17,6 +18,7 @@ Core.use(PluginCenterExport);
 
 /**默认插件 */
 Core.use(ToolbarExport)
+Core.use(MessageExport)
 
 /**用户自定义插件 */
 

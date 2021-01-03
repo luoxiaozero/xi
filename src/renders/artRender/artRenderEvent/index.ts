@@ -4,7 +4,7 @@ import ArtRender from '..';
 import { domToMd } from '../artRenderRender/grammer';
 import EventCenter from '@/eventCenter';
 import Editor from '@/editor';
-import PluginCenter from '@/pluginCenter';
+import Message from '@/plugins/message';
 
 /**
  * 渲染器的事件类
@@ -273,7 +273,7 @@ export default class ArtRenderEvent {
                 //读取文件中的内容 —— DataURL：一种特殊的URL地址，本身包含着所有的数据
                 fr.readAsDataURL(f0);
             } else {
-                _this.artRender.artText.get<PluginCenter>('$pluginCenter').emit('Message', '不支持该文件类型', 'error');
+                _this.artRender.artText.get<Message>('message').create('不支持该文件类型', 'error');
             }
         }
     }
