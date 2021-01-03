@@ -1,7 +1,9 @@
+import ArtText from "@/artText";
 import { Art } from "@/core";
 import Editor from "@/editor";
 import { _Object_ } from "@/pluginCenter";
 import Toolbar from "@/pluginCenter/plugins/toolbar";
+import Message from "../message";
 
 export let exportMdFile = {
     created: function (art: Art, options) {
@@ -69,6 +71,61 @@ export let GithubExport = {
             {
                 title: '<span title="项目地址">Github</span>',
                 click: () => window.open('https://github.com/liziqiang9/ArtText')
+            }
+        );
+    }
+}
+
+export class SwitchRenderButton {
+
+    artText: ArtText;
+    spanElement: HTMLSpanElement;
+    title: string;
+    abbrNames: string[];
+    renderNames: string[];
+    constructor(artText: ArtText) {
+        this.artText = artText;
+        this.title = '默认';
+
+        this.spanElement = null;
+        this.abbrNames = [];
+        this.renderNames = [];
+    }
+
+    public click(): void {
+        let index: number = this.abbrNames.indexOf(this.title);
+        if (index > -1) {
+            index++;
+            if (index == this.abbrNames.length) {
+                index = 0;
+            }
+            this.title = this.abbrNames[index];
+            this.spanElement.innerHTML = this.abbrNames[index];
+            try{
+                this.artText.get<Editor>('$editor').switchRender(this.renderNames[index]);
+            } catch (err) {
+                console.error(err);
+                this.artText.get<Message>('message').create('切换渲染器失败', 'error');
+            }
+        }
+    }
+}
+
+export let switchRenderButtonExport = {
+    install: (Art, options) => {
+        options['container'].bind('switchRenderButton', SwitchRenderButton, [{'get': 'art'}], true);
+        
+    },
+    created: function (art: Art, options) {
+        let switchRenderBotton = art.get<SwitchRenderButton>('switchRenderButton');
+        
+        if (switchRenderBotton.abbrNames.length > 0)
+            switchRenderBotton.title = switchRenderBotton.abbrNames[0];
+
+        switchRenderBotton.spanElement = art.get<Toolbar>('toolbar').add(
+            {
+                title: switchRenderBotton.title,
+                click: () => switchRenderBotton.click()
             }
         );
     }

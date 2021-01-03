@@ -1,7 +1,7 @@
 import ArtText from "@/artText";
 import { Art, Core } from "@/core";
 import Tool from "@/tool";
-import { exportMdFile, GithubExport, importMdFile, newMdFileExport } from "./default";
+import { exportMdFile, GithubExport, importMdFile, newMdFileExport, switchRenderButtonExport } from "./default";
 
 /**
  * 任务栏
@@ -60,6 +60,7 @@ export default class Toolbar {
 
 export let ToolbarExport = {
     install: function (Art, options) {
+        Core.use(switchRenderButtonExport);
         Core.use(newMdFileExport);
         Core.use(importMdFile);
         Core.use(exportMdFile);

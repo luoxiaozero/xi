@@ -1,55 +1,11 @@
 import { Art } from '@/core';
-import PluginCenter from '@/pluginCenter';
+import { SwitchRenderButton } from '@/plugins/toolbar/default';
 import Render from '@/renders';
 import Tool from '@/tool';
 import ArtText from '../artText'
 import ArtRender from '../renders/artRender';
 import TextareaRender from '../renders/textareaRender';
 import './index.css'
-/**
- * 切换渲染器
- */
-export class SwitchRender {
-
-    editor: Editor;
-    spanElement: HTMLSpanElement;
-    title: string;
-    abbrNames: string[];
-    renderNames: string[];
-    constructor(editor: Editor) {
-        this.editor = editor;
-        this.title = '默认';
-
-        this.spanElement = null;
-        this.abbrNames = [];
-        this.renderNames = [];
-    }
-
-    public emit() {
-        if (this.abbrNames.length > 0)
-            this.title = this.abbrNames[0];
- 
-        this.spanElement = this.editor.artText.get<PluginCenter>('$pluginCenter').emit('Toolbar.add', this);
-    }
-
-    public click(): void {
-        let index: number = this.abbrNames.indexOf(this.title);
-        if (index > -1) {
-            index++;
-            if (index == this.abbrNames.length) {
-                index = 0;
-            }
-            this.title = this.abbrNames[index];
-            this.spanElement.innerHTML = this.abbrNames[index];
-            try{
-                this.editor.switchRender(this.renderNames[index]);
-            } catch (err) {
-                console.error(err);
-                this.editor.artText.get<PluginCenter>('$pluginCenter').emit('Message.create', '切换渲染器失败', 'error');
-            }
-        }
-    }
-}
 
 /**
  * 编辑器
@@ -64,7 +20,6 @@ export default class Editor {
     defaultRender: any;
     runRender: Render;
     renders: {};
-    switchRenderButton: SwitchRender;
     constructor(artText: ArtText) {
         this.artText = artText;
 
@@ -75,7 +30,6 @@ export default class Editor {
         this.fileInfo = {};
         this.renders = {};
 
-        this.switchRenderButton = new SwitchRender(this);
         for (let R of Editor.plugins) {
             this.addRender(R);
         }
@@ -94,7 +48,6 @@ export default class Editor {
         for (let key in this.renders) {
             this.dom.appendChild(this.renders[key].createDom());
         }
-        this.switchRenderButton.emit();
         this.runRender.open();
         this.runRender.setMd(this.artText.options.defaultMd);
     }
@@ -111,8 +64,8 @@ export default class Editor {
             name = R.Name;
         this.renders[name] = new R(this.artText);
         
-        this.switchRenderButton.abbrNames.push(this.renders[name].abbrName);
-        this.switchRenderButton.renderNames.push(name);
+        this.artText.get<SwitchRenderButton>('switchRenderButton').abbrNames.push(this.renders[name].abbrName);
+        this.artText.get<SwitchRenderButton>('switchRenderButton').renderNames.push(name);
     }
 
     /**
