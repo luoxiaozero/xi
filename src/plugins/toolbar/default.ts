@@ -1,8 +1,7 @@
 import ArtText from "@/artText";
 import { Art } from "@/core";
 import Editor from "@/editor";
-import { _Object_ } from "@/pluginCenter";
-import Toolbar from "@/pluginCenter/plugins/toolbar";
+import Toolbar from ".";
 import Message from "../message";
 
 export let exportMdFile = {

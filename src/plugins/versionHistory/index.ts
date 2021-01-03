@@ -1,71 +1,54 @@
-import { _Object_ } from "@/pluginCenter";
+import { Art, Core } from "@/core";
+import Editor from "@/editor";
+import Tool from "@/tool";
+import Message from "../message";
+import Toolbar from "../toolbar";
 
 /**打开历史版本工具 */
-export class OpenVersionHistory {
-    static Name = 'OpenVersionHistory';
-
-    _object_: _Object_;
-    title: string;
-    constructor(_object_: _Object_) {
-        this._object_ = _object_;
-        this.title = '历史';
-        this._object_.emit('Toolbar.add', this);
-    }
-
-    public click() {
-        this._object_.parentPlugin.open();
+export let openVersionHistory = {
+    created: function (art: Art, options) {
+        art.get<Toolbar>('toolbar').add({
+            title: '历史', click: () => art.get<VersionHistory>('versionHistory').open()
+        })
     }
 }
 
-/**
- * 保存md文本
- */
-export class SaveMdFile {
-    static Name = 'SaveMdFile';
-
-    _object_: _Object_;
-    title: string;
-    constructor(_object_: _Object_) {
-        this._object_ = _object_;
-        this.title = '保存';
-        this._object_.emit('Toolbar.add', this);
-    }
-
-    click() {
-        let fileInfo = this._object_.getFile();
-        let art_articles = JSON.parse(localStorage.art_articles);
-        if (fileInfo['id'] && art_articles.hasOwnProperty(fileInfo['id'])) {
-            localStorage[fileInfo['id']] = fileInfo.markdown;
-            art_articles[fileInfo['id']] = fileInfo;
-            localStorage.art_articles = JSON.stringify(art_articles);
-            this._object_.emit('Message.create', '保存成功', 'success');
-        } else {
-            let timestamp = new Date().getTime();
-            let mdId = 'art_md_' + timestamp + '_';
-            let name = mdId;
-            if (fileInfo['name']) {
-                mdId += fileInfo['name'];
-                name = fileInfo['name'];
-            }
-            localStorage[mdId] = fileInfo.markdown;
-            art_articles[mdId] = { ids: [mdId], time: timestamp, name: name, id: mdId }
-            localStorage.art_articles = JSON.stringify(art_articles);
-            let article = art_articles[mdId];
-            article['defaultMd'] = fileInfo.markdown;
-            this._object_.openFile(article);
-            this._object_.emit('Message.create', '保存成功', 'success');
-        }
+/**保存md文本*/
+export let saveMdFile = {
+    created: function (art: Art, options) {
+        art.get<Toolbar>('toolbar').add({
+            title: '保存', click: () => {
+                let fileInfo = art.get<Editor>('$editor').getFile();
+                let art_articles = JSON.parse(localStorage.art_articles);
+                if (fileInfo['id'] && art_articles.hasOwnProperty(fileInfo['id'])) {
+                    localStorage[fileInfo['id']] = fileInfo.markdown;
+                    art_articles[fileInfo['id']] = fileInfo;
+                    localStorage.art_articles = JSON.stringify(art_articles);
+                    art.get<Message>('message').create('保存成功', 'success');
+                } else {
+                    let timestamp = new Date().getTime();
+                    let mdId = 'art_md_' + timestamp + '_';
+                    let name = mdId;
+                    if (fileInfo['name']) {
+                        mdId += fileInfo['name'];
+                        name = fileInfo['name'];
+                    }
+                    localStorage[mdId] = fileInfo.markdown;
+                    art_articles[mdId] = { ids: [mdId], time: timestamp, name: name, id: mdId }
+                    localStorage.art_articles = JSON.stringify(art_articles);
+                    let article = art_articles[mdId];
+                    article['defaultMd'] = fileInfo.markdown;
+                    art.get<Editor>('$editor').openFile(article);
+                    art.get<Message>('message').create('保存成功', 'success');
+                }
+           }
+        });
     }
 }
 
 export default class VersionHistory {
-    static Name = 'VersionHistory';
-    static plugins: any[] = [{ plugin: OpenVersionHistory, options: {} }, { plugin: SaveMdFile, options: {} }];
-    static DEFAULT_CSS = '.art-VersionHistoryTool{position: fixed;z-index:10;width:60vw;right:20vw;height:92vh;top:4vh;background-color:#fff;box-shadow:0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);border-radius: 2px}\n\
-    .art-VersionHistoryTool-MaskLayer{position:fixed;top:0;right:0;bottom:0;left:0;background: rgba(26,26,26,.65);z-index:1}\n\
-    .art-VersionHistoryTool-selected{color: #1aba9c}'
 
-    _object_: _Object_;
+    art: Art;
     dom: HTMLDivElement;
     maskLayer: HTMLDivElement;
     art_articles: {};
@@ -75,8 +58,8 @@ export default class VersionHistory {
     footerRestore: HTMLSpanElement;
     footerTag: HTMLSpanElement;
     mainFooter: HTMLDivElement;
-    constructor(_object_: _Object_) {
-        this._object_ = _object_;
+    constructor(art: Art) {
+        this.art = art;
         this.dom = document.createElement('div');
         this.dom.setAttribute('class', 'art-VersionHistoryTool');
         this.dom.style.display = 'none';
@@ -84,14 +67,8 @@ export default class VersionHistory {
         this.maskLayer = document.createElement('div');
         this.maskLayer.setAttribute('class', 'art-VersionHistoryTool-MaskLayer');
         this.maskLayer.style.display = 'none';
-    }
-
-    /**
-     * 需要挂载的节点
-     */
-    public createDoms(): any[] {
         this.getRootDomChilds();
-        return [{ dom: this.dom }, { dom: this.maskLayer }];
+        this.art.get<Tool>('$tool').add([{ dom: this.dom }, { dom: this.maskLayer }]);
     }
 
     public getRootDomChilds() {
@@ -196,7 +173,7 @@ export default class VersionHistory {
 
     private updateDirectory(): void {
         this.sideDraftHistoryDirectory.innerHTML = '';
-        let fileInfo = this._object_.getFile('fileInfo');
+        let fileInfo = this.art.get<Editor>('$editor').getFile('fileInfo');
         for (let key of Object.keys(this.art_articles).reverse()) {
             let div = document.createElement('div');
             div.style.height = '60px'
@@ -221,11 +198,11 @@ export default class VersionHistory {
                 this.footerDel.onclick = () => {
                     localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']];
                     vH.updateDirectory();
-                    vH._object_.emit('Message.create', article['name'] + '已删除', 'success')
+                    vH.art.get<Message>('message').create(article['name'] + '已删除', 'success')
                 }
                 this.footerRestore.onclick = () => {
-                    vH._object_.openFile(md, article);
-                    vH._object_.emit('Message.create', article['name'] + '已恢复', 'success'); vH.close();
+                    vH.art.get<Editor>('$editor').openFile(md, article);
+                    vH.art.get<Message>('message').create(article['name'] + '已恢复', 'success'); vH.close();
                 }
             }
 
@@ -250,12 +227,12 @@ export default class VersionHistory {
             vH.mainFooter.style.display = 'inherit';
             vH.footerDel.onclick = () => {
                 localStorage.removeItem(article['ids'][0]); delete vH.art_articles[article['id']];
-                vH.updateDirectory(); vH._object_.emit('Message.create', article['name'] + '已删除', 'success')
+                vH.updateDirectory(); vH.art.get<Message>('message').create(article['name'] + '已删除', 'success')
             }
             vH.footerRestore.onclick = () => {
                 article['defaultMd'] = md;
-                vH._object_.openFile(article);
-                vH._object_.emit('Message.create', article['name'] + '已恢复', 'success'); vH.close();
+                vH.art.get<Editor>('$editor').openFile(article);
+                vH.art.get<Message>('message').create(article['name'] + '已恢复', 'success'); vH.close();
             }
         }
         return c;
@@ -267,5 +244,19 @@ export default class VersionHistory {
         this.maskLayer.style.display = 'none';
         this.dom.style.display = 'none';
         document.body.style.overflow = 'auto';
+    }
+}
+
+export let VersionHistoryExport = {
+    install: function (Art, options) {
+        Core.use(openVersionHistory);
+        Core.use(saveMdFile);
+        options['container'].bind('versionHistory', VersionHistory, [{ 'get': 'art' }], true);
+        options['Tool'].addCss('.art-VersionHistoryTool{position: fixed;z-index:10;width:60vw;right:20vw;height:92vh;top:4vh;background-color:#fff;box-shadow:0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);border-radius: 2px}\n\
+        .art-VersionHistoryTool-MaskLayer{position:fixed;top:0;right:0;bottom:0;left:0;background: rgba(26,26,26,.65);z-index:1}\n\
+        .art-VersionHistoryTool-selected{color: #1aba9c}')
+    },
+    created: function (art: Art, options) {
+        art.get<VersionHistory>('versionHistory');
     }
 }
