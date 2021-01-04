@@ -9,7 +9,7 @@ export let exportMdFile = {
         art.get<Toolbar>('toolbar').add({
             title: '导出', click: () => {
                 {
-                    let fileInfo = this._object_.getFile();
+                    let fileInfo = art.get<Editor>('$editor').getFile();
                     let filename = 'arttext';
                     if (fileInfo.name) {
                         filename = fileInfo.name;
@@ -43,11 +43,10 @@ export let importMdFile = {
                     document.body.appendChild(ele);
                     ele.click();
 
-                    let _object_ = this._object_;
                     ele.onchange = () => {
                         const reader = new FileReader()
                         reader.onload = () => {
-                            _object_.openFile({ name: ele.files[0].name.replace(/.md$/, ''), defaultMd: reader.result.toString() });
+                            art.get<Editor>('$editor').openFile({ name: ele.files[0].name.replace(/.md$/, ''), defaultMd: reader.result.toString() });
                         }
                         reader.readAsText(ele.files[0], 'utf8');
                     }
