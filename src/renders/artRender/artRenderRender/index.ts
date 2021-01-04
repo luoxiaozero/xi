@@ -1,3 +1,4 @@
+import EventCenter from '@/eventCenter';
 import ArtRender from '..';
 import { backRender, enterRender, keyupRender } from './eventRender';
 import { aline, inline, mdToNode } from './grammer';
@@ -39,6 +40,7 @@ export default class ArtRenderRender {
         }
 
         this.artRender.cursor.setSelection();
+        this.artRender.artText.get<EventCenter>('$eventCenter').emit('artRender-render')
         return state;
     }
 

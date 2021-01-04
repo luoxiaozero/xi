@@ -11,6 +11,7 @@ import { keyupRender } from './artRenderRender/eventRender';
 import vnodeRender from './artRenderRender/vnodeRender';
 import Editor from '@/editor';
 import { Art } from '@/core';
+import EventCenter from '@/eventCenter';
 
 const win = window;
 /**
@@ -111,6 +112,7 @@ export default class ArtRender implements Render {
     public setMd(md: string): void {
         this.renderRender.vnodeDispose(this.renderRender.rootNode, md);
         vnodeRender(this.renderRender.rootNode.dom, this.renderRender.rootNode);
+        this.artText.get<EventCenter>('$eventCenter').emit('artRender-render')
     }
 
     public attachAllEvent(): void {

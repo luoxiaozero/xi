@@ -9,6 +9,7 @@ import { VersionHistoryExport } from './plugins/versionHistory';
 import { SidebarExport } from './plugins/sidebar';
 import { ArtRenderExport } from './renders/artRender';
 import { TextareaRenderExport } from './renders/textareaRender';
+import { OutlineSidebarExport } from './plugins/outlineSidebar';
 
 export default ArtText;
 
@@ -22,6 +23,7 @@ Core.use(ArtRenderExport);
 /**默认插件 */
 Core.use(ToolbarExport)
 Core.use(SidebarExport)
+Core.use(OutlineSidebarExport)
 Core.use(MessageExport)
 Core.use(VersionHistoryExport)
 Core.use(TextareaRenderExport)

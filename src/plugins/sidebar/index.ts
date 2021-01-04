@@ -27,8 +27,6 @@ export default class Sidebar {
         this.mainDom.setAttribute('class', 'art-sidebar-main');
         this.dom.appendChild(this.mainDom);
 
-        this.add('大纲', document.createElement('span'));
-        this.add('文件', document.createElement('span'));
         this.art.get<Tool>('$tool').add([{ dom: this.dom, place: 'Editor.before' }]);
     }
 
@@ -41,6 +39,8 @@ export default class Sidebar {
         let menuDomChild = document.createElement('span');
         menuDomChild.setAttribute('style', 'flex: 1');
         this.menuDom.appendChild(menuDomChild);
+
+        this.mainDom.appendChild(mainDom);
     }
 
     public openOrClose(): void {
@@ -57,8 +57,9 @@ export let SidebarExport = {
     install: function (Art, options) {
         Core.use(openSidebar);
         options['container'].bind('sidebar', Sidebar, [{'get': 'art'}], true);
-        options['Tool'].addCss('.art-sidebar{width:300px;margin-left: -333px;top: 30px;bottom: 20px;position: fixed;font-size:13.5px;background-color: #fff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 3px;color: #666;} \
-                                .art-sidebar-menu{display: flex;border-bottom: 1px #eee solid;font-weight: 600;padding: 15px 20px 10px;text-align:center;font-size: 14px}.art-sidebar-menu-span{border-bottom: 4px #666 solid;padding: 0 15px 5px;cursor: pointer;}')
+        options['Tool'].addCss('.art-sidebar{width:300px;margin-left: -333px;top: 20px;bottom: 20px;position: fixed;font-size:13.5px;background-color: #fff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 3px;color: #666;} \
+                                .art-sidebar-menu{height: 28px;display: flex;border-bottom: 1px #eee solid;font-weight: 600;padding: 10px 20px 6px;text-align:center;font-size: 14px}.art-sidebar-menu-span{border-bottom: 4px #666 solid;padding: 0 15px 5px;cursor: pointer;}\
+                                .art-sidebar-main{height: calc(100% - 50px);padding: 3px 0 4px}')
     },
     created: (art: Art , options) => art.get<Sidebar>('sidebar')
 }
