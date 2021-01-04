@@ -7,6 +7,8 @@ import { ToolbarExport } from './plugins/toolbar';
 import { MessageExport } from './plugins/message';
 import { VersionHistoryExport } from './plugins/versionHistory';
 import { SidebarExport } from './plugins/sidebar';
+import { ArtRenderExport } from './renders/artRender';
+import { TextareaRenderExport } from './renders/textareaRender';
 
 export default ArtText;
 
@@ -15,12 +17,14 @@ Core.use(ArtTextExport);
 Core.use(ToolExport);
 Core.use(EditorExport);
 Core.use(EventCenterExport);
+Core.use(ArtRenderExport);
 
 /**默认插件 */
 Core.use(ToolbarExport)
 Core.use(SidebarExport)
 Core.use(MessageExport)
 Core.use(VersionHistoryExport)
+Core.use(TextareaRenderExport)
 
 /**用户自定义插件 */
 

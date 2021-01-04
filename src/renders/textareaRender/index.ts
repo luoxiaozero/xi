@@ -1,10 +1,10 @@
 import ArtText from "@/artText";
+import { Art } from "@/core";
+import Editor from "@/editor";
 import EventCenter from "@/eventCenter";
 import Render from "..";
 
 export default class TextareaRender implements Render{
-    static DEFAULT_CSS: string = '.art-editor-md{width:100%;min-height:200px;border:none;outline:none;resize:none;display:none}'
-    static Name = 'TextareaRender';
 
     abbrName: string = 'Text';
     artText: ArtText;
@@ -52,4 +52,14 @@ export default class TextareaRender implements Render{
             this.artText.get<EventCenter>('$eventCenter').detachDOMEvent(id);
         }
     } 
+}
+
+export let TextareaRenderExport = {
+    install: function (Art, options) {
+        options['Tool'].addCss('.art-editor-md{width:100%;min-height:200px;border:none;outline:none;resize:none;display:none}')
+        options['container'].bind('textareaRender', TextareaRender, [{'get': 'art'}], true);
+    },
+    created: function (art: Art, options) {
+        art.get<Editor>('$editor').addRender('textareaRender', art.get('textareaRender'));
+    }
 }

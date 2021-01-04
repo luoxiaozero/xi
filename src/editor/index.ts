@@ -1,18 +1,13 @@
 import { Art } from '@/core';
 import { SwitchRenderButton } from '@/plugins/toolbar/default';
 import Render from '@/renders';
-import Tool from '@/tool';
 import ArtText from '../artText'
-import ArtRender from '../renders/artRender';
-import TextareaRender from '../renders/textareaRender';
 import './index.css'
 
 /**
  * 编辑器
  */
 export default class Editor {
-    static plugins = [ArtRender, TextareaRender]
-    static DEFAULT_CSS = '';
 
     artText: ArtText;
     dom: HTMLDivElement;
@@ -29,25 +24,14 @@ export default class Editor {
 
         this.fileInfo = {};
         this.renders = {};
-
-        for (let R of Editor.plugins) {
-            this.addRender(R);
-        }
-
-        Tool.addCss(Editor.DEFAULT_CSS);
-        Editor.DEFAULT_CSS = '';
-
-        let artRender = this.renders['ArtRender'];
-        this.defaultRender = artRender;
-        this.runRender = artRender;
-
+        
         this.artText.exportAPI('openFile', this.getFile);
     }
 
     public init(): void {
-        for (let key in this.renders) {
-            this.dom.appendChild(this.renders[key].createDom());
-        }
+        if (this.defaultRender)
+            this.runRender = this.defaultRender;
+
         this.runRender.open();
         this.runRender.setMd(this.artText.options.defaultMd);
     }
@@ -55,15 +39,10 @@ export default class Editor {
     /**
      * 添加渲染器
      */
-    public addRender(R: any) {
-        if (R.DEFAULT_CSS != undefined)
-            Editor.DEFAULT_CSS += R.DEFAULT_CSS;
-        
-        let name = R.name;
-        if (R.Name != undefined)
-            name = R.Name;
-        this.renders[name] = new R(this.artText);
-        
+    public addRender(name:string, render: Render) {
+        this.renders[name] = render;
+
+        this.dom.appendChild(render.createDom());
         this.artText.get<SwitchRenderButton>('switchRenderButton').abbrNames.push(this.renders[name].abbrName);
         this.artText.get<SwitchRenderButton>('switchRenderButton').renderNames.push(name);
     }

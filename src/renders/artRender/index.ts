@@ -9,6 +9,8 @@ import './index.css'
 import ArtRenderRender from './artRenderRender';
 import { keyupRender } from './artRenderRender/eventRender';
 import vnodeRender from './artRenderRender/vnodeRender';
+import Editor from '@/editor';
+import { Art } from '@/core';
 
 const win = window;
 /**
@@ -119,4 +121,14 @@ export default class ArtRender implements Render {
         console.log('sdad', this)
         this.renderEvent.detachAllEvent();
     } 
+}
+
+export let ArtRenderExport = {
+    install: function (Art, options) {
+        options['container'].bind('$artRender', ArtRender, [{'get': 'art'}], true);
+    },
+    created: function (art: Art, options) {
+        art.get<Editor>('$editor').addRender('artRender', art.get('$artRender'));
+        art.get<Editor>('$editor').defaultRender = art.get('$artRender');
+    }
 }
