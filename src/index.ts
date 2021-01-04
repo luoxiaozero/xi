@@ -6,6 +6,7 @@ import { EventCenterExport } from '@/eventCenter';
 import { ToolbarExport } from './plugins/toolbar';
 import { MessageExport } from './plugins/message';
 import { VersionHistoryExport } from './plugins/versionHistory';
+import { SidebarExport } from './plugins/sidebar';
 
 export default ArtText;
 
@@ -17,6 +18,7 @@ Core.use(EventCenterExport);
 
 /**默认插件 */
 Core.use(ToolbarExport)
+Core.use(SidebarExport)
 Core.use(MessageExport)
 Core.use(VersionHistoryExport)
 
