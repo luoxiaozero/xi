@@ -1,6 +1,7 @@
 import ArtText from "@/artText";
 import { Art } from "@/core";
 import Editor from "@/editor";
+import EventCenter from "@/eventCenter";
 import Toolbar from ".";
 import Message from "../message";
 
@@ -88,6 +89,17 @@ export class SwitchRenderButton {
         this.spanElement = null;
         this.abbrNames = [];
         this.renderNames = [];
+
+        const _this = this;
+        this.artText.get<EventCenter>('$eventCenter').on('@switchRenderButton-addRender',
+            (abbrNames, renderName) => { 
+                _this.addRender(abbrNames, renderName);
+            })
+    }
+
+    public addRender(abbrNames: string, renderName: string): void{
+        this.abbrNames.push(abbrNames);
+        this.renderNames.push(renderName);
     }
 
     public click(): void {
@@ -99,7 +111,7 @@ export class SwitchRenderButton {
             }
             this.title = this.abbrNames[index];
             this.spanElement.innerHTML = this.abbrNames[index];
-            try{
+            try {
                 this.artText.get<Editor>('$editor').switchRender(this.renderNames[index]);
             } catch (err) {
                 console.error(err);
@@ -111,12 +123,12 @@ export class SwitchRenderButton {
 
 export let switchRenderButtonExport = {
     install: (Art, options) => {
-        options['container'].bind('switchRenderButton', SwitchRenderButton, [{'get': 'art'}], true);
-        
+        options['container'].bind('switchRenderButton', SwitchRenderButton, [{ 'get': 'art' }], true);
+
     },
     created: function (art: Art, options) {
         let switchRenderBotton = art.get<SwitchRenderButton>('switchRenderButton');
-        
+
         if (switchRenderBotton.abbrNames.length > 0)
             switchRenderBotton.title = switchRenderBotton.abbrNames[0];
 
