@@ -5,10 +5,12 @@ export default class EventCenter {
     artText: ArtText;
     listeners: {};
     events: Map<string, { target: HTMLElement, type: string, listener: Function, options: {} }>;
+    waitEvents: Map<string, any[]>;
     domID: number;
     constructor(artText: ArtText) {
         this.artText = artText;
         this.events = new Map();
+        this.waitEvents = new Map();
         this.listeners = {};
         this.domID = 0;
         const eventCenter = this;
@@ -84,6 +86,11 @@ export default class EventCenter {
         } else {
             this.listeners[type] = [handler];
         }
+
+        if (this.waitEvents.has(type)) {
+            this.emit(type, ...this.waitEvents.get(type))
+            this.waitEvents.delete(type);
+        }       
     }
 
     /**添加事件 */
@@ -97,7 +104,7 @@ export default class EventCenter {
     }
 
     /**提交事件 */
-    public emit(type: string, ...data): void{
+    public emit(type: string, ...data): boolean {
         const eventListener = this.listeners[type];
 
         if (eventListener && Array.isArray(eventListener)) {
@@ -107,6 +114,16 @@ export default class EventCenter {
                     this.off(type, listener)
                 }
             })
+            return true;
+        }
+
+        return false;
+    }
+
+    /**提交等待事件 */
+    public waitOnceEmit(type: string, ...data): void{
+        if (!this.emit(type, ...data)) {
+            this.waitEvents.set(type, data);
         }
     }
 
