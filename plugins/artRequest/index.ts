@@ -3,6 +3,12 @@ class ArtHttpRequest {
     xhr: XMLHttpRequest;
     method: string;
     url: string;
+    data: any;
+    constructor(method: string, url: string) {
+        this.xhr = new XMLHttpRequest();
+        this.method = method;
+        this.url = url;
+    }
 
     public then(callback: Function): ArtHttpRequest {
         this.xhr.onreadystatechange = function () {
@@ -11,7 +17,12 @@ class ArtHttpRequest {
             }
         }
         this.xhr.open(this.method, this.url, true);
-        this.xhr.send();
+        if (this.method == 'POST' && this.data != undefined) {
+            this.xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            this.xhr.send(this.data);
+        } else {
+            this.xhr.send();
+        }
         return this;
     }
 }
@@ -23,18 +34,23 @@ export default class ArtRequest {
     }
 
     public get(url: string): ArtHttpRequest {
-        let artHttpRequest = new ArtHttpRequest();
-        artHttpRequest.xhr = new XMLHttpRequest();
-        artHttpRequest.method = 'GET';
-        artHttpRequest.url = this.rootUrl + url;
-        return artHttpRequest;
+        return new ArtHttpRequest('GET', this.rootUrl + url);
     }
 
-    public post(url: string): ArtHttpRequest {
-        let artHttpRequest = new ArtHttpRequest();
-        artHttpRequest.xhr = new XMLHttpRequest();
-        artHttpRequest.method = 'POST';
-        artHttpRequest.url = this.rootUrl + url;
+    public post(url: string, data:any=undefined): ArtHttpRequest {
+        let artHttpRequest = new ArtHttpRequest('POST', this.rootUrl + url);
+        if (data == undefined) {
+            artHttpRequest.data = data;
+        } else {
+            let dataString = '';
+            for (let key in data) {
+                if (dataString != '')
+                    dataString += '&';
+
+                dataString += key;
+                dataString += String(data[key]);
+            }
+        }
         return artHttpRequest;
     }
 }
