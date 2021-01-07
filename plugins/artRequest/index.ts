@@ -18,7 +18,7 @@ class ArtHttpRequest {
         }
         this.xhr.open(this.method, this.url, true);
         if (this.method == 'POST' && this.data != undefined) {
-            this.xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            this.xhr.setRequestHeader("Content-type","application/json");
             this.xhr.send(this.data);
         } else {
             this.xhr.send();
@@ -42,14 +42,7 @@ export default class ArtRequest {
         if (data == undefined) {
             artHttpRequest.data = data;
         } else {
-            let dataString = '';
-            for (let key in data) {
-                if (dataString != '')
-                    dataString += '&';
-
-                dataString += key;
-                dataString += String(data[key]);
-            }
+            artHttpRequest.data = JSON.stringify(data);
         }
         return artHttpRequest;
     }
