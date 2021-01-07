@@ -1,5 +1,6 @@
 import { Art, Core } from "@/core";
 import Editor from "@/editor";
+import EventCenter from "@/eventCenter";
 import Tool from "@/tool";
 import Message from "../message";
 import Toolbar from "../toolbar";
@@ -18,6 +19,7 @@ export let saveMdFile = {
     created: function (art: Art, options) {
         art.get<Toolbar>('toolbar').add({
             title: '保存', click: () => {
+                art.get<EventCenter>('$eventCenter').emit('art-save');
                 let fileInfo = art.get<Editor>('$editor').getFile();
                 let art_articles = JSON.parse(localStorage.art_articles);
                 if (fileInfo['id'] && art_articles.hasOwnProperty(fileInfo['id'])) {
