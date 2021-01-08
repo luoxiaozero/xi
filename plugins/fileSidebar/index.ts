@@ -15,21 +15,21 @@ class FileSidebar {
         this.dom.setAttribute('class', 'art-fileSidebar')
 
         this.art = art;
-        this.file = { path: '/src' , files: [{path: '/src/index.ts', name: 'index.ts', type: 'ts'}], name: 'src', type: ''};
+        this.file = { path: '/src', files: [{ path: '/src/index.ts', name: 'index.ts', type: 'ts' }], name: 'src', type: '' };
 
         this.openFolderDom = document.createElement('div');
         this.openFolderDom.setAttribute('class', 'art-fileSidebar-openFolder')
         this.openFolderDom.innerHTML = '打开文件夹';
         this.openFolderDom.onclick = () => this.openFolder();
         this.dom.appendChild(this.openFolderDom);
-        
+
         this.folderDom = document.createElement('ul');
         this.dom.appendChild(this.folderDom);
     }
 
     private openFolder() {
         const _this = this;
-        this.art.get<ArtRequest>('artRequest').get('/openFolder').then((json: any)=> {
+        this.art.get<ArtRequest>('artRequest').get('/openFolder').then((json: any) => {
             _this.file = json;
             _this.updata();
         })
@@ -48,26 +48,34 @@ class FileSidebar {
 
         let li = document.createElement('li');
         let span = document.createElement('span');
-        span.setAttribute('art-path', file.path)
+        span.setAttribute('art-path', file.path);
+        span.setAttribute('art-fileSidebar-type', file.type);
         span.innerHTML = file.name;
         li.appendChild(span);
 
-        if (file.type == '') {
+        if (file.type == 'folder') {
             let ul = document.createElement('ul');
             if (file.files)
                 for (let f of file.files) 
                     ul.appendChild(this.openFile(f));
-            
             li.appendChild(ul);
         } else {
             li.setAttribute('class', 'art-fileSidebar-file')
-            
-            span.onclick = function() {
-                _this.selectDom.classList.remove('art-fileSidebar-select');
-                _this.selectDom = this as HTMLSpanElement;
-                _this.selectDom.classList.add('art-fileSidebar-select');
-                let path = _this.selectDom.getAttribute('art-path');
-                _this.art.get<ArtRequest>('artRequest').get('/openFileText?path=' + path).then((json: any)=> {
+        }
+
+        span.onclick = function () {
+            _this.selectDom.classList.remove('art-fileSidebar-select');
+            _this.selectDom = this as HTMLSpanElement;
+            _this.selectDom.classList.add('art-fileSidebar-select');
+            let path = _this.selectDom.getAttribute('art-path');
+            let type = _this.selectDom.getAttribute('art-fileSidebar-type');
+            if (type == 'folder') {
+                _this.art.get<ArtRequest>('artRequest').get('/openFolder?path=' + path).then((json: any) => {
+                    (this as HTMLSpanElement).parentElement.parentElement.replaceChild(
+                        _this.openFile(json), (this as HTMLSpanElement).parentElement)
+                })
+            } else {
+                _this.art.get<ArtRequest>('artRequest').get('/openFileText?path=' + path).then((json: any) => {
                     _this.art.get<Editor>('$editor').openFile(json);
                 })
             }
