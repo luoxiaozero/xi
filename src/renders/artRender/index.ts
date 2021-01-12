@@ -10,22 +10,23 @@ import ArtRenderRender from './artRenderRender';
 import { keyupRender } from './artRenderRender/eventRender';
 import vnodeRender from './artRenderRender/vnodeRender';
 import Editor from '@/editor';
-import { Art } from '@/core';
+import { Art, Core } from '@/core';
 import EventCenter from '@/eventCenter';
+import { loadPluginsExport } from './plugins/default';
 
-const win = window;
+
 /**
  * 默认的渲染器
  */
 export default class ArtRender implements Render {
     static plugins = { hljs: null, katex: null, flowchart: null, Raphael: null };
-    static Name: string = "ArtRender";
+    private static artRenders: ArtRender[] = [];
 
-    static setPlugin(key: string, value: any, artRender: ArtRender = null): void {
+    static setPlugin(key: string, value: any): void {
         ArtRender.plugins[key] = value;
-
-        if (artRender && artRender.renderRender.render != undefined)
+        for (let artRender of ArtRender.artRenders) {
             artRender.renderRender.render(null, 'keyup');
+        }
     }
 
 
@@ -48,35 +49,7 @@ export default class ArtRender implements Render {
 
         this.renderEvent = new ArtRenderEvent(this);
         this.renderRender = new ArtRenderRender(this);
-        this.registerPlugin();
-    }
-
-    private registerPlugin(): void {
-        if (this.artText.nameId != 'artText-0' && true)
-            return null;
-
-        if (this.artText.options.code.jsFun) {
-            ArtRender.setPlugin('hljs', this.artText.options.code.jsFun);
-        } else if (this.artText.options.code.js) {
-            Tool.loadScript(this.artText.options.code.js, () => { ArtRender.setPlugin('hljs', win['hljs'], this) });
-        }
-
-        if (this.artText.options.math.jsFun != undefined) {
-            ArtRender.setPlugin('katex', this.artText.options.math.jsFun);
-        } else if (this.artText.options.math.js) {
-            Tool.loadScript(this.artText.options.math.js, () => { ArtRender.setPlugin('katex', win['katex'], this) })
-        }
-
-        if (this.artText.options.math.css) {
-            Tool.loadCss(this.artText.options.math.css)
-        }
-
-        if (this.artText.options.flowchart.jsFun) {
-            ArtRender.setPlugin('flowchart', this.artText.options.flowchart.jsFun);
-        } else if (this.artText.options.flowchart.js) {
-            let fun = () => { Tool.loadScript(this.artText.options.flowchart.js[1], () => { ArtRender.setPlugin('flowchart', win['flowchart'], this) }) };
-            Tool.loadScript(this.artText.options.flowchart.js[0], () => { ArtRender.setPlugin('Raphael', win['Raphael'], null); fun(); })
-        }
+        ArtRender.artRenders.push(this);
     }
 
     public createDom(): HTMLDivElement {
@@ -127,6 +100,7 @@ export default class ArtRender implements Render {
 
 export let ArtRenderExport = {
     install: function (Art, options) {
+        Core.use(loadPluginsExport);
         options['container'].bind('$artRender', ArtRender, [{'get': 'art'}], true);
     },
     created: function (art: Art, options) {
