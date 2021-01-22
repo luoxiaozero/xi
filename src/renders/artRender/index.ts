@@ -13,6 +13,10 @@ import Editor from '@/editor';
 import { Art, Core } from '@/core';
 import EventCenter from '@/eventCenter';
 import { loadPluginsExport } from './plugins/default';
+import Parser from './artRenderRender/parser';
+import HtmlRenderer from './artRenderRender/render/html';
+import VNodeRenderer from './artRenderRender/render/vnode';
+import InteractionParser from './artRenderRender/parser/interaction';
 
 
 /**
@@ -83,6 +87,14 @@ export default class ArtRender implements Render {
     }
 
     public setMd(md: string): void {
+        let parser = new InteractionParser({});
+        let render = new VNodeRenderer({});
+        let doc = parser.parse(md);
+        let mdhtml = render.render(doc, this.dom);
+
+        console.log(doc);
+        console.log(mdhtml);
+        return;
         this.renderRender.vnodeDispose(this.renderRender.rootNode, md);
         vnodeRender(this.renderRender.rootNode.dom, this.renderRender.rootNode);
         this.artText.get<EventCenter>('$eventCenter').emit('artRender-render')
@@ -100,7 +112,7 @@ export default class ArtRender implements Render {
 
 export let ArtRenderExport = {
     install: function (Art, options) {
-        Core.use(loadPluginsExport);
+        //Core.use(loadPluginsExport);
         options['container'].bind('$artRender', ArtRender, [{'get': 'art'}], true);
     },
     created: function (art: Art, options) {
