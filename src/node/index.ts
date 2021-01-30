@@ -52,24 +52,24 @@ export default class VNode{
     private _lastChild: VNode;
     private _prev: any;
     private _next: any;
-    public lastLineChecked: boolean;
+    public _lastLineChecked: boolean;
     private _sourcepos: any;
-    public lastLineBlank: boolean;
-    public open: boolean;
-    public string_content: string;
-    public literal: any;
-    private _listData: {type , tight, start, delimiter};
-    public info: any;
-    public destination: any;
-    public title: any;
-    public isFenced: boolean;
-    private _fenceChar: any;
-    private _fenceLength: number;
-    private _fenceOffset: any;
-    public level: any;
-    public onEnter: any;
-    public onExit: any;
-    htmlBlockType: any;
+    public _lastLineBlank: boolean;
+    public _open: boolean;
+    public _string_content: string;
+    public _literal: any;
+    public _listData: {type , tight, start, delimiter};
+    public _info: any;
+    public _destination: any;
+    public _title: any;
+    public _isFenced: boolean;
+    public _fenceChar: any;
+    public _fenceLength: number;
+    public _fenceOffset: any;
+    public _level: any;
+    public _onEnter: any;
+    public _onExit: any;
+    _htmlBlockType: any;
     attrs: Map<string, string>;
     constructor(nodeType: string, sourcepos=null) {
         this._type = nodeType;
@@ -79,22 +79,22 @@ export default class VNode{
         this._prev = null;
         this._next = null;
         this._sourcepos = sourcepos;
-        this.lastLineBlank = false;
-        this.lastLineChecked = false;
-        this.open = true;
-        this.string_content = null;
-        this.literal = null;
+        this._lastLineBlank = false;
+        this._lastLineChecked = false;
+        this._open = true;
+        this._string_content = null;
+        this._literal = null;
         this._listData = {type: '', tight: '', start: '', delimiter: ''};
-        this.info = null;
-        this.destination = null;
-        this.title = null;
-        this.isFenced = false;
+        this._info = null;
+        this._destination = null;
+        this._title = null;
+        this._isFenced = false;
         this._fenceChar = null;
         this._fenceLength = 0;
         this._fenceOffset = null;
-        this.level = null;
-        this.onEnter = null;
-        this.onExit = null;
+        this._level = null;
+        this._onEnter = null;
+        this._onExit = null;
         this.attrs = new Map();
     }
 
@@ -171,6 +171,7 @@ export default class VNode{
             case "link":
             case "image":
             case "span":
+            case "delete":
             case "custom_inline":
             case "custom_block":
                 return true;

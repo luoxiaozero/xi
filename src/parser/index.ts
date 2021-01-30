@@ -53,21 +53,21 @@ const reLineEnding = /\r\n|\n|\r/;
 
 // Returns true if string contains only space characters.
 // 如果字符串只包含空格字符则返回true。
-var isBlank = function (s: string) {
+function isBlank (s: string) {
     return !reNonSpace.test(s);
-};
+}
 
-var isSpaceOrTab = function (c: number) {
+function isSpaceOrTab (c: number) {
     return c === C_SPACE || c === C_TAB;
-};
+}
 
-var peek = function (ln, pos) {
+function peek (ln: string, pos: number) {
     if (pos < ln.length) {
         return ln.charCodeAt(pos);
     } else {
         return -1;
     }
-};
+}
 
 // DOC PARSER
 // 文档解析器
@@ -79,15 +79,15 @@ var peek = function (ln, pos) {
 // 分成列表和子列表。
 function endsWithBlankLine(block: VNode) {
     while (block) {
-        if (block.lastLineBlank) {
+        if (block._lastLineBlank) {
             return true;
         }
         var t = block.type;
-        if (!block.lastLineChecked && (t === "list" || t === "item")) {
-            block.lastLineChecked = true;
+        if (!block._lastLineChecked && (t === "list" || t === "item")) {
+            block._lastLineChecked = true;
             block = block.lastChild;
         } else {
-            block.lastLineChecked = true;
+            block._lastLineChecked = true;
             break;
         }
     }
@@ -98,7 +98,7 @@ function endsWithBlankLine(block: VNode) {
 // 解析列表标记并返回标记上的数据(键入，
 // start, delimiter, bullet character, padding) or null.
 // 起始、分隔符、子弹字符、填充)或空。
-function parseListMarker(parser, container) {
+function parseListMarker(parser: Parser, container: VNode) {
     var rest = parser.currentLine.slice(parser.nextNonspace);
     var match;
     var nextc;
@@ -349,24 +349,24 @@ const blocks = {
             }
             return 0;
         },
-        finalize: function (parser, block: VNode) {
-            if (block.isFenced) {
+        finalize: function (parser: Parser, block: VNode) {
+            if (block._isFenced) {
                 // fenced
                 // first line becomes info string
-                var content = block.string_content;
+                var content = block._string_content;
                 var newlinePos = content.indexOf("\n");
                 var firstLine = content.slice(0, newlinePos);
                 var rest = content.slice(newlinePos + 1);
-                block.info = unescapeString(firstLine.trim());
-                block.literal = rest;
+                block._info = unescapeString(firstLine.trim());
+                block._literal = rest;
             } else {
                 // indented
-                block.literal = block.string_content.replace(
+                block._literal = block._string_content.replace(
                     /(\n *)+$/,
                     "\n"
                 );
             }
-            block.string_content = null; // allow GC
+            block._string_content = null; // allow GC
         },
         canContain: function () {
             return false;
@@ -374,7 +374,7 @@ const blocks = {
         acceptsLines: true
     },
     html_block: {
-        continue: function (parser, container) {
+        continue: function (parser: Parser, container: VNode) {
             return parser.blank &&
                 (container._htmlBlockType === 6 ||
                     container._htmlBlockType === 7)
@@ -382,8 +382,8 @@ const blocks = {
                 : 0;
         },
         finalize: function (parser, block: VNode) {
-            block.literal = block.string_content.replace(/(\n *)+$/, "");
-            block.string_content = null; // allow GC
+            block._literal = block._string_content.replace(/(\n *)+$/, "");
+            block._string_content = null; // allow GC
         },
         canContain: function () {
             return false;
@@ -400,16 +400,16 @@ const blocks = {
 
             // try parsing the beginning as link reference definitions:
             while (
-                peek(block.string_content, 0) === C_OPEN_BRACKET &&
+                peek(block._string_content, 0) === C_OPEN_BRACKET &&
                 (pos = parser.inlineParser.parseReference(
-                    block.string_content,
+                    block._string_content,
                     parser.refmap
                 ))
             ) {
-                block.string_content = block.string_content.slice(pos);
+                block._string_content = block._string_content.slice(pos);
                 hasReferenceDefs = true;
             }
-            if (hasReferenceDefs && isBlank(block.string_content)) {
+            if (hasReferenceDefs && isBlank(block._string_content)) {
                 block.unlink();
             }
         },
@@ -426,7 +426,7 @@ const blocks = {
 // 2 = matched leaf, no more block starts
 const blockStarts = [
     // block quote
-    function (parser) {
+    function (parser: Parser) {
         if (
             !parser.indented &&
             peek(parser.currentLine, parser.nextNonspace) === C_GREATERTHAN
@@ -446,7 +446,7 @@ const blockStarts = [
     },
 
     // ATX heading
-    function (parser) {
+    function (parser: Parser) {
         var match;
         if (
             !parser.indented &&
@@ -458,9 +458,9 @@ const blockStarts = [
             parser.advanceOffset(match[0].length, false);
             parser.closeUnmatchedBlocks();
             var container: VNode = parser.addChild("heading", parser.nextNonspace);
-            container.level = match[0].trim().length; // number of #s
+            container._level = match[0].trim().length; // number of #s
             // remove trailing ###s:
-            container.string_content = parser.currentLine
+            container._string_content = parser.currentLine
                 .slice(parser.offset)
                 .replace(/^[ \t]*#+[ \t]*$/, "")
                 .replace(/[ \t]+#+[ \t]*$/, "");
@@ -472,7 +472,7 @@ const blockStarts = [
     },
 
     // Fenced code block
-    function (parser) {
+    function (parser: Parser) {
         var match;
         if (
             !parser.indented &&
@@ -496,7 +496,7 @@ const blockStarts = [
     },
 
     // HTML block
-    function (parser, container) {
+    function (parser: Parser, container: VNode) {
         if (
             !parser.indented &&
             peek(parser.currentLine, parser.nextNonspace) === C_LESSTHAN
@@ -523,7 +523,7 @@ const blockStarts = [
     },
 
     // Setext heading
-    function (parser, container: VNode) {
+    function (parser: Parser, container: VNode) {
         var match;
         if (
             !parser.indented &&
@@ -536,20 +536,20 @@ const blockStarts = [
             // resolve reference link definitiosn
             var pos;
             while (
-                peek(container.string_content, 0) === C_OPEN_BRACKET &&
+                peek(container._string_content, 0) === C_OPEN_BRACKET &&
                 (pos = parser.inlineParser.parseReference(
-                    container.string_content,
+                    container._string_content,
                     parser.refmap
                 ))
             ) {
-                container.string_content = container.string_content.slice(
+                container._string_content = container._string_content.slice(
                     pos
                 );
             }
-            if (container.string_content.length > 0) {
+            if (container._string_content.length > 0) {
                 var heading = new VNode("heading", container.sourcepos);
-                heading.level = match[0][0] === "=" ? 1 : 2;
-                heading.string_content = container.string_content;
+                heading._level = match[0][0] === "=" ? 1 : 2;
+                heading._string_content = container._string_content;
                 container.insertAfter(heading);
                 container.unlink();
                 parser.tip = heading;
@@ -567,7 +567,7 @@ const blockStarts = [
     },
 
     // thematic break
-    function (parser) {
+    function (parser: Parser) {
         if (
             !parser.indented &&
             reThematicBreak.test(parser.currentLine.slice(parser.nextNonspace))
@@ -585,7 +585,7 @@ const blockStarts = [
     },
 
     // list item
-    function (parser, container) {
+    function (parser: Parser, container: VNode) {
         var data;
 
         if (
@@ -613,7 +613,7 @@ const blockStarts = [
     },
 
     // indented code block
-    function (parser) {
+    function (parser: Parser) {
         if (
             parser.indented &&
             parser.tip.type !== "paragraph" &&
@@ -699,7 +699,7 @@ class Parser {
         this.indented = this.indent >= CODE_INDENT;
     }
 
-    public advanceOffset(count, columns) {
+    public advanceOffset(count, columns=null) {
         var currentLine = this.currentLine;
         var charsToTab, charsToAdvance;
         var c;
@@ -742,25 +742,25 @@ class Parser {
             this.offset += 1; // skip over tab
             // add space characters:
             var charsToTab = 4 - (this.column % 4);
-            this.tip.string_content += " ".repeat(charsToTab);
+            this.tip._string_content += " ".repeat(charsToTab);
         }
-        this.tip.string_content += this.currentLine.slice(this.offset) + "\n";
+        this.tip._string_content += this.currentLine.slice(this.offset) + "\n";
     }
 
     // Add block of type tag as a child of the tip.  If the tip can't
     // accept children, close and finalize it and try its parent,
     // and so on til we find a block that can accept children.
-    public addChild(tag, offset) {
+    public addChild(tag: string, offset: number): VNode {
         while (!this.blocks[this.tip.type].canContain(tag)) {
             this.finalize(this.tip, this.lineNumber - 1);
         }
 
-        var column_number = offset + 1; // offset 0 = column 1
+        let column_number: number = offset + 1; // offset 0 = column 1
         var newBlock = new VNode(tag, [
             [this.lineNumber, column_number],
             [0, 0]
         ]);
-        newBlock.string_content = "";
+        newBlock._string_content = "";
         this.tip.appendChild(newBlock);
         this.tip = newBlock;
         return newBlock;
@@ -799,7 +799,7 @@ class Parser {
         // Set all_matched to false if not all containers match.
         // 如果不是所有容器都匹配，则将all_matched设置为false。
         let lastChild: VNode;
-        while ((lastChild = container.lastChild) && lastChild.open) {
+        while ((lastChild = container.lastChild) && lastChild._open) {
             container = lastChild;
 
             this.findNextNonspace();
@@ -877,7 +877,7 @@ class Parser {
             // finalize any blocks not matched
             this.closeUnmatchedBlocks();
             if (this.blank && container.lastChild) {
-                container.lastChild.lastLineBlank = true;
+                container.lastChild._lastLineBlank = true;
             }
 
             t = container.type;
@@ -890,7 +890,7 @@ class Parser {
                 this.blank &&
                 !(
                     t === "block_quote" ||
-                    (t === "code_block" && container.isFenced) ||
+                    (t === "code_block" && container._isFenced) ||
                     (t === "item" &&
                         !container.firstChild &&
                         container.sourcepos[0][0] === this.lineNumber)
@@ -899,7 +899,7 @@ class Parser {
             // propagate lastLineBlank up through parents:
             var cont = container;
             while (cont) {
-                cont.lastLineBlank = lastLineBlank;
+                cont._lastLineBlank = lastLineBlank;
                 cont = cont.parent;
             }
 
@@ -908,9 +908,9 @@ class Parser {
                 // if HtmlBlock, check for end condition
                 if (
                     t === "html_block" &&
-                    container.htmlBlockType >= 1 &&
-                    container.htmlBlockType <= 5 &&
-                    reHtmlBlockClose[container.htmlBlockType].test(
+                    container._htmlBlockType >= 1 &&
+                    container._htmlBlockType <= 5 &&
+                    reHtmlBlockClose[container._htmlBlockType].test(
                         this.currentLine.slice(this.offset)
                     )
                 ) {
@@ -939,7 +939,7 @@ class Parser {
     // 关闭块的父块。
     public finalize(block: VNode, lineNumber: number): void {
         var above = block.parent;
-        block.open = false;
+        block._open = false;
         block.sourcepos[1] = [lineNumber, this.lastLineLength];
 
         this.blocks[block.type].finalize(this, block);

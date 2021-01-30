@@ -10,6 +10,9 @@ import { SidebarExport } from './plugins/sidebar';
 import { ArtRenderExport } from './renders/artRender';
 import { TextareaRenderExport } from './renders/textareaRender';
 import { OutlineSidebarExport } from './plugins/outlineSidebar';
+import { FileSidebarExport } from '../plugins/fileSidebar';
+import { ArtRequestExport } from '../plugins/artRequest';
+import { ArtLocalExport } from '../plugins/artLocal';
 
 export default ArtText;
 
@@ -29,4 +32,6 @@ Core.use(VersionHistoryExport)
 Core.use(TextareaRenderExport)
 
 /**用户自定义插件 */
-
+Core.use(FileSidebarExport)
+Core.use(ArtRequestExport)
+Core.use(ArtLocalExport)

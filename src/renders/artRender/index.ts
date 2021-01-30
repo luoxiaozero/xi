@@ -13,10 +13,10 @@ import Editor from '@/editor';
 import { Art, Core } from '@/core';
 import EventCenter from '@/eventCenter';
 import { loadPluginsExport } from './plugins/default';
-import Parser from './artRenderRender/parser';
-import HtmlRenderer from './artRenderRender/render/html';
-import VNodeRenderer from './artRenderRender/render/vnode';
-import InteractionParser from './artRenderRender/parser/interaction';
+import Parser from '../../parser';
+import HtmlRenderer from './render/html';
+import VNodeRenderer from './render/vnode';
+import InteractionParser from './interaction';
 
 
 /**

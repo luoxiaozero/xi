@@ -39,6 +39,12 @@ const C_COLON = 58;
 const C_SINGLEQUOTE = 39;
 /**双引号 " */
 const C_DOUBLEQUOTE = 34;
+/**等号 */
+const C_EQUAL = 61;
+/**波浪号 ~ */
+const C_WAVES = 126;
+
+
 
 // Some regexps used in inline parser:
 
@@ -48,7 +54,7 @@ var ESCAPED_CHAR = "\\\\" + ESCAPABLE;
 var ENTITY = common.ENTITY;
 var reHtmlTag = common.reHtmlTag;
 
-var rePunctuation = new RegExp(
+const rePunctuation = new RegExp(
     /[!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u0AF0\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166D\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E42\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]|\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC9\uDDCD\uDDDB\uDDDD-\uDDDF\uDE38-\uDE3D\uDEA9]|\uD805[\uDCC6\uDDC1-\uDDD7\uDE41-\uDE43\uDF3C-\uDF3E]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD82F\uDC9F|\uD836[\uDE87-\uDE8B]/
 );
 
@@ -84,11 +90,11 @@ var reEmailAutolink = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-
 
 var reAutolink = /^<[A-Za-z][A-Za-z0-9.+-]{1,31}:[^<>\x00-\x20]*>/i;
 
-var reSpnl = /^ *(?:\n *)?/;
+const reSpnl = /^ *(?:\n *)?/;
 
 var reWhitespaceChar = /^[ \t\n\x0b\x0c\x0d]/;
 
-var reUnicodeWhitespaceChar = /^\s/;
+const reUnicodeWhitespaceChar = /^\s/;
 
 var reFinalSpace = / *$/;
 
@@ -99,11 +105,11 @@ var reSpaceAtEndOfLine = /^ *(?:\n|$)/;
 var reLinkLabel = /^\[(?:[^\\\[\]]|\\.){0,1000}\]/;
 
 // Matches a string of non-special characters.
-var reMain = /^[^\n`\[\]\\!<&*_'"]+/m;
+const reMain = /^[^\n`\[\]\\!<&*_'"~]+/m;
 
 var text = function (s) {
     var node = new VNode("text");
-    node.literal = s;
+    node._literal = s;
     return node;
 };
 
@@ -129,8 +135,8 @@ var removeDelimitersBetween = function (bottom, top) {
 
 type Res = {
     numdelims: number;
-    can_open: any;
-    can_close: any;
+    can_open: boolean;
+    can_close: boolean;
 }
 
 type Delimiters = {
@@ -140,27 +146,26 @@ type Delimiters = {
     node: VNode,
     previous: Delimiters,
     next: Delimiters,
-    can_open: Res,
-    can_close: Res
+    can_open: boolean,
+    can_close: boolean
 }
 
 // The InlineParser object.
 export default class InlineParser {
 
     subject: string;
-    delimiters: Delimiters;
+    delimiters: Delimiters; // 分隔符
     brackets: any;
     pos: number;
     refmap: {};
     options: { smart };
     constructor(options = { smart: '' }) {
         this.subject = '';
-        this.delimiters = null; // used by handleDelim method
+        this.delimiters = null; // used by handleDelim method # 用 handleDelim 方法
         this.brackets = null;
         this.pos = 0;
         this.refmap = {};
         this.options = options
-        //parse: parseInlines
     }
 
 
@@ -169,11 +174,17 @@ export default class InlineParser {
     // These are methods of an InlineParser object, defined below.
     // An InlineParser keeps track of a subject (a string to be
     // parsed) and a position in that subject.
+    //这些是InlineParser对象的方法，在下面定义。
+    //一个InlineParser跟踪一个主题(一个要被
+    // parse)和在该主题中的一个位置。
+
 
     // If re matches at current position in the subject, advance
+    // 如果re在主题的当前位置匹配，则前进
     // position in subject and return the match; otherwise return null.
-    public match(re) {
-        var m = re.exec(this.subject.slice(this.pos));
+    // 定位主题并返回匹配;否则返回null。
+    private match(re: RegExp): string {
+        let m = re.exec(this.subject.slice(this.pos));
         if (m === null) {
             return null;
         } else {
@@ -186,7 +197,7 @@ export default class InlineParser {
     // 返回当前主题位置的字符的代码，或-1
     // there are no more characters.
     // 没有更多的字符。
-    public peek() {
+    public peek(): number {
         if (this.pos < this.subject.length) {
             return this.subject.charCodeAt(this.pos);
         } else {
@@ -195,6 +206,7 @@ export default class InlineParser {
     }
 
     // Parse zero or more space characters, including at most one newline
+    // 解析0个或多个空格字符，最多包含一个换行符
     public spnl() {
         this.match(reSpnl);
         return true;
@@ -227,9 +239,9 @@ export default class InlineParser {
                     contents[0] == " " &&
                     contents[contents.length - 1] == " "
                 ) {
-                    node.literal = contents.slice(1, contents.length - 1);
+                    node._literal = contents.slice(1, contents.length - 1);
                 } else {
-                    node.literal = contents;
+                    node._literal = contents;
                 }
                 block.appendChild(node);
                 return true;
@@ -295,7 +307,7 @@ export default class InlineParser {
             return false;
         } else {
             var node = new VNode("html_inline");
-            node.literal = m;
+            node._literal = m;
             block.appendChild(node);
             return true;
         }
@@ -305,17 +317,20 @@ export default class InlineParser {
     // Scan a sequence of characters with code cc, and return information about
     // 用代码cc扫描字符序列，并返回关于的信息
     // the number of delimiters and whether they are positioned such that
+    // 分隔符的数目以及它们是否被这样定位
     // they can open and/or close emphasis or strong emphasis.  A utility
+    // 它们可以开启和/或关闭强调或强烈强调。一个实用程序
     // function for strong/emph parsing.
+    // 用于 strong/emph 解析的函数。
     public scanDelims(cc: number) {
-        let numdelims = 0;
+        let numdelims: number = 0;
         var char_before, char_after, cc_after;
         var startpos = this.pos;
-        var left_flanking, right_flanking, can_open, can_close;
-        var after_is_whitespace,
-            after_is_punctuation,
-            before_is_whitespace,
-            before_is_punctuation;
+        var left_flanking, right_flanking, can_open: boolean, can_close: boolean;
+        let after_is_whitespace: boolean,
+            after_is_punctuation: boolean,
+            before_is_whitespace: boolean,
+            before_is_punctuation: boolean;
 
         if (cc === C_SINGLEQUOTE || cc === C_DOUBLEQUOTE) {
             numdelims++;
@@ -368,14 +383,15 @@ export default class InlineParser {
     }
 
     // Handle a delimiter marker for emphasis or a quote.
+    // 处理用于强调或引号的分隔符标记。
     public handleDelim(cc: number, block: VNode) {
-        var res = this.scanDelims(cc);
+        let res: Res = this.scanDelims(cc);
         if (!res) {
             return false;
         }
-        var numdelims = res.numdelims;
-        var startpos = this.pos;
-        var contents;
+        let numdelims = res.numdelims;
+        let startpos = this.pos;
+        let contents: string;
 
         this.pos += numdelims;
         if (cc === C_SINGLEQUOTE) {
@@ -385,6 +401,12 @@ export default class InlineParser {
         } else {
             contents = this.subject.slice(startpos, this.pos);
         }
+
+        if (contents == String.fromCharCode(C_WAVES)) {
+            this.pos -= numdelims;
+            return false;
+        }
+            
         console.log(contents);
         var node = text(contents);
         block.appendChild(node);
@@ -394,6 +416,7 @@ export default class InlineParser {
             (res.can_open || res.can_close) &&
             (this.options.smart || (cc !== C_SINGLEQUOTE && cc !== C_DOUBLEQUOTE))
         ) {
+            console.log(node);
             this.delimiters = {
                 cc: cc,
                 numdelims: numdelims,
@@ -608,8 +631,8 @@ export default class InlineParser {
 
         if (matched) {
             var node = new VNode(is_image ? "image" : "link");
-            node.destination = dest;
-            node.title = title || "";
+            node._destination = dest;
+            node._title = title || "";
 
             var tmp, next;
             tmp = opener.node._next;
@@ -731,10 +754,10 @@ export default class InlineParser {
         if (
             lastc &&
             lastc.type === "text" &&
-            lastc.literal[lastc.literal.length - 1] === " "
+            lastc._literal[lastc._literal.length - 1] === " "
         ) {
-            var hardbreak = lastc.literal[lastc.literal.length - 2] === " ";
-            lastc.literal = lastc.literal.replace(reFinalSpace, "");
+            var hardbreak = lastc._literal[lastc._literal.length - 2] === " ";
+            lastc._literal = lastc._literal.replace(reFinalSpace, "");
             block.appendChild(new VNode(hardbreak ? "linebreak" : "softbreak"));
         } else {
             block.appendChild(new VNode("softbreak"));
@@ -845,6 +868,7 @@ export default class InlineParser {
             case C_BACKTICK:
                 res = this.parseBackticks(block);
                 break;
+            case C_WAVES:
             case C_ASTERISK:
             case C_UNDERSCORE:
                 res = this.handleDelim(c, block);
@@ -901,6 +925,7 @@ export default class InlineParser {
         console.log(closer)
         while (closer !== null && closer.previous !== stack_bottom) {
             closer = closer.previous;
+            console.log("aaa@: ", closer.cc)
         }
         console.log(closer)
         // move forward, looking for closers, and handling each
@@ -940,22 +965,78 @@ export default class InlineParser {
                         opener_inl = opener.node;
                         closer_inl = closer.node;
                         
-                        let art_mark = opener_inl.literal; 
+                        let art_mark = opener_inl._literal; 
                         // remove used delimiters from stack elts and inlines
                         opener.numdelims -= use_delims;
                         closer.numdelims -= use_delims;
-                        opener_inl.literal = opener_inl.literal.slice(
+                        opener_inl._literal = opener_inl._literal.slice(
                             0,
-                            opener_inl.literal.length - use_delims
+                            opener_inl._literal.length - use_delims
                         );
-                        closer_inl.literal = closer_inl.literal.slice(
+                        closer_inl._literal = closer_inl._literal.slice(
                             0,
-                            closer_inl.literal.length - use_delims
+                            closer_inl._literal.length - use_delims
                         );
 
                         // build contents for new emph element
                         var emph = new VNode(use_delims === 1 ? "emph" : "strong")
-                        emph.attrs.set("art-mark", art_mark)
+                        emph.attrs.set("art-marker", art_mark)
+                        tmp = opener_inl.next;
+                        console.log(tmp);
+                        while (tmp && tmp !== closer_inl) {
+                            next = tmp._next;
+                            tmp.unlink();
+                            emph.appendChild(tmp);
+
+                            tmp = next;
+                        }
+
+                        opener_inl.insertAfter(emph);
+
+                        // remove elts between opener and closer in delimiters stack
+                        removeDelimitersBetween(opener, closer);
+
+                        // if opener has 0 delims, remove it and the inline
+                        if (opener.numdelims === 0) {
+                            opener_inl.unlink();
+                            this.removeDelimiter(opener);
+                        }
+
+                        if (closer.numdelims === 0) {
+                            closer_inl.unlink();
+                            tempstack = closer.next;
+                            this.removeDelimiter(closer);
+                            closer = tempstack;
+                        }
+                    }
+                } else if(closercc === C_WAVES) {
+                    if (!opener_found) {
+                        closer = closer.next;
+                    } else {
+                        // calculate actual number of delimiters used from closer
+                        use_delims =
+                            closer.numdelims >= 2 && opener.numdelims >= 2 ? 2 : 1;
+
+                        opener_inl = opener.node;
+                        closer_inl = closer.node;
+                        console.log(opener_inl, closer_inl);
+                        
+                        let art_mark = opener_inl._literal; 
+                        // remove used delimiters from stack elts and inlines
+                        opener.numdelims -= use_delims;
+                        closer.numdelims -= use_delims;
+                        opener_inl._literal = opener_inl._literal.slice(
+                            0,
+                            opener_inl._literal.length - use_delims
+                        );
+                        closer_inl._literal = closer_inl._literal.slice(
+                            0,
+                            closer_inl._literal.length - use_delims
+                        );
+
+                        // build contents for new emph element
+                        var emph = new VNode(use_delims === 1 ? "sub" : "delete")
+                        emph.attrs.set("art-marker", art_mark)
                         tmp = opener_inl.next;
                         console.log(tmp);
                         while (tmp && tmp !== closer_inl) {
@@ -985,13 +1066,13 @@ export default class InlineParser {
                         }
                     }
                 } else if (closercc === C_SINGLEQUOTE) {
-                    closer.node.literal = "\u2019";
+                    closer.node._literal = "\u2019";
                     if (opener_found) {
                         opener.node._literal = "\u2018";
                     }
                     closer = closer.next;
                 } else if (closercc === C_DOUBLEQUOTE) {
-                    closer.node.literal = "\u201D";
+                    closer.node._literal = "\u201D";
                     if (opener_found) {
                         opener.node.literal = "\u201C";
                     }
@@ -1034,13 +1115,13 @@ export default class InlineParser {
     // using refmap to resolve references.
     // 使用refmap来解析引用。
     public parseInlines(block: VNode) {
-        console.log(block.string_content);
-        this.subject = block.string_content.trim(); //  trim()方法用于删除字符串的头尾空白符，空白符包括：空格、制表符 tab、换行符等其他空白符等。
+        console.log(block._string_content);
+        this.subject = block._string_content.trim(); //  trim()方法用于删除字符串的头尾空白符，空白符包括：空格、制表符 tab、换行符等其他空白符等。
         this.pos = 0;
         this.delimiters = null;
         this.brackets = null;
         while (this.parseInline(block));
-        block.string_content = null; // allow raw string to be garbage collected # 允许原始字符串被垃圾收集
+        block._string_content = null; // allow raw string to be garbage collected # 允许原始字符串被垃圾收集
         this.processEmphasis(null);
     }
 

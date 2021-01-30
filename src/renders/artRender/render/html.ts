@@ -1,6 +1,6 @@
 
-import { escapeXml } from "../parser/common";
-import VNode  from "../node";
+import { escapeXml } from "../../../parser/common";
+import VNode  from "../../../node";
 import Renderer from "./renderer";
 
 var reUnsafeProtocol = /^javascript:|vbscript:|file:|data:/i;
@@ -28,7 +28,7 @@ export default class HtmlRenderer extends Renderer {
     }
 /* Node methods */
     public text(node: VNode) {
-        this.out(node.literal);
+        this.out(node._literal);
     }
 
     public html_inline(node) {

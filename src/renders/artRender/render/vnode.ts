@@ -1,4 +1,5 @@
-import VNode from "../node";
+import { initCodeTool } from "../tool";
+import VNode from "../../../node";
 
 export default class VNodeRenderer {
     options: any;
@@ -29,7 +30,7 @@ export default class VNodeRenderer {
     }
 
     public text(node: VNode) {
-        let dom = new Text(node.literal);
+        let dom = new Text(node._literal);
         this.currentDom.appendChild(dom);
     }
 
@@ -47,10 +48,22 @@ export default class VNodeRenderer {
         if (entering) {
             let dom = document.createElement("a");
             this.attrs(node, dom);
-            dom.href = node.destination
+            dom.href = node._destination
 
-            if (node.title)
-                dom.title = node.title;
+            if (node._title)
+                dom.title = node._title;
+
+            this.currentDom.appendChild(dom);
+            this.currentDom = dom;
+        } else {
+            this.currentDom = this.currentDom.parentElement;
+        }
+    }
+
+    public delete(node: VNode, entering: boolean) {
+        if (entering) {
+            let dom = document.createElement("del");
+            this.attrs(node, dom);
 
             this.currentDom.appendChild(dom);
             this.currentDom = dom;
@@ -75,8 +88,8 @@ export default class VNodeRenderer {
         if (entering) {
             let dom = document.createElement("img");
             this.attrs(node, dom);
-            dom.src = node.destination;
-            if (node.title)
+            dom.src = node._destination;
+            if (node._title)
                 dom.title = dom.title;
 
             this.currentDom.appendChild(dom);
@@ -124,7 +137,7 @@ export default class VNodeRenderer {
 
     public heading(node: VNode, entering: boolean) {
         if (entering) {
-            let dom = document.createElement("h" + node.level);
+            let dom = document.createElement("h" + node._level);
             this.attrs(node, dom);
 
             this.currentDom.appendChild(dom);
@@ -138,17 +151,26 @@ export default class VNodeRenderer {
         let dom = document.createElement("code");
         this.attrs(node, dom);
 
-        dom.innerHTML = node.literal;
+        dom.innerHTML = node._literal;
       
         this.currentDom.appendChild(dom);
     }
 
     public code_block(node: VNode) {
-        var info_words = node.info ? node.info.split(/\s+/) : []
-            ;
+        var info_words = node._info ? node._info.split(/\s+/) : [];
+            
+    
+        let tool = document.createElement("div");
+        initCodeTool(tool);
+        this.currentDom.appendChild(tool);
+
         let pre = document.createElement("pre");
         let code = document.createElement("code");
-        code.innerHTML = node.literal;
+
+        if (info_words.length > 0 && info_words[0].length > 0) {
+            code.setAttribute("class", "language-" + info_words[0]);
+        }
+        code.innerHTML = node._literal;
 
         pre.appendChild(code);
         this.currentDom.appendChild(pre);

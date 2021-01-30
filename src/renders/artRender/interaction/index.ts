@@ -1,5 +1,5 @@
-import Parser from ".";
-import VNode from "../node";
+import Parser from "../../../parser";
+import VNode from "../../../node";
 
 export default class InteractionParser {
     private parser: Parser;
@@ -13,7 +13,7 @@ export default class InteractionParser {
             let span = new VNode("span");
             span.attrs.set("class", "art-hide");
             let text = new VNode("text");
-            text.literal = "#".repeat(node.level) + " ";
+            text._literal = "#".repeat(node._level) + " ";
             span.appendChild(text);
             node.firstChild.insertBefore(span);
 
@@ -31,7 +31,7 @@ export default class InteractionParser {
             let span = new VNode("span");
             span.attrs.set("class", "art-hide");
             let text = new VNode("text");
-            text.literal = '[';
+            text._literal = '[';
             span.appendChild(text);
             node.insertBefore(span);
 
@@ -40,7 +40,7 @@ export default class InteractionParser {
             span = new VNode("span");
             span.attrs.set("class", "art-hide");
             text = new VNode("text");
-            text.literal = '](' + node.destination + ')';
+            text._literal = '](' + node._destination + ')';
             span.appendChild(text);
             node.insertAfter(span);
         }
@@ -51,7 +51,7 @@ export default class InteractionParser {
             let span = new VNode("span");
             span.attrs.set("class", "art-hide");
             let text = new VNode("text");
-            text.literal = '`';
+            text._literal = '`';
             span.appendChild(text);
             node.insertBefore(span);
 
@@ -60,13 +60,15 @@ export default class InteractionParser {
             span = new VNode("span");
             span.attrs.set("class", "art-hide");
             text = new VNode("text");
-            text.literal = '`';
+            text._literal = '`';
             span.appendChild(text);
             node.insertAfter(span);
         }
     }
 
     public code_block(node: VNode, entering: boolean) {
+        console.log("---------------------------")
+        console.log(node, node._info)
         if (entering) {
             
         }
@@ -75,12 +77,12 @@ export default class InteractionParser {
 
     public emph(node: VNode, entering: boolean) {
         if (entering) {
-            let art_mark = node.firstChild.type === 'strong' ? node.firstChild.attrs.get('art-mark') : node.attrs.get('art-mark');
+            let art_mark = node.firstChild.type === 'strong' ? node.firstChild.attrs.get('art-marker') : node.attrs.get('art-marker');
 
             let span = new VNode("span");
             span.attrs.set("class", "art-hide");
             let text = new VNode("text");
-            text.literal = art_mark;
+            text._literal = art_mark;
             span.appendChild(text);
             node.insertBefore(span);
 
@@ -89,7 +91,7 @@ export default class InteractionParser {
             span = new VNode("span");
             span.attrs.set("class", "art-hide");
             text = new VNode("text");
-            text.literal = art_mark;
+            text._literal = art_mark;
             span.appendChild(text);
             node.insertAfter(span);
         }
@@ -100,7 +102,7 @@ export default class InteractionParser {
             let span = new VNode("span");
             span.attrs.set("class", "art-hide");
             let text = new VNode("text");
-            text.literal = node.attrs.get('art-mark');
+            text._literal = node.attrs.get('art-marker');
             span.appendChild(text);
             node.insertBefore(span);
 
@@ -109,7 +111,27 @@ export default class InteractionParser {
             span = new VNode("span");
             span.attrs.set("class", "art-hide");
             text = new VNode("text");
-            text.literal = node.attrs.get('art-mark');
+            text._literal = node.attrs.get('art-marker');
+            span.appendChild(text);
+            node.insertAfter(span);
+        }
+    }
+
+    public delete(node, entering) {
+        if (entering) {
+            let span = new VNode("span");
+            span.attrs.set("class", "art-hide");
+            let text = new VNode("text");
+            text._literal = node.attrs.get('art-marker');
+            span.appendChild(text);
+            node.insertBefore(span);
+
+            node.attrs.set("class", "art-text-double");
+
+            span = new VNode("span");
+            span.attrs.set("class", "art-hide");
+            text = new VNode("text");
+            text._literal = node.attrs.get('art-marker');
             span.appendChild(text);
             node.insertAfter(span);
         }

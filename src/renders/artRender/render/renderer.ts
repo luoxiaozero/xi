@@ -1,4 +1,4 @@
-import VNode from "../node";
+import VNode from "../../../node";
 
 export default class Renderer {
     buffer: any;
