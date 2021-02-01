@@ -16,7 +16,7 @@ import { loadPluginsExport } from './plugins/default';
 import Parser from '../../parser';
 import HtmlRenderer from './render/html';
 import VNodeRenderer from './render/vnode';
-import InteractionParser from './interaction/InteractionParser';
+import InteractionParser from './interaction/interactionParser';
 import VNode from '@/node';
 
 

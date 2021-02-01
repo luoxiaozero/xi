@@ -153,7 +153,7 @@ export default class Cursor {
             }
             return false;
         }
-        tools = this.mountDom.getElementsByClassName('art-codeTool');
+        tools = this.mountDom.getElementsByClassName('art-codeBlockTool');
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
         }
@@ -172,7 +172,7 @@ export default class Cursor {
         }
 
         if (alineDom.nodeName == "PRE") {
-            if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeTool")) {
+            if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeBlockTool")) {
                 (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
             } 
             if (ArtRender.plugins.flowchart && Tool.hasClass(alineDom as HTMLElement, "art-pre-flow")) {

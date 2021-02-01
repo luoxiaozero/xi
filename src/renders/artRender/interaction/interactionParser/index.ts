@@ -1,5 +1,5 @@
-import Parser from "../../../parser";
-import VNode from "../../../node";
+import Parser from "@/parser";
+import VNode from "@/node";
 
 export default class InteractionParser {
     private parser: Parser;
@@ -67,10 +67,10 @@ export default class InteractionParser {
     }
 
     public code_block(node: VNode, entering: boolean) {
-        console.log("---------------------------")
-        console.log(node, node._info)
         if (entering) {
-            
+            let art_tool = new VNode("art_tool");
+            art_tool.attrs.set("--tool", "code_block");
+            node.insertBefore(art_tool);
         }
     }
 

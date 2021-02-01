@@ -1,5 +1,6 @@
 import { initCodeTool } from "../tool";
 import VNode from "../../../node";
+import createCodeBlockTool from "../tool/codeBlockTool";
 
 export default class VNodeRenderer {
     options: any;
@@ -161,13 +162,8 @@ export default class VNodeRenderer {
     }
 
     public code_block(node: VNode) {
-        var info_words = node._info ? node._info.split(/\s+/) : [];
+        let info_words = node._info ? node._info.split(/\s+/) : [];
             
-    
-        let tool = document.createElement("div");
-        initCodeTool(tool);
-        this.currentDom.appendChild(tool);
-
         let pre = document.createElement("pre");
         let code = document.createElement("code");
 
@@ -220,6 +216,18 @@ export default class VNodeRenderer {
             this.currentDom = dom;
         } else {
             this.currentDom = this.currentDom.parentElement;
+        }
+    }
+
+    private art_tool(node: VNode) {
+        let tool = node.attrs.get('--tool');
+        if (tool === "code_block") {
+            console.log(this)
+            let info_words = node.next._info ? node.next._info.split(/\s+/) : [];
+            if (info_words.length > 0 && info_words[0].length > 0) 
+                createCodeBlockTool(this.currentDom, info_words[0]);
+            else 
+                createCodeBlockTool(this.currentDom);
         }
     }
 
