@@ -572,8 +572,9 @@ const blockStarts = [
             !parser.indented &&
             reThematicBreak.test(parser.currentLine.slice(parser.nextNonspace))
         ) {
+            let art_marker = parser.currentLine.slice(parser.nextNonspace);
             parser.closeUnmatchedBlocks();
-            parser.addChild("thematic_break", parser.nextNonspace);
+            parser.addChild("thematic_break", parser.nextNonspace).attrs.set("art-marker", art_marker);
             parser.advanceOffset(
                 parser.currentLine.length - parser.offset,
                 false

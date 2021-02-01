@@ -1,4 +1,6 @@
-class NodeWalker{
+import { mdToNode } from "@/renders/artRender/artRenderRender/grammer";
+
+class NodeWalker {
     current: VNode;
     root: any;
     entering: boolean;
@@ -11,13 +13,13 @@ class NodeWalker{
     public next() {
         var cur = this.current;
         var entering = this.entering;
-    
+
         if (cur === null) {
             return null;
         }
-    
+
         var container = VNode.isContainer(cur);
-    
+
         if (entering && container) {
             if (cur.firstChild) {
                 this.current = cur.firstChild;
@@ -35,7 +37,7 @@ class NodeWalker{
             this.current = cur.next;
             this.entering = true;
         }
-    
+
         return { entering: entering, node: cur };
     }
 
@@ -45,20 +47,20 @@ class NodeWalker{
     };
 }
 
-export default class VNode{
+export default class VNode {
     private _type: string;
     private _parent: VNode;
     private _firstChild: VNode;
     private _lastChild: VNode;
-    private _prev: any;
-    private _next: any;
+    private _prev: VNode;
+    private _next: VNode;
     public _lastLineChecked: boolean;
     private _sourcepos: any;
     public _lastLineBlank: boolean;
     public _open: boolean;
     public _string_content: string;
     public _literal: any;
-    public _listData: {type , tight, start, delimiter};
+    public _listData: { type, tight, start, delimiter };
     public _info: any;
     public _destination: any;
     public _title: any;
@@ -71,7 +73,7 @@ export default class VNode{
     public _onExit: any;
     _htmlBlockType: any;
     attrs: Map<string, string>;
-    constructor(nodeType: string, sourcepos=null) {
+    constructor(nodeType: string, sourcepos = null) {
         this._type = nodeType;
         this._parent = null;
         this._firstChild = null;
@@ -84,7 +86,7 @@ export default class VNode{
         this._open = true;
         this._string_content = null;
         this._literal = null;
-        this._listData = {type: '', tight: '', start: '', delimiter: ''};
+        this._listData = { type: '', tight: '', start: '', delimiter: '' };
         this._info = null;
         this._destination = null;
         this._title = null;
@@ -110,7 +112,7 @@ export default class VNode{
         return this._lastChild;
     }
 
-    public get next() {
+    public get next(): VNode {
         return this._next;
     }
 
@@ -156,7 +158,7 @@ export default class VNode{
     public set listDelimiter(delim) {
         this._listData.delimiter = delim;
     }
-    
+
 
     public static isContainer(node: VNode) {
         switch (node._type) {
@@ -254,8 +256,35 @@ export default class VNode{
         return new NodeWalker(this);
     }
 
-    public getMd(): string {
-        return '';
+    public getMd(model: string = 'editor'): string {
+        let md = "", node: VNode = this._firstChild;
+
+        if (this._type === "text")
+            return this._literal;
+        else if (this._type === "thematic_break") {
+            md += this.attrs.get("art-marker");
+        } else if (this._type === "heading") {
+            while (node) {
+                md += node.getMd();
+                node = node._next;
+            }
+        }
+
+        return md;
+    }
+
+    public getText(): string {
+        if (this.attrs.has("class") && /art\-meta/.test(this.attrs.get("class")))
+            return "";
+        else if (this._type === "text")
+            return this._literal;
+
+        let md = "", node: VNode = this._firstChild;
+        while (node) {
+            md += node.getText();
+            node = node._next;
+        }
+        return md;
     }
 }
 

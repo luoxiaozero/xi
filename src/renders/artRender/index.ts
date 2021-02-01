@@ -16,7 +16,8 @@ import { loadPluginsExport } from './plugins/default';
 import Parser from '../../parser';
 import HtmlRenderer from './render/html';
 import VNodeRenderer from './render/vnode';
-import InteractionParser from './interaction';
+import InteractionParser from './interaction/InteractionParser';
+import VNode from '@/node';
 
 
 /**
@@ -43,6 +44,10 @@ export default class ArtRender implements Render {
     floatAuxiliaryTool: FloatAuxiliaryTool;
     renderEvent: ArtRenderEvent;
     renderRender: ArtRenderRender;
+
+    doc: VNode;
+    parser: InteractionParser;
+    render: VNodeRenderer;
     constructor(artText: ArtText) {
         this.artText = artText;
         this.cursor = null;
@@ -53,6 +58,10 @@ export default class ArtRender implements Render {
 
         this.renderEvent = new ArtRenderEvent(this);
         this.renderRender = new ArtRenderRender(this);
+
+        this.parser = new InteractionParser({});
+        this.render = new VNodeRenderer({});
+        this.doc = null;
         ArtRender.artRenders.push(this);
     }
 
@@ -87,13 +96,11 @@ export default class ArtRender implements Render {
     }
 
     public setMd(md: string): void {
-        let parser = new InteractionParser({});
-        let render = new VNodeRenderer({});
-        let doc = parser.parse(md);
-        let mdhtml = render.render(doc, this.dom);
-
-        console.log(doc);
-        console.log(mdhtml);
+        this.doc = this.parser.parse(md);
+        this.render.render(this.doc, this.dom);
+        console.log(this.doc);
+      
+        this.artText.get<EventCenter>('$eventCenter').emit('artRender-render');
         return;
         this.renderRender.vnodeDispose(this.renderRender.rootNode, md);
         vnodeRender(this.renderRender.rootNode.dom, this.renderRender.rootNode);

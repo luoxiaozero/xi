@@ -2,6 +2,7 @@ import { Art } from "@/core";
 import EventCenter from "@/eventCenter";
 import Sidebar from "@/plugins/sidebar";
 import ArtRender from "@/renders/artRender";
+import VNode from "@/node";
 
 class OutlineSidebar {
     dom: HTMLDivElement;
@@ -18,18 +19,20 @@ class OutlineSidebar {
 
     public updataToc() {
         this.dom.innerHTML = '';
-        for (let v of this.art.get<ArtRender>('$artRender').renderRender.rootNode.childNodes) {
-            if (/^h\d$/.test(v.nodeName)) {
-                let md = v.getMd();
+        let node = this.art.get<ArtRender>('$artRender').doc.firstChild;
+        while (node) {
+            if (node.type === "heading") {
+                let md = node.getMd();
                 md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
                 let p = document.createElement('p');
-                p.setAttribute('class', 'art-outlineSidebar-' + v.nodeName)
+                p.setAttribute('class', 'art-outlineSidebar-h' + node._level);
                 let a = document.createElement('a');
                 a.href = '#' + md;
-                a.innerHTML = v.getText()
+                a.innerHTML = node.getText();
                 p.appendChild(a);
                 this.dom.appendChild(p);
             }
+            node = node.next;
         }
     }
 }
