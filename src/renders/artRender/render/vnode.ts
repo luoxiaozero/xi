@@ -30,8 +30,10 @@ export default class VNodeRenderer {
     }
 
     public text(node: VNode) {
-        let dom = new Text(node._literal);
-        this.currentDom.appendChild(dom);
+        if (this.currentDom.nodeName === "IMG") 
+            this.currentDom.setAttribute("alt", node._literal);
+        else            
+            this.currentDom.appendChild(new Text(node._literal));
     }
 
     public softbreak() {
@@ -84,17 +86,19 @@ export default class VNodeRenderer {
         }
     }
 
-    public image(node: VNode, entering) {
+    public image(node: VNode, entering: boolean) {
         if (entering) {
+            
             let dom = document.createElement("img");
             this.attrs(node, dom);
             dom.src = node._destination;
             if (node._title)
-                dom.title = dom.title;
+                dom.title = node._title;
 
             this.currentDom.appendChild(dom);
+            this.currentDom = dom;
         } else {
-            // this.currentDom = this.currentDom.parentElement;
+            this.currentDom = this.currentDom.parentElement;
         }
     }
 
