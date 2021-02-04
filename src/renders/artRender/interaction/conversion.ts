@@ -39,6 +39,17 @@ export function domToNode(dom: HTMLElement): VNode {
         case "A":
             node = new VNode("link");
             break;
+        case "UL":
+        case "OL":
+            node = new VNode("list");
+            node.listType = dom.nodeName == "UL" ? "bullet" : "ordered";
+            break;
+        case "LI":
+            node = new VNode("item");
+            break;
+        case "BLOCKQUOTE":
+            node = new VNode("block_quote");
+            break;
         default:
             node = new VNode(dom.nodeName.toLocaleLowerCase());
             break;

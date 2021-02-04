@@ -87,15 +87,19 @@ export default class Interaction {
         if (sub == -1)
             return false;
 
-        let node = this.artRender.doc.firstChild, i = sub, newNode: VNode;
+        let node = this.artRender.doc.firstChild, i = sub;
         while (--i != -1) {
             node = node.next;
         }
-
+        console.log(node);
         if (node.type == "code_block" || node.type == "thematic_break") {
             return null;
         } else if (node.type === "paragraph" || node.type === "heading") {
             this.paragraph(node);
+        } else if (node.type === "list") {
+            this.list(node);
+        } else if (node.type === "block_quote") {
+            this.block_quote(node);
         }
 
         return false;
@@ -248,8 +252,6 @@ export default class Interaction {
                 Cursor.setCursor(location.anchorNode, location.anchorOffset + 1);
                 this.artRender.cursor.getSelection();
                 return false;
-            } else {
-                console.log("无执行", location)
             }
         }
 
@@ -258,6 +260,7 @@ export default class Interaction {
 
     public paragraph(node: VNode): void {
         let md = node.getMd(), match: RegExpMatchArray, newNode: VNode;
+        console.log(md);
         if (md.length && md.charCodeAt(md.length - 1) === 10)
             md = md.substring(0, md.length - 1);
         if (md == "" || md == "\n" || reCodeFence.test(md) || reThematicBreak.test(md))
@@ -309,21 +312,36 @@ export default class Interaction {
         }
     }
 
-    public list(node: VNode, md: string): void {
-        // if (/^>\s/.test(md)) {
-        //     li.replaceAllChild([new VNode('blockquote', {}, new VNode('p', {}, inline(li.getMd().substring(2))))]);
-        //     this.cursor.location.focusInlineOffset -= 2;
-        //     this.cursor.location.anchorInlineOffset -= 2;
-        // } else if (/^\*\s/.test(li.getMd())) {
-        //     let p = new VNode('p', {}, inline(li.getMd().substring(2)));
-        //     li.replaceAllChild([new VNode('ul', {}, new VNode('li', {}, p))]);
-        //     this.artRender.cursor.location.focusInlineOffset -= 2;
-        //     this.artRender.cursor.location.anchorInlineOffset -= 2;
-        // } else if (/^\d\.\s/.test(li.getMd())) {
-        //     let p = new VNode('p', {}, inline(li.getMd().substring(2)));
-        //     li.replaceAllChild([new VNode('ol', {}, new VNode('li', {}, p))]);
-        //     this.artRender.cursor.location.focusInlineOffset -= 3;
-        //     this.artRender.cursor.location.anchorInlineOffset -= 3;
+    public list(node: VNode): void {
+        let child = node.firstChild, next: VNode;
+        while (child) {
+            next = child.next;
+            this.item(child);
+            child = next;
+        }
+    }
+
+    public item(node: VNode) {
+        let child = node.firstChild, next: VNode;
+        while (child) {
+            next = child.next;
+            switch(child.type) {
+                case "list":
+                    this.list(child);
+                    break;
+                case "paragraph":
+                    this.paragraph(child);
+                    break;
+                case "block_quote":
+                    this.block_quote(child);
+                    break;
+                default:
+                    console.error(child);
+                    throw "Interction class: item 中不存在" + child.type + "类型";
+            }
+            child = next;
+        }
+
         // } else if (vnode.nodeName == 'ul' && /^\[x|X\]\s/.test(li.getMd())) {
         //     let p = new VNode('p', {}, [new VNode('input', { type: 'checkbox', checked: 'checked' }), ...inline(li.getMd().substring(4))]);
         //     li.replaceAllChild([p]);
@@ -332,40 +350,27 @@ export default class Interaction {
         //     li.replaceAllChild([p]);
         // } else if (li.childNodes[0].nodeName == 'p' && (<VNode>li.childNodes[0]).childNodes[0].nodeName == 'input') {
         //     (<VNode>li.childNodes[0]).replaceAllChild([(<VNode>li.childNodes[0]).childNodes[0], ...inline(li.childNodes[0].getMd())]);
-        // } else {
-        //     li.replaceAllChild([new VNode('p', {}, inline(li.childNodes[0].getMd()))]);
         // }
     }
 
-    block_quote(node: VNode) {
-        let child = node.firstChild;
+    public block_quote(node: VNode) {
+        let child = node.firstChild, next: VNode;
         while (child) {
-            if (child.type == "block_quote" || child.type == "ul" || child.type == "ol") {
-
-            } else if (/^>\s/.test(child.getMd())) {
-                let blockquote = new VNode("block_quote");
-                let p = new VNode("paragraph");
-                p.appendChild(new VNode("linebreak"));
-                blockquote.appendChild(p);
-                child.replace(blockquote);
-            } else if (/^\*\s/.test(child.getMd())) {
-                let list = new VNode("list");
-                list.listType = "bullet";
-                let li = new VNode("litm")
-                li.appendChild(new VNode("linebreak"));
-                list.appendChild(li);
-                child.replace(list);
-            } else if (/^\d\.\s/.test(child.getMd())) {
-                let list = new VNode("list");
-                list.listType = "ordered";
-                let li = new VNode("litm")
-                li.appendChild(new VNode("linebreak"));
-                list.appendChild(li);
-                child.replace(list);
-            } else {
-                //(<VNode>vnode.childNodes[i]).replaceAllChild(inline(vnode.childNodes[i].getMd()));
+            next = child.next;
+            switch(child.type) {
+                case "list":
+                    this.list(child);
+                    break;
+                case "paragraph":
+                    this.paragraph(child);
+                    break;
+                case "block_quote":
+                    this.block_quote(child);
+                    break;
+                default:
+                    throw "Interction class: block_quote 中不存在" + child.type + "类型";
             }
-            child = child.next;
+            child = next;
         }
     }
 }
