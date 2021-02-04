@@ -34,13 +34,9 @@ class Location {
 export default class Cursor {
     static sel: Selection = window.getSelection();
 
-    /**
-     * 挂载的DOM
-     */
+    /**挂载的DOM */
     mountDom: HTMLElement;
-    /**
-     * 光标位置
-     */
+    /**光标位置 */
     location: Location;
     constructor(mountDom: HTMLElement) {
         this.mountDom = mountDom;
@@ -164,20 +160,22 @@ export default class Cursor {
         }
 
         if (ArtRender.plugins.flowchart) {
-            tools = this.mountDom.getElementsByClassName('art-flowTool');
+            tools = this.mountDom.getElementsByClassName('art-codeBlockBottomTool');
             for (let i = 0; i < tools.length; i++) {
-                (<HTMLElement>tools[i]).style.border = 'inherit';
-                (<HTMLElement>tools[i].previousSibling).style.display = 'none';
+                if (ArtRender.plugins.flowchart && alineDom == (<HTMLElement>tools[i].previousSibling)) {
+                    alineDom.style.display = 'inherit';
+                    (<HTMLDivElement>alineDom.nextSibling).style.border = '1px solid #999';
+                } else {
+                    (<HTMLElement>tools[i]).style.border = 'inherit';
+                    (<HTMLElement>tools[i].previousSibling).style.display = 'none';
+                }
+
             }
         }
 
         if (alineDom.nodeName == "PRE") {
             if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeBlockTool")) {
                 (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
-            } 
-            if (ArtRender.plugins.flowchart && Tool.hasClass(alineDom as HTMLElement, "art-pre-flow")) {
-                alineDom.style.display = 'inherit';
-                (<HTMLDivElement>alineDom.nextSibling).style.border = '1px solid #999';
             }
             return true;
         }
@@ -212,15 +210,15 @@ export default class Cursor {
             var pLen = this.location.anchorInlineOffset;
             this.setTool(pNode as HTMLElement)
             console.log(this.location)
-            if(/art-shield/.test(pNode.className)){
+            if (/art-shield/.test(pNode.className)) {
                 return null;
             }
             if (pNode.nodeName == 'HR') {
                 // 不可调优先度
                 info = [pNode, 0];
             } else if (this.location.anchorOffset == 0 && (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
-                this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD" )) {
-                    // 删除 this.location.anchorNode.nodeName === "DIV"
+                this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD")) {
+                // 删除 this.location.anchorNode.nodeName === "DIV"
                 info = [this.location.anchorNode, 0];
             } else if (this.location.anchorOffset == 0 && this.location.anchorNode.parentNode && ((this.location.anchorNode.parentNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.parentNode.nodeName == 'PRE') || this.location.anchorNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.nodeName == 'PRE')) {
                 info = [this.location.anchorNode, 0]
@@ -273,7 +271,7 @@ export default class Cursor {
     }
 
     static setCursor(node: Node, offset: number): boolean {
-        if(node == undefined && !node)
+        if (node == undefined && !node)
             return false;
         let range = Cursor.sel.getRangeAt(0).cloneRange();
         range.setStart(node, offset);

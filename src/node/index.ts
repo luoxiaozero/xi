@@ -1,13 +1,13 @@
-import { mdToNode } from "@/renders/artRender/artRenderRender/grammer";
-
 class NodeWalker {
     current: VNode;
-    root: any;
+    root: VNode;
     entering: boolean;
-    constructor(root) {
+    selfFalg: boolean;
+    constructor(root: VNode, selfFalg: boolean = false) {
         this.current = root;
         this.root = root;
         this.entering = true;
+        this.selfFalg = selfFalg;
     }
 
     public next() {
@@ -38,10 +38,13 @@ class NodeWalker {
             this.entering = true;
         }
 
+        if (this.selfFalg && cur === this.root)
+            return this.next();
+
         return { entering: entering, node: cur };
     }
 
-    public resumeAt(node, entering) {
+    public resumeAt(node: VNode, entering: boolean) {
         this.current = node;
         this.entering = entering === true;
     };
@@ -59,8 +62,8 @@ export default class VNode {
     public _lastLineBlank: boolean;
     public _open: boolean;
     public _string_content: string;
-    public _literal: any;
-    public _listData: { type, tight, start, delimiter };
+    public _literal: string;
+    public _listData: { type: string, tight, start: number, delimiter, markerOffset, padding, bulletChar };
     public _info: any;
     public _destination: any;
     public _title: any;
@@ -68,11 +71,12 @@ export default class VNode {
     public _fenceChar: any;
     public _fenceLength: number;
     public _fenceOffset: any;
-    public _level: any;
+    public _level: number;
     public _onEnter: any;
     public _onExit: any;
     _htmlBlockType: any;
     attrs: Map<string, string>;
+    dom: HTMLElement | Text;
     constructor(nodeType: string, sourcepos = null) {
         this._type = nodeType;
         this._parent = null;
@@ -86,7 +90,7 @@ export default class VNode {
         this._open = true;
         this._string_content = null;
         this._literal = null;
-        this._listData = { type: '', tight: '', start: '', delimiter: '' };
+        this._listData = { type: '', tight: '', start: null, delimiter: '', markerOffset: '', padding: '', bulletChar: "" };
         this._info = null;
         this._destination = null;
         this._title = null;
@@ -98,6 +102,7 @@ export default class VNode {
         this._onEnter = null;
         this._onExit = null;
         this.attrs = new Map();
+        this.dom = null;
     }
 
     public get type() {
@@ -159,6 +164,168 @@ export default class VNode {
         this._listData.delimiter = delim;
     }
 
+    updateDom() {
+        if (!this.dom)
+            this.newDom();
+
+        let child = this.firstChild;
+        while (child) {
+            if (!child)
+                child.newDom();
+
+            child = child.next;
+        }
+    }
+
+    newDom() {
+        let nodeName: string;
+        switch (this._type) {
+            case "text":
+                if (this.parent._type === "link")
+                    (<HTMLElement>this.parent.dom).setAttribute("alt", this._literal);
+
+                this.dom = new Text(this._literal);
+                return;
+            case "softbreak":
+                this.dom = new Text("\n");
+                return;
+            case "code":
+                this.dom = document.createElement("code");
+                this.setAttrs();
+                this.dom.innerHTML = this._literal;
+                return;
+            case "linebreak":
+                this.dom = document.createElement("br");
+                return;
+            case "thematic_break":
+                this.dom = document.createElement("hr");
+                return;
+            case "art_tool":
+                this.dom = document.createElement("div");
+                // let tool = this.attrs.get('--tool');
+                // if (tool === "code_block") {
+                //     let info_words = this.next._info ? this.next._info.split(/\s+/) : [];
+                //     if (info_words.length > 0 && info_words[0].length > 0)
+                //         createCodeBlockTool(this.currentDom, info_words[0]);
+                //     else
+                //         createCodeBlockTool(this.currentDom);
+                // } else if (tool == "math") {
+
+                // } else if (tool == "toc") {
+
+                // } else if (tool == "table") {
+
+                // } else if (tool == "code_block_flow") {
+                //     let dom = document.createElement("div");
+                //     dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
+                //     dom.setAttribute("contenteditable", "false");
+                //     this.currentDom.appendChild(dom);
+
+                //     if (ArtRender.plugins.flowchart && ArtRender.plugins.Raphael) {
+                //         let md = node.prev._literal;
+                //         try {
+                //             let chart = ArtRender.plugins.flowchart.parse(md);
+                //             chart.drawSVG(dom);
+                //             (dom.previousSibling as HTMLPreElement).style.display = 'none';
+                //             dom.onclick = function click() {
+                //                 console.log(this, (<HTMLDivElement>this).previousSibling);
+                //                 ((<HTMLDivElement>this).previousSibling as HTMLPreElement).style.display = 'inherit';
+
+                //                 Cursor.setCursor((<HTMLDivElement>this).previousSibling, 0);
+                //             }
+                //         } catch (error) {
+                //             console.error('flowchart发生错误:', error);
+                //         }
+                //     }
+                // }
+                return;
+            case "link":
+                this.dom = document.createElement("a");
+                (<HTMLAnchorElement>this.dom).href = this._destination;
+                if (this._title)
+                    this.dom.title = this._title;
+                break;
+            case "image":
+                this.dom = document.createElement("img");
+                (<HTMLImageElement>this.dom).src = this._destination;
+                if (this._title)
+                    this.dom.title = this._title;
+                break;
+            case "code_block":
+                this.dom = document.createElement("pre");
+                let code = document.createElement("code");
+
+                let info_words = this._info ? this._info.split(/\s+/) : [];
+                if (info_words.length > 0 && info_words[0].length > 0) {
+                    code.setAttribute("class", "language-" + info_words[0]);
+                }
+                code.innerHTML = this._literal;
+                this.dom.appendChild(code);
+                break;
+            default:
+                switch (this._type) {
+                    case "heading":
+                        nodeName = "h" + this._level;
+                        break;
+                    case "paragraph":
+                        nodeName = "p";
+                        break;
+                    case "delete":
+                        nodeName = "del";
+                        break;
+                    case "emph":
+                        nodeName = "em";
+                        break;
+                    case "block_quote":
+                        nodeName = "blockquote";
+                        break;
+                    case "list":
+                        nodeName = this.listType === "bullet" ? "ul" : "ol";
+                        break;
+                    case "item":
+                        nodeName = "li";
+                        break;
+                    default:
+                        nodeName = this._type;
+                }
+             
+                this.dom = document.createElement(nodeName);
+        }
+
+        if (VNode.isContainer(this)) {
+            this.setAttrs();
+
+            let child = this.firstChild;
+            while (child) {
+                child.newDom();
+
+                this.dom.appendChild(child.dom);
+                child = child.next;
+            }
+        }
+
+
+    }
+
+    private setAttrs() {
+        this.attrs.forEach((value, key) => {
+            (<HTMLElement>this.dom).setAttribute(key, value);
+        });
+    }
+
+    public static isBlock(node: VNode) {
+        switch (node._type) {
+            case "document":
+            case "block_quote":
+            case "list":
+            case "paragraph":
+            case "heading":
+            case "custom_block":
+                return true;
+            default:
+                return false;
+        }
+    }
 
     public static isContainer(node: VNode) {
         switch (node._type) {
@@ -182,7 +349,10 @@ export default class VNode {
         }
     }
 
+    /**向最后添加孩子节点 */
     public appendChild(child: VNode) {
+
+
         child.unlink();
         child._parent = this;
         if (this._lastChild) {
@@ -195,6 +365,7 @@ export default class VNode {
         }
     }
 
+    /**向最前添加孩子节点 */
     public prependChild(child: VNode) {
         child.unlink();
         child._parent = this;
@@ -208,6 +379,7 @@ export default class VNode {
         }
     }
 
+    /**拆开节点 */
     public unlink() {
         if (this._prev) {
             this._prev._next = this._next;
@@ -224,7 +396,30 @@ export default class VNode {
         this._prev = null;
     }
 
-    public insertAfter(sibling) {
+    /**替换该节点 */
+    public replace(sibling: VNode) {
+        sibling.unlink();
+
+        sibling._parent = this._parent;
+        if (this._prev) {
+            sibling._prev = this._prev;
+            this._prev._next = sibling;
+        } else
+            sibling._parent._firstChild = sibling;
+
+        if (this._next) {
+            sibling._next = this._next;
+            this._next._prev = sibling;
+        } else
+            sibling._parent._lastChild = sibling;
+
+        this._parent = null;
+        this._next = null;
+        this._prev = null;
+    }
+
+    /**插入之后 */
+    public insertAfter(sibling: VNode) {
         sibling.unlink();
         sibling._next = this._next;
         if (sibling._next) {
@@ -238,7 +433,8 @@ export default class VNode {
         }
     }
 
-    public insertBefore(sibling) {
+    /**插入之前 */
+    public insertBefore(sibling: VNode) {
         sibling.unlink();
         sibling._prev = this._prev;
         if (sibling._prev) {
@@ -252,25 +448,60 @@ export default class VNode {
         }
     }
 
-    public walker(): NodeWalker {
-        return new NodeWalker(this);
+    public walker(selfFalg?: boolean): NodeWalker {
+        return new NodeWalker(this, selfFalg);
     }
 
-    public getMd(model: string = 'editor'): string {
-        let md = "", node: VNode = this._firstChild;
+    public getMd(layer: number = 0): string {
+        layer += 1;
+        let md = "", node = this._firstChild;
+        switch (this._type) {
+            case "text":
+                return this._literal;
+            case "softbreak":
+                return "\n";
+            case "thematic_break":
+                return this.attrs.get("art-marker") + "\n";
+            case "code":
+                return this._literal;
+            case "code_block":
+                md += "```" + this._info + "\n";
+                md += this._literal;
+                md += "\n```\n"
+                return md;
+            case "item":
+                if (this.parent.firstChild !== this) {
+                    md += "  ".repeat(layer / 2 - 1);
+                }
 
-        if (this._type === "text")
-            return this._literal;
-        else if (this._type === "thematic_break") {
-            md += this.attrs.get("art-marker");
-        } else if (this._type === "heading") {
-            while (node) {
-                md += node.getMd();
-                node = node._next;
-            }
+                if (this._listData.type === "ordered")
+                    md += this._listData.start + ". " + node.getMd(layer);
+                else
+                    md += this._listData.bulletChar + " " + node.getMd(layer);
+                return md;
+            case "block_quote":
+                while (node) {
+                    md += "> " + node.getMd(layer);
+                    node = node._next;
+                }
+                return md;
+            default:
+                if (VNode.isContainer(this)) {
+                    while (node) {
+                        md += node.getMd(layer);
+                        node = node._next;
+                    }
+                }
+
+                if (this.type === "list") {
+                    if (this.parent.type === "document")
+                        md += "\n";
+                } else if (VNode.isBlock(this)) {
+                    md += "\n";
+                }
+
+                return md;
         }
-
-        return md;
     }
 
     public getText(): string {

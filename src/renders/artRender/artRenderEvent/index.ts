@@ -1,7 +1,6 @@
 import ArtText from '@/artText';
 import { blod, del, ins, italic, mark, sub, sup } from '../tool/default';
 import ArtRender from '..';
-import { domToMd } from '../artRenderRender/grammer';
 import EventCenter from '@/eventCenter';
 import Editor from '@/editor';
 import Message from '@/plugins/message';
@@ -96,13 +95,13 @@ export default class ArtRenderEvent {
             return false;
         } else if (key == 'Enter') {
             // 回车时渲染
-            if (!_this.artRender.renderRender.render(key, 'keydown')) {
+            if (!_this.artRender.interaction.render(key, 'keydown')) {
                 e.preventDefault();
                 return false;
             }
         } else if (key == 'Backspace') {
             // 退格时渲染
-            if (!_this.artRender.renderRender.render(key, 'keydown')) {
+            if (!_this.artRender.interaction.render(key, 'keydown')) {
                 e.preventDefault();
                 return false;
             }
@@ -151,7 +150,7 @@ export default class ArtRenderEvent {
         }
         if (!_this.isComposition) {
             // 输入法不为连续时，如中文输入时
-            _this.artRender.renderRender.render(key, 'keyup');
+            _this.artRender.interaction.render(key, 'keyup');
         }
     }
 
@@ -209,7 +208,7 @@ export default class ArtRenderEvent {
 
             let location = _this.cursor.location;
             console.log(location);
-            let md = domToMd(body as HTMLElement);
+            let md = ""//domToMd(body as HTMLElement);
             console.log(md);
             md = md.replace(/(^\s*)|(\s*$)/g, "");
             let mdRows = md.split('\n');

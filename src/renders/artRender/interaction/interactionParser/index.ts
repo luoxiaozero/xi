@@ -2,10 +2,28 @@ import Parser from "@/parser";
 import VNode from "@/node";
 
 export default class InteractionParser {
-    private parser: Parser;
-    private doc: VNode;
+    public parser: Parser;
     constructor(options) {
         this.parser = new Parser(options);
+    }
+
+    public image(node: VNode, entering: boolean) {
+        if (entering) {
+            let span = new VNode("span");
+            span.attrs.set("class", "art-meta art-hide");
+            let text = new VNode("text");
+            text._literal = "![" + node.firstChild._literal;
+            text._literal += "](" + node._destination;
+            if (node._title)
+                text._literal += "\"" + node._title + "\"";
+
+            text._literal += ")";
+            span.appendChild(text);
+            node.insertBefore(span);
+
+            node.attrs.set("contenteditable", "false");
+        }
+
     }
 
     public heading(node: VNode, entering: boolean) {
@@ -15,14 +33,14 @@ export default class InteractionParser {
             let text = new VNode("text");
             text._literal = "#".repeat(node._level) + " ";
             span.appendChild(text);
-            node.firstChild.insertBefore(span);
+            node.prependChild(span);
 
             let md = node.getMd();
             md = md.replace(/\s/g, '-').replace(/\\|\/|#|\:/g, '');
             let a = new VNode('link');
             a.attrs.set('name', md);
             a.attrs.set('class', 'art-meta art-shield');
-            node.firstChild.insertBefore(a);
+            node.prependChild(a);
         }
     }
 
@@ -71,12 +89,23 @@ export default class InteractionParser {
             let art_tool = new VNode("art_tool");
             art_tool.attrs.set("--tool", "code_block");
             node.insertBefore(art_tool);
+
+            let info_words = node._info ? node._info.split(/\s+/) : [];
+            if (info_words.length > 0 && info_words[0].length > 0 && info_words[0] == "flow") {
+                let art_tool = new VNode("art_tool");
+                art_tool.attrs.set("--tool", "code_block_flow");
+                node.insertAfter(art_tool)
+            }
+        } else {
+
         }
     }
 
 
     public emph(node: VNode, entering: boolean) {
         if (entering) {
+            if (node.firstChild.type === "strong")
+                return;
             let art_mark = node.firstChild.type === 'strong' ? node.firstChild.attrs.get('art-marker') : node.attrs.get('art-marker');
 
             let span = new VNode("span");
@@ -97,7 +126,7 @@ export default class InteractionParser {
         }
     }
 
-    public strong(node, entering) {
+    public strong(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -117,7 +146,7 @@ export default class InteractionParser {
         }
     }
 
-    public delete(node, entering) {
+    public delete(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -137,8 +166,8 @@ export default class InteractionParser {
         }
     }
 
-    private interactionParse() {
-        let walker = this.doc.walker(),
+    public interactionParse(ast: VNode) {
+        let walker = ast.walker(),
             event: { entering: boolean; node: VNode; },
             type: string;
 
@@ -153,9 +182,18 @@ export default class InteractionParser {
     }
 
     public parse(input: string): VNode {
-        this.doc = this.parser.parse(input);
-        this.interactionParse();
+        let doc = this.parser.parse(input);
+        this.interactionParse(doc);
 
-        return this.doc;
+        return doc;
+    }
+
+    public inlineParse(input: string): VNode {
+        let doc = new VNode("paragraph");
+        doc._string_content = input;
+        this.parser.inlineParser.parse(doc);
+        this.interactionParse(doc);
+
+        return doc;
     }
 }

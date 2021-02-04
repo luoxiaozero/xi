@@ -1,5 +1,5 @@
 let md = function() {  
-    /*  
+    /*
 [TOC]
 
 2020 0818
@@ -34,15 +34,17 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 
 #### 字符效果
 
-~~删除线~~  __下划线__
+***粗斜体***  
 
-***粗斜体***  **粗体**  *斜体字* 
+**粗体** || __粗体__ 
 
-上标：X^2^  下标：O~2~
+*斜体字* || _斜体字_
+
+#### 扩展字符效果
+
+~~删除线~~
 
 数学公式：$x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}$
-
-==高亮==
 
 #### 横线
 
@@ -89,6 +91,8 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 > > 2. 引用
 > > > * 引用
 > > > * 引用
+> > > > 引用
+> > > > 引用
 
 #### 表格
 

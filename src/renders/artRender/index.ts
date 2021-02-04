@@ -6,18 +6,17 @@ import ArtRenderEvent from "./artRenderEvent";
 import { TableMoreTool } from "./tool/tableTool/tableMoreTool";
 import Tool from '../../tool';
 import './index.css'
-import ArtRenderRender from './artRenderRender';
-import { keyupRender } from './artRenderRender/eventRender';
-import vnodeRender from './artRenderRender/vnodeRender';
 import Editor from '@/editor';
 import { Art, Core } from '@/core';
 import EventCenter from '@/eventCenter';
 import { loadPluginsExport } from './plugins/default';
 import Parser from '../../parser';
-import HtmlRenderer from './render/html';
-import VNodeRenderer from './render/vnode';
+import HtmlRenderer from '../../../dist/render/html';
+import VNodeRenderer from '../../../dist/render/vnode';
 import InteractionParser from './interaction/interactionParser';
 import VNode from '@/node';
+import Interaction from './interaction';
+import Operation from '@/node/operation';
 
 
 /**
@@ -30,7 +29,7 @@ export default class ArtRender implements Render {
     static setPlugin(key: string, value: any): void {
         ArtRender.plugins[key] = value;
         for (let artRender of ArtRender.artRenders) {
-            artRender.renderRender.render(null, 'keyup');
+            artRender.interaction.render(null, 'keyup');
         }
     }
 
@@ -43,25 +42,35 @@ export default class ArtRender implements Render {
     tableMoreTool: TableMoreTool;
     floatAuxiliaryTool: FloatAuxiliaryTool;
     renderEvent: ArtRenderEvent;
-    renderRender: ArtRenderRender;
 
     doc: VNode;
+    interaction: Interaction;
     parser: InteractionParser;
-    render: VNodeRenderer;
+    operation: Operation;
     constructor(artText: ArtText) {
         this.artText = artText;
         this.cursor = null;
         this.abbrName = ' MD ';
 
+        this.dom = document.createElement("div");
+        this.dom.setAttribute("class", "art-render-art");
+        let p = document.createElement("p");
+        p.appendChild(document.createElement("br"));
+        this.dom.appendChild(p);
+
+        this.cursor = new Cursor(this.dom);
+        
         this.tableMoreTool = new TableMoreTool();
         this.floatAuxiliaryTool = new FloatAuxiliaryTool();
 
         this.renderEvent = new ArtRenderEvent(this);
-        this.renderRender = new ArtRenderRender(this);
 
+        this.operation = new Operation();
         this.parser = new InteractionParser({});
-        this.render = new VNodeRenderer({});
-        this.doc = null;
+        this.interaction = new Interaction(this);
+        
+        this.doc = new VNode('document', [[1, 1], [0, 0]]);
+        this.doc.dom = this.dom;
         ArtRender.artRenders.push(this);
     }
 
@@ -69,8 +78,7 @@ export default class ArtRender implements Render {
         this.artText.get<Tool>('$tool').add({ dom: this.tableMoreTool.createDom() });
         this.artText.get<Tool>('$tool').add({ dom: this.floatAuxiliaryTool.createDom() });
 
-        this.dom = this.renderRender.rootNode.newDom();
-        this.cursor = new Cursor(this.renderRender.rootNode.dom);
+        
         return this.dom;
     }
 
@@ -85,26 +93,33 @@ export default class ArtRender implements Render {
     }
 
     public getMd(): string {
-        keyupRender(this.renderRender); // 更新
-        let md = '';
-        for (let i = 0; i < this.renderRender.rootNode.childNodes.length; i++) {
-            let lineMd = this.renderRender.rootNode.childNodes[i].getMd('read');
+        let md = "";
+        let child = this.doc.firstChild;
+        while(child) {
+            let lineMd = child.getMd();
             if (lineMd)
                 md += lineMd + '\n';
+            child = child.next;
         }
         return md;
     }
 
     public setMd(md: string): void {
-        this.doc = this.parser.parse(md);
-        this.render.render(this.doc, this.dom);
+        this.doc = new VNode('document', [[1, 1], [0, 0]]);
+        this.doc.dom = this.dom;
+        this.doc.dom.innerHTML = "";
+    
+        let doc = this.parser.parse(md);
+        let child = doc.firstChild, next: VNode;
+        while(child) {
+            next = child.next;
+            this.operation.appendChild(this.doc, child);
+            child = next;
+        }
+        this.operation.update();
+
         console.log(this.doc);
-      
         this.artText.get<EventCenter>('$eventCenter').emit('artRender-render');
-        return;
-        this.renderRender.vnodeDispose(this.renderRender.rootNode, md);
-        vnodeRender(this.renderRender.rootNode.dom, this.renderRender.rootNode);
-        this.artText.get<EventCenter>('$eventCenter').emit('artRender-render')
     }
 
     public attachAllEvent(): void {
