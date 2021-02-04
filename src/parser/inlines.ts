@@ -407,7 +407,6 @@ export default class InlineParser {
             return false;
         }
             
-        console.log(contents);
         var node = text(contents);
         block.appendChild(node);
 
@@ -416,7 +415,6 @@ export default class InlineParser {
             (res.can_open || res.can_close) &&
             (this.options.smart || (cc !== C_SINGLEQUOTE && cc !== C_DOUBLEQUOTE))
         ) {
-            console.log(node);
             this.delimiters = {
                 cc: cc,
                 numdelims: numdelims,
@@ -854,7 +852,6 @@ export default class InlineParser {
     public parseInline(block: VNode) {
         let res = false;
         let c = this.peek();
-        console.log(c);
         if (c === -1) {
             return false;
         }
@@ -922,12 +919,9 @@ export default class InlineParser {
         }
         // find first closer above stack_bottom:
         closer = this.delimiters;
-        console.log(closer)
         while (closer !== null && closer.previous !== stack_bottom) {
             closer = closer.previous;
-            console.log("aaa@: ", closer.cc)
         }
-        console.log(closer)
         // move forward, looking for closers, and handling each
         while (closer !== null) {
             var closercc = closer.cc;
@@ -965,7 +959,7 @@ export default class InlineParser {
                         opener_inl = opener.node;
                         closer_inl = closer.node;
                         
-                        let art_mark = opener_inl._literal; 
+                        let art_mark = opener_inl._literal.length > closer_inl._literal.length ? closer_inl._literal: opener_inl._literal; 
                         // remove used delimiters from stack elts and inlines
                         opener.numdelims -= use_delims;
                         closer.numdelims -= use_delims;
@@ -982,7 +976,6 @@ export default class InlineParser {
                         var emph = new VNode(use_delims === 1 ? "emph" : "strong")
                         emph.attrs.set("art-marker", art_mark)
                         tmp = opener_inl.next;
-                        console.log(tmp);
                         while (tmp && tmp !== closer_inl) {
                             next = tmp._next;
                             tmp.unlink();
@@ -1019,7 +1012,6 @@ export default class InlineParser {
 
                         opener_inl = opener.node;
                         closer_inl = closer.node;
-                        console.log(opener_inl, closer_inl);
                         
                         let art_mark = opener_inl._literal; 
                         // remove used delimiters from stack elts and inlines
@@ -1038,7 +1030,6 @@ export default class InlineParser {
                         var emph = new VNode(use_delims === 1 ? "sub" : "delete")
                         emph.attrs.set("art-marker", art_mark)
                         tmp = opener_inl.next;
-                        console.log(tmp);
                         while (tmp && tmp !== closer_inl) {
                             next = tmp._next;
                             tmp.unlink();
@@ -1115,7 +1106,6 @@ export default class InlineParser {
     // using refmap to resolve references.
     // 使用refmap来解析引用。
     public parseInlines(block: VNode) {
-        console.log(block._string_content);
         this.subject = block._string_content.trim(); //  trim()方法用于删除字符串的头尾空白符，空白符包括：空格、制表符 tab、换行符等其他空白符等。
         this.pos = 0;
         this.delimiters = null;
