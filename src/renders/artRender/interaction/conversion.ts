@@ -50,6 +50,25 @@ export function domToNode(dom: HTMLElement): VNode {
         case "BLOCKQUOTE":
             node = new VNode("block_quote");
             break;
+        case "PRE":
+            node = new VNode("code_block");
+            node.dom = dom;
+
+            for (let i = 0; i < dom.attributes.length; i++) {
+                let it = dom.attributes[i];
+                node.attrs[it.localName] = it.value;
+            }
+
+            let code = dom.firstChild as HTMLElement;
+            node._literal = code.innerText;
+            let langs = code.getAttribute("class").split(/\s/), lang = "", match;
+            langs.forEach((value: string) => { 
+                if (match = value.match(/^lang-(.*?)$/)){
+                    lang += match[1] + " ";
+                }
+            })
+            node._info = lang;
+            return node;
         default:
             node = new VNode(dom.nodeName.toLocaleLowerCase());
             break;

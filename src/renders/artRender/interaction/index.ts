@@ -92,8 +92,10 @@ export default class Interaction {
             node = node.next;
         }
         console.log(node);
-        if (node.type == "code_block" || node.type == "thematic_break") {
+        if (node.type == "thematic_break") {
             return null;
+        } else if (node.type == "code_block") {
+            this.code_block(node);
         } else if (node.type === "paragraph" || node.type === "heading") {
             this.paragraph(node);
         } else if (node.type === "list") {
@@ -325,7 +327,7 @@ export default class Interaction {
         let child = node.firstChild, next: VNode;
         while (child) {
             next = child.next;
-            switch(child.type) {
+            switch (child.type) {
                 case "list":
                     this.list(child);
                     break;
@@ -357,7 +359,7 @@ export default class Interaction {
         let child = node.firstChild, next: VNode;
         while (child) {
             next = child.next;
-            switch(child.type) {
+            switch (child.type) {
                 case "list":
                     this.list(child);
                     break;
@@ -372,5 +374,22 @@ export default class Interaction {
             }
             child = next;
         }
+    }
+
+    public code_block(node: VNode) {
+        let code = node.dom.firstChild as HTMLElement;
+
+        let lang;
+        let info_words = node._info ? node._info.split(/\s+/) : [];
+        if (info_words.length > 0 && info_words[0].length > 0) {
+            code.setAttribute("class", "lang-" + info_words[0]);
+            lang = info_words[0].match(/lang-(.*?)(\s|$)/);
+        }
+        if (ArtRender.plugins.hljs) {
+            ArtRender.plugins.hljs(code, node._literal, lang);
+        } else {
+            code.innerHTML = node._literal;
+        }
+
     }
 }
