@@ -9,14 +9,12 @@ import './index.css'
 import Editor from '@/editor';
 import { Art, Core } from '@/core';
 import EventCenter from '@/eventCenter';
-import { loadPluginsExport } from './plugins/default';
-import Parser from '../../parser';
-import HtmlRenderer from '../../../dist/render/html';
-import VNodeRenderer from '../../../dist/render/vnode';
 import InteractionParser from './interaction/interactionParser';
 import VNode from '@/node';
 import Interaction from './interaction';
 import Operation from '@/node/operation';
+import { flowchartExport } from './plugins/flowchart';
+import { hljsExport } from './plugins/highlight';
 
 
 /**
@@ -134,7 +132,8 @@ export default class ArtRender implements Render {
 
 export let ArtRenderExport = {
     install: function (Art, options) {
-        //Core.use(loadPluginsExport);
+        Core.use(flowchartExport);
+        Core.use(hljsExport);
         options['container'].bind('$artRender', ArtRender, [{'get': 'art'}], true);
     },
     created: function (art: Art, options) {

@@ -1,6 +1,5 @@
 
-export default function createCodeBlockTool(currentDom: HTMLElement, lang: string = ''): void {
-    let root = document.createElement("div");
+export default function createCodeBlockTool(root: HTMLElement, lang: string = ''): void {
     root.setAttribute("class", "art-meta art-shield art-codeBlockTool");
     root.setAttribute("style", "visibility:hidden");
     root.setAttribute("contenteditable", "false");
@@ -21,8 +20,6 @@ export default function createCodeBlockTool(currentDom: HTMLElement, lang: strin
 
     root.appendChild(prompt);
     root.appendChild(langInput);
-
-    currentDom.appendChild(root);
 }
 
 function changCodeLang() {

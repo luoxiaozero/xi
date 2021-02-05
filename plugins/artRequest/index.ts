@@ -53,6 +53,6 @@ export let ArtRequestExport = {
         options['container'].bind('artRequest', ArtRequest, ['http://127.0.0.1:8000/api']);
     },
     created(art: Art, options) {
-        art.get<ArtRequest>('artRequest').get('/test').then((json: any) => {console.log(json)})
+        // art.get<ArtRequest>('artRequest').get('/test').then((json: any) => {console.log(json)})
     }
 }

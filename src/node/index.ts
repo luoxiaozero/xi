@@ -1,3 +1,7 @@
+import ArtRender from "@/renders/artRender";
+import Cursor from "@/renders/artRender/cursor";
+import createCodeBlockTool from "@/renders/artRender/tool/codeBlockTool";
+
 class NodeWalker {
     current: VNode;
     root: VNode;
@@ -177,7 +181,7 @@ export default class VNode {
         }
     }
 
-    newDom() {
+    newDom(): Function {
         let nodeName: string;
         switch (this._type) {
             case "text":
@@ -185,60 +189,48 @@ export default class VNode {
                     (<HTMLElement>this.parent.dom).setAttribute("alt", this._literal);
 
                 this.dom = new Text(this._literal);
-                return;
+                return null;
             case "softbreak":
                 this.dom = new Text("\n");
-                return;
+                return null;
             case "code":
                 this.dom = document.createElement("code");
                 this.setAttrs();
                 this.dom.innerHTML = this._literal;
-                return;
+                return null;
             case "linebreak":
                 this.dom = document.createElement("br");
-                return;
+                return null;
             case "thematic_break":
                 this.dom = document.createElement("hr");
-                return;
+                return null;
             case "art_tool":
                 this.dom = document.createElement("div");
-                // let tool = this.attrs.get('--tool');
-                // if (tool === "code_block") {
-                //     let info_words = this.next._info ? this.next._info.split(/\s+/) : [];
-                //     if (info_words.length > 0 && info_words[0].length > 0)
-                //         createCodeBlockTool(this.currentDom, info_words[0]);
-                //     else
-                //         createCodeBlockTool(this.currentDom);
-                // } else if (tool == "math") {
+                let tool = this.attrs.get('--tool');
+                if (tool === "code_block") {
+                    let info_words = this.next._info ? this.next._info.split(/\s+/) : [];
+                    if (info_words.length > 0 && info_words[0].length > 0)
+                        createCodeBlockTool(this.dom, info_words[0]);
+                    else
+                        createCodeBlockTool(this.dom);
+                } //else if (tool == "math") {
 
                 // } else if (tool == "toc") {
 
                 // } else if (tool == "table") {
 
-                // } else if (tool == "code_block_flow") {
-                //     let dom = document.createElement("div");
-                //     dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
-                //     dom.setAttribute("contenteditable", "false");
-                //     this.currentDom.appendChild(dom);
+                // } 
+                else if (tool == "code_block_flow") {
+                    this.dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
+                    this.dom.setAttribute("contenteditable", "false");
 
-                //     if (ArtRender.plugins.flowchart && ArtRender.plugins.Raphael) {
-                //         let md = node.prev._literal;
-                //         try {
-                //             let chart = ArtRender.plugins.flowchart.parse(md);
-                //             chart.drawSVG(dom);
-                //             (dom.previousSibling as HTMLPreElement).style.display = 'none';
-                //             dom.onclick = function click() {
-                //                 console.log(this, (<HTMLDivElement>this).previousSibling);
-                //                 ((<HTMLDivElement>this).previousSibling as HTMLPreElement).style.display = 'inherit';
-
-                //                 Cursor.setCursor((<HTMLDivElement>this).previousSibling, 0);
-                //             }
-                //         } catch (error) {
-                //             console.error('flowchart发生错误:', error);
-                //         }
-                //     }
-                // }
-                return;
+                    if (ArtRender.plugins.flowchart) {
+                        let dom = this.dom, mdText = this.prev._literal;
+                        let fun = () => { console.log("flowchar 执行"); ArtRender.plugins.flowchart(dom, mdText); };
+                        return fun;
+                    }
+                }
+                return null;
             case "link":
                 this.dom = document.createElement("a");
                 (<HTMLAnchorElement>this.dom).href = this._destination;
@@ -255,11 +247,17 @@ export default class VNode {
                 this.dom = document.createElement("pre");
                 let code = document.createElement("code");
 
+                let lang, md = this._literal;
                 let info_words = this._info ? this._info.split(/\s+/) : [];
                 if (info_words.length > 0 && info_words[0].length > 0) {
-                    code.setAttribute("class", "language-" + info_words[0]);
+                    code.setAttribute("class", "lang-" + info_words[0]);
+                    lang = info_words[0].match(/lang-(.*?)(\s|$)/);
                 }
-                code.innerHTML = this._literal;
+                if (ArtRender.plugins.hljs) {
+                    ArtRender.plugins.hljs(code, md, lang);
+                } else {
+                    code.innerHTML = md;
+                }
                 this.dom.appendChild(code);
                 break;
             default:
@@ -288,23 +286,23 @@ export default class VNode {
                     default:
                         nodeName = this._type;
                 }
-             
+
                 this.dom = document.createElement(nodeName);
         }
 
         if (VNode.isContainer(this)) {
             this.setAttrs();
 
-            let child = this.firstChild;
+            let child = this.firstChild, fun: Function;
             while (child) {
-                child.newDom();
-
+                fun = child.newDom();
                 this.dom.appendChild(child.dom);
+                if (fun)
+                    fun();
                 child = child.next;
             }
         }
-
-
+        return null;
     }
 
     private setAttrs() {

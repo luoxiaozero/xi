@@ -88,26 +88,32 @@ export default class Operation {
             this.currentNodeHead = null;
 
             if (flag) {
-                let child = this.last.first;
+                let child = this.last.first, fun: Function;
                 while (child) {
                     if (child.command == "appendChild") {
-                        child.node.newDom();
+                        fun = child.node.newDom();
                         child.beNode.dom.appendChild(child.node.dom);
+                        if (fun)
+                            fun();
                     } else if (child.command == "replace") {
-                        child.node.newDom();
-                        console.log(child)
+                        fun = child.node.newDom();
                         child.beNode.dom.parentElement.replaceChild(child.node.dom, child.beNode.dom);
+                        if (fun)
+                            fun();
                     } else if (child.command == "insertBefore") {
-                        child.node.newDom();
+                        fun = child.node.newDom();
                         child.beNode.dom.parentElement.insertBefore(child.node.dom, child.beNode.dom);
+                        if (fun)
+                            fun();
                     } else if (child.command == "insertAfter") {
-                        child.node.newDom();
+                        fun = child.node.newDom();
                         if (child.beNode.dom.nextElementSibling) {
                             child.beNode.dom.parentElement.insertBefore(child.node.dom, child.beNode.dom.nextElementSibling);
                         } else {
                             child.beNode.dom.parentElement.appendChild(child.node.dom);
                         }
-                        
+                        if (fun)
+                            fun();
                     }
                     child = child.next;
                 }
