@@ -1,9 +1,9 @@
 import ArtText from '@/artText';
-import { blod, del, ins, italic, mark, sub, sup } from '../tool/default';
 import ArtRender from '..';
 import EventCenter from '@/eventCenter';
 import Editor from '@/editor';
 import Message from '@/plugins/message';
+import { installShortcutKey } from './shortcutKey';
 
 /**
  * 渲染器的事件类
@@ -25,6 +25,7 @@ export default class ArtRenderEvent {
         this.artRender.dom.setAttribute('contenteditable', 'true');
 
         const artRenderEvent = this;
+        installShortcutKey(this);
         this.addCustomizeEvent('MoreTableTool.open', detail => {
             artRenderEvent.artRender.tableMoreTool.open(detail['xy'], detail['table']);
             return false;
@@ -79,16 +80,19 @@ export default class ArtRenderEvent {
     }
 
     /**添加自定义事件 */
-    private addCustomizeEvent(type: string, listener: Function): void {
+    addCustomizeEvent(type: string, listener: Function): void {
         this.artRender.artText.get<EventCenter>('$eventCenter').on(type, listener);
         this.customizeEvents.push([type, listener]);
     }
 
+    
+
     /**摁键摁下行为 */
     public keydown(e: KeyboardEvent, _this: ArtRenderEvent): boolean {
         let key: string = e.key;
-        if (!_this.shortcutKey(e, _this.artRender.artText)) {
+        if (_this.shortcutKey(e, _this.artRender.artText)) {
             // 是否摁下快捷键
+            e.preventDefault();
             return false;
         } else if (/^Arrow(Right|Left|Up|Down)$/.test(key) && _this.artRender.cursor.moveCursor(key)) {
             e.preventDefault();
@@ -111,29 +115,8 @@ export default class ArtRenderEvent {
 
     // 快捷键
     private shortcutKey(e: KeyboardEvent, artText: ArtText): boolean {
-        if (e.ctrlKey && e.keyCode == 66) {
-            // ctrl + b 粗体
-            blod(artText);
-        } else if (e.ctrlKey && e.keyCode == 73) {
-            // ctrl + i 斜体
-            italic(artText);
-        } else if (e.ctrlKey && e.shiftKey && e.keyCode == 68) {
-            // ctrl + shift + d 删除线
-            del(artText);
-        } else if (e.ctrlKey && e.keyCode == 85) {
-            // ctrl + u 下划线
-            ins(artText);
-        } else if (e.ctrlKey && e.altKey && e.keyCode == 83) {
-            // ctrl + alt + s 上标
-            sup(artText);
-        } else if (e.ctrlKey && e.shiftKey && e.keyCode == 83) {
-            // ctrl + shift + s 下标
-            sub(artText);
-        } else if (e.ctrlKey && e.keyCode == 77) {
-            // ctrl + m 标记
-            mark(artText);
-        } else {
-            return true;
+        if (e.ctrlKey) {
+            return artText.get<EventCenter>("$eventCenter").emit("art-ShortcutKey-Control+" + e.key);
         }
         return false;
     }

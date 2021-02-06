@@ -134,7 +134,7 @@ export default class ArtRender implements Render {
 export let ArtRenderExport = {
     install: function (Art, options) {
         Core.use(flowchartExport);
-        // Core.use(hljsExport);
+        Core.use(hljsExport);
         Core.use(mermaidExport);
         options['container'].bind('$artRender', ArtRender, [{'get': 'art'}], true);
     },

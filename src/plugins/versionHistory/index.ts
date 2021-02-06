@@ -18,33 +18,9 @@ export let openVersionHistory = {
 export let saveMdFile = {
     created: function (art: Art, options) {
         art.get<Toolbar>('toolbar').add({
-            title: '保存', click: () => {
-                art.get<EventCenter>('$eventCenter').emit('art-save');
-                let fileInfo = art.get<Editor>('$editor').getFile();
-                let art_articles = JSON.parse(localStorage.art_articles);
-                if (fileInfo['id'] && art_articles.hasOwnProperty(fileInfo['id'])) {
-                    localStorage[fileInfo['id']] = fileInfo.markdown;
-                    art_articles[fileInfo['id']] = fileInfo;
-                    localStorage.art_articles = JSON.stringify(art_articles);
-                    art.get<Message>('message').create('保存成功', 'success');
-                } else {
-                    let timestamp = new Date().getTime();
-                    let mdId = 'art_md_' + timestamp + '_';
-                    let name = mdId;
-                    if (fileInfo['name']) {
-                        mdId += fileInfo['name'];
-                        name = fileInfo['name'];
-                    }
-                    localStorage[mdId] = fileInfo.markdown;
-                    art_articles[mdId] = { ids: [mdId], time: timestamp, name: name, id: mdId }
-                    localStorage.art_articles = JSON.stringify(art_articles);
-                    let article = art_articles[mdId];
-                    article['defaultMd'] = fileInfo.markdown;
-                    art.get<Editor>('$editor').openFile(article);
-                    art.get<Message>('message').create('保存成功', 'success');
-                }
-           }
-        });
+            title: '保存', click: () => 
+                art.get<EventCenter>('$eventCenter').emit('art-save')
+            });
     }
 }
 
@@ -71,6 +47,7 @@ export default class VersionHistory {
         this.maskLayer.style.display = 'none';
         this.getRootDomChilds();
         this.art.get<Tool>('$tool').add([{ dom: this.dom }, { dom: this.maskLayer }]);
+        this.art.get<EventCenter>("$eventCenter").on("art-save", () => this.save());
     }
 
     public getRootDomChilds() {
@@ -240,13 +217,39 @@ export default class VersionHistory {
         return c;
     }
 
+    save() {
+        let fileInfo = this.art.get<Editor>('$editor').getFile();
+        let art_articles = JSON.parse(localStorage.art_articles);
+        if (fileInfo['id'] && art_articles.hasOwnProperty(fileInfo['id'])) {
+            localStorage[fileInfo['id']] = fileInfo.markdown;
+            art_articles[fileInfo['id']] = fileInfo;
+            localStorage.art_articles = JSON.stringify(art_articles);
+            this.art.get<Message>('message').create('保存成功', 'success');
+        } else {
+            let timestamp = new Date().getTime();
+            let mdId = 'art_md_' + timestamp + '_';
+            let name = mdId;
+            if (fileInfo['name']) {
+                mdId += fileInfo['name'];
+                name = fileInfo['name'];
+            }
+            localStorage[mdId] = fileInfo.markdown;
+            art_articles[mdId] = { ids: [mdId], time: timestamp, name: name, id: mdId }
+            localStorage.art_articles = JSON.stringify(art_articles);
+            let article = art_articles[mdId];
+            article['defaultMd'] = fileInfo.markdown;
+            this.art.get<Editor>('$editor').openFile(article);
+            this.art.get<Message>('message').create('保存成功', 'success');
+        }
+    }
+
     /**关闭历史工具 */
     public close(): void {
-        localStorage.art_articles = JSON.stringify(this.art_articles);
-        this.maskLayer.style.display = 'none';
-        this.dom.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
+    localStorage.art_articles = JSON.stringify(this.art_articles);
+    this.maskLayer.style.display = 'none';
+    this.dom.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
 }
 
 export let VersionHistoryExport = {

@@ -1,31 +1,35 @@
 import ArtText from '@/artText'
+import { Art } from '@/core';
+import EventCenter from '@/eventCenter';
+import ArtRenderEvent from '.';
 
-export function blod(artText: ArtText) {
+export function installShortcutKey(artRenderEvent: ArtRenderEvent) {
+    // ctrl + s 保存
+    artRenderEvent.addCustomizeEvent("art-ShortcutKey-Control+s", () => {save(artRenderEvent.artRender.artText)});
+    // ctrl + b 粗体
+    artRenderEvent.addCustomizeEvent("art-ShortcutKey-Control+b", () => {blod(artRenderEvent.artRender.artText)}); 
+    // ctrl + i 斜体
+    artRenderEvent.addCustomizeEvent("art-ShortcutKey-Control+i", () => {italic(artRenderEvent.artRender.artText)}); 
+    // ctrl + shift + d 删除线
+}
+
+function save(art: Art) {
+    art.get<EventCenter>("$eventCenter").emit("art-save");
+}
+
+function blod(artText: ArtText) {
     model(artText, '**');
 }
 
-export function italic(artText: ArtText) {
+function italic(artText: ArtText) {
     model(artText, '*');
 }
-export function del(artText: ArtText){
+
+function del(artText: ArtText){
     model(artText, '~~');
 }
-export function ins(artText: ArtText){
-    model(artText, '__');
-} 
-export function sup(artText: ArtText){
-    model(artText, '^');
-}
-export function sub(artText: ArtText){
-    model(artText, '~');
-} 
-export function mark(artText: ArtText) {
-    model(artText, '==');
-}
+
 function model(artText: ArtText, str: string) {
-    artText;
-    str;
-    return null;
     //let location = artText.editor.cursor.getSelection();
     /*if(location.focusNode.nodeName == '#text'){
         let nodeValue = location.focusNode.nodeValue;
