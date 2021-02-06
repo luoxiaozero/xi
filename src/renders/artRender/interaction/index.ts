@@ -385,11 +385,20 @@ export default class Interaction {
             code.setAttribute("class", "lang-" + info_words[0]);
             lang = info_words[0].match(/lang-(.*?)(\s|$)/);
         }
+
+        if (node.next.type == "art_tool") {
+            let tool = node.next.attrs.get('--tool');
+            if (tool == "code_block_flow" && ArtRender.plugins.flowchart) {
+                ArtRender.plugins.flowchart(node.next.dom, node._literal);
+            } else if (tool == "code_block_mermaid" && ArtRender.plugins.mermaid) {
+                ArtRender.plugins.mermaid(node.next.dom, node._literal);
+            }
+        }
+
         if (ArtRender.plugins.hljs) {
             ArtRender.plugins.hljs(code, node._literal, lang);
         } else {
             code.innerHTML = node._literal;
         }
-
     }
 }

@@ -5,6 +5,7 @@ import Cursor from "../cursor";
 let flowchart = null;
 function update(dom: HTMLElement, codeText: string) {
     try {
+        dom.innerHTML = "";
         let chart = flowchart.parse(codeText);
         chart.drawSVG(dom);
         (dom.previousSibling as HTMLPreElement).style.display = 'none';

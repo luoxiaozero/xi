@@ -15,13 +15,14 @@ import Interaction from './interaction';
 import Operation from '@/node/operation';
 import { flowchartExport } from './plugins/flowchart';
 import { hljsExport } from './plugins/highlight';
+import { mermaidExport } from './plugins/mermaid';
 
 
 /**
  * 默认的渲染器
  */
 export default class ArtRender implements Render {
-    static plugins = { hljs: null, katex: null, flowchart: null, Raphael: null };
+    static plugins = { hljs: null, katex: null, flowchart: null, mermaid: null };
     private static artRenders: ArtRender[] = [];
 
     static setPlugin(key: string, value: any): void {
@@ -133,7 +134,8 @@ export default class ArtRender implements Render {
 export let ArtRenderExport = {
     install: function (Art, options) {
         Core.use(flowchartExport);
-        Core.use(hljsExport);
+        // Core.use(hljsExport);
+        Core.use(mermaidExport);
         options['container'].bind('$artRender', ArtRender, [{'get': 'art'}], true);
     },
     created: function (art: Art, options) {

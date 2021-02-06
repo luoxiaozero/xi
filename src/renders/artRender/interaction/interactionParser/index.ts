@@ -91,10 +91,18 @@ export default class InteractionParser {
             node.insertBefore(art_tool);
 
             let info_words = node._info ? node._info.split(/\s+/) : [];
-            if (info_words.length > 0 && info_words[0].length > 0 && info_words[0] == "flow") {
-                let art_tool = new VNode("art_tool");
-                art_tool.attrs.set("--tool", "code_block_flow");
-                node.insertAfter(art_tool)
+            if (info_words.length > 0 && info_words[0].length > 0) {
+                switch (info_words[0]) {
+                    case "flow":
+                    case "mermaid":
+                        let art_tool = new VNode("art_tool");
+                        art_tool.attrs.set("--tool", "code_block_" + info_words[0]);
+                        node.insertAfter(art_tool);
+                        break;
+                    default:
+                        console.log("InteractionParser:" + info_words[0]);
+                }
+
             }
         } else {
 

@@ -229,6 +229,15 @@ export default class VNode {
                         let fun = () => { console.log("flowchar 执行"); ArtRender.plugins.flowchart(dom, mdText); };
                         return fun;
                     }
+                } else if (tool == "code_block_mermaid") {
+                    this.dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
+                    this.dom.setAttribute("contenteditable", "false");
+
+                    if (ArtRender.plugins.mermaid) {
+                        let dom = this.dom, mdText = this.prev._literal;
+                        let fun = () => { console.log("mermaid 执行"); ArtRender.plugins.mermaid(dom, mdText); };
+                        return fun;
+                    }
                 }
                 return null;
             case "link":

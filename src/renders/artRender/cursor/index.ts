@@ -159,10 +159,10 @@ export default class Cursor {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
         }
 
-        if (ArtRender.plugins.flowchart) {
+        if (ArtRender.plugins.flowchart || ArtRender.plugins.mermaid) {
             tools = this.mountDom.getElementsByClassName('art-codeBlockBottomTool');
             for (let i = 0; i < tools.length; i++) {
-                if (ArtRender.plugins.flowchart && alineDom == (<HTMLElement>tools[i].previousSibling)) {
+                if (alineDom == (<HTMLElement>tools[i].previousSibling)) {
                     alineDom.style.display = 'inherit';
                     (<HTMLDivElement>alineDom.nextSibling).style.border = '1px solid #999';
                 } else {
