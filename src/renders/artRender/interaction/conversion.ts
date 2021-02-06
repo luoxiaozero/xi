@@ -22,6 +22,7 @@ export function domToNode(dom: HTMLElement): VNode {
             node._level = parseInt(dom.nodeName.charAt(1));
             break;
         case "P":
+        case "DIV":
             node = new VNode("paragraph");
             break;
         case "BR":

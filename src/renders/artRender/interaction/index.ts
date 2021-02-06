@@ -72,6 +72,7 @@ export default class Interaction {
         console.log(node, domToNode(dom), this.artRender.cursor.location.anchorAlineOffset)
         let newNode = domToNode(dom);
         if (this.behavior.type == "keyup" && this.behavior.key === "Enter") {
+            this.operation.insertBefore(domToNode(dom.previousSibling as HTMLElement), node.prev);
             this.operation.insertBefore(newNode, node);
         } else {
             this.operation.replace(domToNode(dom), node);
@@ -91,7 +92,18 @@ export default class Interaction {
         while (--i != -1) {
             node = node.next;
         }
-        console.log(node);
+
+        if (this.behavior.type == "keyup" && this.behavior.key === "Enter") {
+            this.process_keyup(node.prev);
+            this.process_keyup(node);
+        } else {
+            this.process_keyup(node);
+        }
+        
+        return false;
+    }
+
+    process_keyup(node: VNode) {
         if (node.type == "thematic_break") {
             return null;
         } else if (node.type == "code_block") {
@@ -103,8 +115,6 @@ export default class Interaction {
         } else if (node.type === "block_quote") {
             this.block_quote(node);
         }
-
-        return false;
     }
 
     /**退格渲染 */
