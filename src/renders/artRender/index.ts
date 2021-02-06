@@ -58,16 +58,16 @@ export default class ArtRender implements Render {
         this.dom.appendChild(p);
 
         this.cursor = new Cursor(this.dom);
-        
+
         this.tableMoreTool = new TableMoreTool();
         this.floatAuxiliaryTool = new FloatAuxiliaryTool();
 
         this.renderEvent = new ArtRenderEvent(this);
 
-        this.operation = new Operation();
+        this.operation = new Operation(this);
         this.parser = new InteractionParser({});
         this.interaction = new Interaction(this);
-        
+
         this.doc = new VNode('document', [[1, 1], [0, 0]]);
         this.doc.dom = this.dom;
         ArtRender.artRenders.push(this);
@@ -77,7 +77,7 @@ export default class ArtRender implements Render {
         this.artText.get<Tool>('$tool').add({ dom: this.tableMoreTool.createDom() });
         this.artText.get<Tool>('$tool').add({ dom: this.floatAuxiliaryTool.createDom() });
 
-        
+
         return this.dom;
     }
 
@@ -94,7 +94,7 @@ export default class ArtRender implements Render {
     public getMd(): string {
         let md = "";
         let child = this.doc.firstChild;
-        while(child) {
+        while (child) {
             let lineMd = child.getMd();
             if (lineMd)
                 md += lineMd + '\n';
@@ -104,18 +104,18 @@ export default class ArtRender implements Render {
     }
 
     public setMd(md: string): void {
-        this.doc = new VNode('document', [[1, 1], [0, 0]]);
+        this.doc = this.parser.parse(md);
         this.doc.dom = this.dom;
         this.doc.dom.innerHTML = "";
-    
-        let doc = this.parser.parse(md);
-        let child = doc.firstChild, next: VNode;
-        while(child) {
-            next = child.next;
-            this.operation.appendChild(this.doc, child);
-            child = next;
+
+        let child = this.doc.firstChild, fun: Function;
+        while (child) {
+            fun = child.newDom();
+            this.doc.dom.appendChild(child.dom);
+            if (fun && fun !== null)
+                fun();
+            child = child.next;
         }
-        this.operation.update();
 
         console.log(this.doc);
         this.artText.get<EventCenter>('$eventCenter').emit('artRender-render');
@@ -128,15 +128,15 @@ export default class ArtRender implements Render {
     public detachAllEvent(): void {
         console.log('sdad', this)
         this.renderEvent.detachAllEvent();
-    } 
+    }
 }
 
 export let ArtRenderExport = {
     install: function (Art, options) {
-        Core.use(flowchartExport);
-        Core.use(hljsExport);
-        Core.use(mermaidExport);
-        options['container'].bind('$artRender', ArtRender, [{'get': 'art'}], true);
+        //Core.use(flowchartExport);
+        //Core.use(hljsExport);
+        //Core.use(mermaidExport);
+        options['container'].bind('$artRender', ArtRender, [{ 'get': 'art' }], true);
     },
     created: function (art: Art, options) {
         art.get<Editor>('$editor').addRender('artRender', art.get('$artRender'));

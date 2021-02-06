@@ -11,6 +11,9 @@ export function installShortcutKey(artRenderEvent: ArtRenderEvent) {
     // ctrl + i 斜体
     artRenderEvent.addCustomizeEvent("art-ShortcutKey-Control+i", () => {italic(artRenderEvent.artRender.artText)}); 
     // ctrl + shift + d 删除线
+
+    // ctrl + z 撤销
+    artRenderEvent.addCustomizeEvent("art-ShortcutKey-Control+z", () => {artRenderEvent.artRender.operation.undo()}); 
 }
 
 function save(art: Art) {

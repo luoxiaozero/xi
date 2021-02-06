@@ -37,7 +37,7 @@ export default class Interaction {
         this.behavior = { key, type };
         let state: boolean = true;
         this.cursor.getSelection();
-        this.domUpdateDoc();
+        console.log(key)
         if (type == 'keydown') {
             switch (key) {
                 case 'Backspace':
@@ -48,7 +48,16 @@ export default class Interaction {
                     break;
             }
         } else if (type == 'keyup') {
-            state = this.keyup();
+            switch (key) {
+                case "Control":
+                case "Shift":
+                    break;
+                case "Enter":
+                    
+                default:
+                    this.domUpdateDoc();
+                    state = this.keyup();
+            }
         }
 
         this.cursor.setSelection();
@@ -70,14 +79,38 @@ export default class Interaction {
             node = node.next;
         }
         console.log(node, domToNode(dom), this.artRender.cursor.location.anchorAlineOffset)
-        let newNode = domToNode(dom);
         if (this.behavior.type == "keyup" && this.behavior.key === "Enter") {
-            this.operation.insertBefore(domToNode(dom.previousSibling as HTMLElement), node.prev);
-            this.operation.insertBefore(newNode, node);
+            this.operation.replace(domToNode(dom.previousSibling as HTMLElement), node.prev, false);
+            this.operation.insertBefore(domToNode(dom), node, false);
         } else {
-            this.operation.replace(domToNode(dom), node);
+            this.updateNode(dom, node);
         }
-        this.operation.update(false);
+    }
+
+    updateNode(dom: HTMLElement, node: VNode) {
+        switch (dom.nodeName) {
+            case "#text":
+                if (node.type == "text") {
+                    if (node._literal != dom.nodeValue) {
+                        let newNode = new VNode("text");
+                        newNode._literal = dom.nodeValue;
+
+                        node.dom = new Text(node._literal);
+                        dom.parentElement.replaceChild(node.dom, dom);
+                        console.log(newNode, node)
+                        this.operation.replace(newNode, node);
+                    }
+                } else {
+                    throw "class Interaction 的 updateNode 方法";
+                }
+                return;
+        }
+
+        let child = node.firstChild;
+        for (let i = 0; i < dom.childNodes.length && child; i++) {
+            this.updateNode(<HTMLElement>dom.childNodes[i], child);
+            child = child.next;
+        }
     }
 
     /**摁键抬起时渲染 */
@@ -93,13 +126,13 @@ export default class Interaction {
             node = node.next;
         }
 
-        if (this.behavior.type == "keyup" && this.behavior.key === "Enter") {
+        if (this.behavior.key === "Enter") {
             this.process_keyup(node.prev);
             this.process_keyup(node);
         } else {
             this.process_keyup(node);
         }
-        
+
         return false;
     }
 
@@ -264,6 +297,8 @@ export default class Interaction {
                 Cursor.setCursor(location.anchorNode, location.anchorOffset + 1);
                 this.artRender.cursor.getSelection();
                 return false;
+            } else {
+
             }
         }
 
@@ -409,6 +444,12 @@ export default class Interaction {
             ArtRender.plugins.hljs(code, node._literal, lang);
         } else {
             code.innerHTML = node._literal;
+        }
+    }
+
+    diff(newNode: VNode, oldNode: VNode) {
+        if (newNode == oldNode) {
+            
         }
     }
 }

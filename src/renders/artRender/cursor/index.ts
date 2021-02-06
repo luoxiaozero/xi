@@ -1,7 +1,7 @@
 import Tool from '@/tool';
 import ArtRender from '..';
 
-class Location {
+export class Location {
     anchorInlineOffset: number;
     focusInlineOffset: number;
     anchorAlineOffset: number;

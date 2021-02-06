@@ -56,11 +56,11 @@ class NodeWalker {
 
 export default class VNode {
     private _type: string;
-    private _parent: VNode;
+    _parent: VNode;
     private _firstChild: VNode;
     private _lastChild: VNode;
-    private _prev: VNode;
-    private _next: VNode;
+    _prev: VNode;
+    _next: VNode;
     public _lastLineChecked: boolean;
     private _sourcepos: any;
     public _lastLineBlank: boolean;
