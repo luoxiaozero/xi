@@ -76,6 +76,7 @@ class FileSidebar {
                 })
             } else {
                 _this.art.get<ArtRequest>('artRequest').get('/openFileText?path=' + path).then((json: any) => {
+                    console.log(json)
                     _this.art.get<Editor>('$editor').openFile(json);
                 })
             }

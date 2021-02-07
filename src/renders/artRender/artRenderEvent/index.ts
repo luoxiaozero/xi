@@ -4,6 +4,7 @@ import EventCenter from '@/eventCenter';
 import Editor from '@/editor';
 import Message from '@/plugins/message';
 import { installShortcutKey } from './shortcutKey';
+import { win } from '@/config';
 
 /**
  * 渲染器的事件类
@@ -13,7 +14,6 @@ export default class ArtRenderEvent {
     artRender: ArtRender;
     /**是否连续输入，如中文输入时，多个摁键代表一个中文 */
     isComposition: boolean = false;
-    uploadImg: Function;
     DOMEvents: string[] = [];
     customizeEvents: [string, Function][] = [];
     constructor(artRender: ArtRender) {
@@ -22,6 +22,10 @@ export default class ArtRenderEvent {
 
     /**添加所有事件 */
     public attachAllEvent() {
+        this.artRender.dom.onmousedown = function (evt) {
+            console.log(evt);
+
+        }
         this.artRender.dom.setAttribute('contenteditable', 'true');
 
         const artRenderEvent = this;
@@ -39,7 +43,7 @@ export default class ArtRenderEvent {
         // 连续输开始
         this.addDOMEvent('compositionstart', (e: CompositionEvent, _this: ArtRenderEvent) => _this.isComposition = true);
         // 连续输结束
-        this.addDOMEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) =>  _this.isComposition = false);
+        this.addDOMEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) => _this.isComposition = false);
 
         this.addDOMEvent('click', this.click);
         this.addDOMEvent('contextmenu', this.contextmenu);
@@ -85,7 +89,7 @@ export default class ArtRenderEvent {
         this.customizeEvents.push([type, listener]);
     }
 
-    
+
 
     /**摁键摁下行为 */
     public keydown(e: KeyboardEvent, _this: ArtRenderEvent): boolean {
@@ -231,29 +235,28 @@ export default class ArtRenderEvent {
                 };
                 fr.readAsText(f0);
             } else if (/^image\/(png|jpe?g)$/.test(f0.type)) {
-                // 加载图片
-                fr.onload = function () {
-                    let url = null;
-                    if (_this.uploadImg) {
-                        url = _this.uploadImg(fr.result);
-                    } else {
-                        url = fr.result;
-                    }
+                console.log(f0, fr)
+                const closure = function (url: string, name: string) {
+ 
 
                     let img = new Image();
                     img.src = url;
 
                     let span = document.createElement('span');
                     span.setAttribute('class', 'art-hide');
-                    let text = document.createTextNode('![' + f0.name + '](' + url + ')');
+                    let text = new Text('![' + name + '](' + url + ')');
                     span.appendChild(text);
                     const target = e.target as HTMLElement;
 
-                    target.appendChild(span);
-                    target.appendChild(img);
+                    target.appendChild(text);
+                    //target.appendChild(img);
+
+                    _this.artRender.interaction.render(null, "keyup");
                 }
-                //读取文件中的内容 —— DataURL：一种特殊的URL地址，本身包含着所有的数据
-                fr.readAsDataURL(f0);
+
+                _this.artRender.artText.get<EventCenter>('$eventCenter').emit("art-uploadImage", [f0, closure]);
+
+
             } else {
                 _this.artRender.artText.get<Message>('message').create('不支持该文件类型', 'error');
             }

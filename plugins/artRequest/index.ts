@@ -4,10 +4,13 @@ class ArtHttpRequest {
     method: string;
     url: string;
     data: any;
+    headers: any;
+    contentType: any;
     constructor(method: string, url: string) {
         this.xhr = new XMLHttpRequest();
         this.method = method;
         this.url = url;
+        this.contentType = true;
     }
 
     public then(callback: Function): ArtHttpRequest {
@@ -18,7 +21,8 @@ class ArtHttpRequest {
         }
         this.xhr.open(this.method, this.url, true);
         if (this.method == 'POST' && this.data != undefined) {
-            this.xhr.setRequestHeader("Content-type","application/json");
+            if (this.contentType)
+                this.xhr.setRequestHeader("Content-type","application/json");
             this.xhr.send(this.data);
         } else {
             this.xhr.send();
@@ -37,9 +41,10 @@ export default class ArtRequest {
         return new ArtHttpRequest('GET', this.rootUrl + url);
     }
 
-    public post(url: string, data:any=undefined): ArtHttpRequest {
+    public post(url: string, data: any = undefined, contentType: boolean=true): ArtHttpRequest {
         let artHttpRequest = new ArtHttpRequest('POST', this.rootUrl + url);
-        if (data == undefined) {
+        artHttpRequest.contentType = contentType;
+        if (data == undefined || !contentType) {
             artHttpRequest.data = data;
         } else {
             artHttpRequest.data = JSON.stringify(data);

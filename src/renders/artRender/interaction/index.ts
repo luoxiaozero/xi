@@ -83,7 +83,7 @@ export default class Interaction {
             this.operation.replace(domToNode(dom.previousSibling as HTMLElement), node.prev, false);
             this.operation.insertBefore(domToNode(dom), node, false);
         } else {
-            this.updateNode(dom, node);
+            this.operation.insertBefore(domToNode(dom), node, false);
         }
     }
 

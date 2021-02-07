@@ -18,9 +18,9 @@ export let openVersionHistory = {
 export let saveMdFile = {
     created: function (art: Art, options) {
         art.get<Toolbar>('toolbar').add({
-            title: '保存', click: () => 
+            title: '保存', click: () =>
                 art.get<EventCenter>('$eventCenter').emit('art-save')
-            });
+        });
     }
 }
 
@@ -238,18 +238,18 @@ export default class VersionHistory {
             localStorage.art_articles = JSON.stringify(art_articles);
             let article = art_articles[mdId];
             article['defaultMd'] = fileInfo.markdown;
-            this.art.get<Editor>('$editor').openFile(article);
+            this.art.get<Editor>('$editor').openFile(Object.assign(fileInfo, article));
             this.art.get<Message>('message').create('保存成功', 'success');
         }
     }
 
     /**关闭历史工具 */
     public close(): void {
-    localStorage.art_articles = JSON.stringify(this.art_articles);
-    this.maskLayer.style.display = 'none';
-    this.dom.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
+        localStorage.art_articles = JSON.stringify(this.art_articles);
+        this.maskLayer.style.display = 'none';
+        this.dom.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 }
 
 export let VersionHistoryExport = {
