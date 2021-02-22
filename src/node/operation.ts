@@ -42,6 +42,7 @@ class OperationVNode {
 export default class Operation {
     private first: OperationVNodeHead;
     private last: OperationVNodeHead;
+    private current: OperationVNodeHead;
 
     private currentNodeHead: OperationVNodeHead;
     artRender: ArtRender;
@@ -49,6 +50,7 @@ export default class Operation {
         this.artRender = artRender;
         this.first = null;
         this.last = null;
+        this.current = null;
         this.currentNodeHead = null;
     }
 
@@ -101,6 +103,7 @@ export default class Operation {
                         child = child.next;
                         continue;
                     }
+                    console.log("asdad update")
                     fun = null;
                     if (child.command == "appendChild") {
                         fun = child.node.newDom();
@@ -128,8 +131,46 @@ export default class Operation {
         }
     }
 
+    /**重做 */
     redo() {
+        if (this.currentNodeHead) {
+            if (this.current) {
+                this.current.next = this.currentNodeHead;
+                this.currentNodeHead.prev = this.current;
+            }
 
+            this.current = this.currentNodeHead;
+            this.currentNodeHead = null;
+
+            let child = this.last.first, fun: Function;
+            while (child) {
+                if (child.renderFlag) {
+                    fun = null;
+                    if (child.command == "appendChild") {
+                        fun = child.node.setDom();
+                        child.beNode.dom.appendChild(child.node.dom);
+                    } else if (child.command == "replace") {
+                        fun = child.node.setDom();
+                        child.beNode.dom.parentElement.replaceChild(child.node.dom, child.beNode.dom);
+                    } else if (child.command == "insertBefore") {
+                        fun = child.node.setDom();
+                        child.beNode.dom.parentElement.insertBefore(child.node.dom, child.beNode.dom);
+                    } else if (child.command == "insertAfter") {
+                        fun = child.node.setDom();
+                        if (child.beNode.dom.nextElementSibling) {
+                            child.beNode.dom.parentElement.insertBefore(child.node.dom, child.beNode.dom.nextElementSibling);
+                        } else {
+                            child.beNode.dom.parentElement.appendChild(child.node.dom);
+                        }
+                    }
+                    if (fun)
+                        fun();
+                }
+                child = child.next;
+            }
+
+            this.last.location = this.artRender.cursor.location;
+        }
     }
 
     undo() {

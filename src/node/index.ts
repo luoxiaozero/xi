@@ -168,19 +168,15 @@ export default class VNode {
         this._listData.delimiter = delim;
     }
 
-    updateDom() {
-        if (!this.dom)
-            this.newDom();
+    /**dom为空时, 新建 */
+    setDom(): Function {
+        if (this.dom == null)
+            return this.newDom();
 
-        let child = this.firstChild;
-        while (child) {
-            if (!child)
-                child.newDom();
-
-            child = child.next;
-        }
+        return null;
     }
 
+    /**新建dom值 */
     newDom(): Function {
         let nodeName: string;
         switch (this._type) {
@@ -523,6 +519,19 @@ export default class VNode {
             node = node._next;
         }
         return md;
+    }
+
+    isEqual(node: VNode): boolean {
+        if (node.type != this._type)
+            return false;
+
+        switch(this._type) {
+            case "text":
+                if (this._literal != node._literal)
+                    return false;
+                break;
+        }
+        return true;
     }
 }
 

@@ -4,7 +4,7 @@ import sample from './md/sample'
 import table from './md/table'
 import code_block from "./md/code_block"
 
-let defaultMd = sample;
+let defaultMd = "asdad\n```\nsdfsdfsf\nsdfs\n```\n";
 
 window.onload = function () {
     const art: ArtText = new ArtText({ defaultMd: defaultMd }).mount('#art');

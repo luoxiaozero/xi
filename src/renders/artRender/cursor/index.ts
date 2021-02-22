@@ -6,33 +6,37 @@ export class Location {
     focusInlineOffset: number;
     anchorAlineOffset: number;
     focusAlineOffset: number;
+    recentlyParentClassNode: Node;
     anchorOffset: number;
     anchorNode: Node;
     focusNode: Node;
     focusOffset: number;
-    constructor(
-        anchorInlineOffset: number,
-        focusInlineOffset: number,
-        anchorAlineOffset: number,
-        focusAlineOffset: number,
-        anchorOffset: number,
-        anchorNode: Node,
-        focusOffset: number,
-        focusNode: Node) {
-
-        this.anchorInlineOffset = anchorInlineOffset;
-        this.focusInlineOffset = focusInlineOffset;
-        this.anchorAlineOffset = anchorAlineOffset;
-        this.focusAlineOffset = focusAlineOffset;
-        this.anchorOffset = anchorOffset;
-        this.anchorNode = anchorNode;
-        this.focusNode = focusNode;
-        this.focusOffset = focusOffset;
+    isCollapsed: boolean;
+    selection: Selection;
+    constructor() {
+        this.recentlyParentClassNode = null;
+    }
+    
+    setParentClass(node: Node):boolean {
+        if (["P", "TH", "TR"].includes(node.nodeName) && this.recentlyParentClassNode == null) {
+            this.recentlyParentClassNode = node;
+            return true;
+        }
+        return false;
     }
 }
 
 export default class Cursor {
     static sel: Selection = window.getSelection();
+    static setCursor(node: Node, offset: number): boolean {
+        if (node == undefined && !node)
+            return false;
+        let range = Cursor.sel.getRangeAt(0).cloneRange();
+        range.setStart(node, offset);
+        range.collapse(true);
+        Cursor.sel.removeAllRanges();
+        Cursor.sel.addRange(range);
+    }
 
     /**挂载的DOM */
     mountDom: HTMLElement;
@@ -43,39 +47,33 @@ export default class Cursor {
         this.location = null;
     }
 
-    /**
-     * 获取光标位置
-     */
+    /** 获取光标位置 */
     public getSelection(): Location {
-        let { anchorNode, anchorOffset, focusNode, focusOffset } = Cursor.sel;
-        if (anchorNode && focusNode) {
+        let { anchorNode, anchorOffset, focusNode, focusOffset, isCollapsed } = Cursor.sel;
+
+        if (anchorNode && focusNode && anchorNode != this.mountDom) {
+            this.location = new Location();
+            this.location.selection = Cursor.sel;
+            this.location.anchorOffset = anchorOffset;
+            this.location.anchorNode = anchorNode;
+            this.location.focusOffset = focusOffset;
+            this.location.focusNode = focusNode;
+            this.location.isCollapsed = isCollapsed;
+
             let node = anchorNode;
             let len = anchorOffset;
-            if (node == this.mountDom) {
-                this.location = null;
-                return this.location;
-            }
-
+         
+            this.location.setParentClass(node.parentNode);
             while (node.parentNode != this.mountDom) {
                 while (node.previousSibling) {
+                    this.location.setParentClass(node);
                     node = node.previousSibling;
                     if (!Tool.hasClass(node as HTMLElement, 'art-shield'))
                         len += node.textContent.length;
                 }
                 node = node.parentNode;
             }
-
-            let nodeF = focusNode;
-            let lenF = focusOffset;
-
-            while (nodeF.parentNode !== this.mountDom) {
-                while (nodeF.previousSibling) {
-                    nodeF = nodeF.previousSibling;
-                    if (!Tool.hasClass(nodeF as HTMLElement, 'art-shield'))
-                        lenF += nodeF.textContent.length;
-                }
-                nodeF = nodeF.parentNode;
-            }
+            this.location.anchorInlineOffset = len;
 
             let rootNodeSub = -1;
             for (let i = 0; i < this.mountDom.childNodes.length; i++) {
@@ -84,6 +82,19 @@ export default class Cursor {
                     break;
                 }
             }
+            this.location.anchorAlineOffset = rootNodeSub;
+
+            let nodeF = focusNode;
+            let lenF = focusOffset;
+            while (nodeF.parentNode !== this.mountDom) {
+                while (nodeF.previousSibling) {
+                    nodeF = nodeF.previousSibling;
+                    if (!Tool.hasClass(nodeF as HTMLElement, 'art-shield'))
+                        lenF += nodeF.textContent.length;
+                }
+                nodeF = nodeF.parentNode;
+            }
+            this.location.focusInlineOffset = lenF;
 
             let rootNodeSubF = -1;
             for (let i = 0; i < this.mountDom.childNodes.length; i++) {
@@ -92,17 +103,18 @@ export default class Cursor {
                     break;
                 }
             }
-            let name = anchorNode.parentNode.nodeName;
-            if (anchorOffset == 0 && anchorNode.previousSibling == null &&
-                (name == 'LI' || name == 'P' || name == 'TH' || name == 'TD')) {
-                anchorNode = anchorNode.parentNode;
-            }
-            this.location = new Location(len, lenF, rootNodeSub, rootNodeSubF, anchorOffset, anchorNode, focusOffset, focusNode);
+            this.location.focusAlineOffset = rootNodeSubF;
+            // let name = anchorNode.parentNode.nodeName;
+            // if (anchorOffset == 0 && anchorNode.previousSibling == null &&
+            //     (name == 'LI' || name == 'P' || name == 'TH' || name == 'TD')) {
+            //     anchorNode = anchorNode.parentNode;
+            // }
         } else {
             this.location = null;
         }
         return this.location;
     }
+
     private searchNode(node: Node, len: number) {
         if (node.childNodes.length == 1 && node.childNodes[0].nodeName == '#text') {
             if (len <= node.childNodes[0].textContent.length)
@@ -270,17 +282,7 @@ export default class Cursor {
         }
     }
 
-    static setCursor(node: Node, offset: number): boolean {
-        if (node == undefined && !node)
-            return false;
-        let range = Cursor.sel.getRangeAt(0).cloneRange();
-        range.setStart(node, offset);
-        range.collapse(true);
-        Cursor.sel.removeAllRanges();
-        Cursor.sel.addRange(range);
-    }
-
-    public moveCursor(direcction): boolean {
+    public moveCursor(direcction: string): boolean {
         switch (direcction) {
             case 'ArrowRight':
                 this.location.anchorOffset++;

@@ -83,7 +83,8 @@ export default class Interaction {
             this.operation.replace(domToNode(dom.previousSibling as HTMLElement), node.prev, false);
             this.operation.insertBefore(domToNode(dom), node, false);
         } else {
-            this.operation.insertBefore(domToNode(dom), node, false);
+            // this.operation.insertBefore(domToNode(dom), node, false);
+            this.updateNode(dom, node);
         }
     }
 
@@ -94,11 +95,11 @@ export default class Interaction {
                     if (node._literal != dom.nodeValue) {
                         let newNode = new VNode("text");
                         newNode._literal = dom.nodeValue;
-
+                        newNode.dom = node.dom;
                         node.dom = new Text(node._literal);
-                        dom.parentElement.replaceChild(node.dom, dom);
-                        console.log(newNode, node)
-                        this.operation.replace(newNode, node);
+                        
+                        this.operation.replace(newNode, node, false);
+                        this.operation.update();
                     }
                 } else {
                     throw "class Interaction 的 updateNode 方法";
@@ -448,7 +449,7 @@ export default class Interaction {
     }
 
     diff(newNode: VNode, oldNode: VNode) {
-        if (newNode == oldNode) {
+        if (!oldNode.isEqual(newNode)) {
             
         }
     }
