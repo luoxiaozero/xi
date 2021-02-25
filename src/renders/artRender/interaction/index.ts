@@ -383,6 +383,8 @@ export default class Interaction {
                 case "block_quote":
                     this.block_quote(child);
                     break;
+                case "item_checkbox":
+                    break;
                 default:
                     console.error(child);
                     throw "Interction class: item 中不存在" + child.type + "类型";

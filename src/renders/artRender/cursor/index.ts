@@ -16,8 +16,8 @@ export class Location {
     constructor() {
         this.recentlyParentClassNode = null;
     }
-    
-    setParentClass(node: Node):boolean {
+
+    setParentClass(node: Node): boolean {
         if (["P", "TH", "TR"].includes(node.nodeName) && this.recentlyParentClassNode == null) {
             this.recentlyParentClassNode = node;
             return true;
@@ -31,6 +31,7 @@ export default class Cursor {
     static setCursor(node: Node, offset: number): boolean {
         if (node == undefined && !node)
             return false;
+        console.log(Cursor.sel)
         let range = Cursor.sel.getRangeAt(0).cloneRange();
         range.setStart(node, offset);
         range.collapse(true);
@@ -62,7 +63,7 @@ export default class Cursor {
 
             let node = anchorNode;
             let len = anchorOffset;
-         
+
             this.location.setParentClass(node.parentNode);
             while (node.parentNode != this.mountDom) {
                 while (node.previousSibling) {
@@ -246,21 +247,24 @@ export default class Cursor {
                 classVal = classVal.replace("art-show-math", "");
                 showNodeList[i].setAttribute("class", classVal);
             }
-            if (info[0].nodeName == '#text' && Tool.hasClass(info[0].parentNode, 'art-math')) {
+            if (info[0].nodeName == '#text' && Tool.hasClass(info[0].parentNode, 'art-md-math')) {
                 let classVal = (<HTMLSpanElement>info[0].parentNode.previousSibling.childNodes[0]).getAttribute("class");
                 if (classVal == null || classVal.indexOf('art-show-math') < 0) {
-                    classVal = 'art-show-math';
+                    classVal += ' art-show-math';
                     (<HTMLSpanElement>info[0].parentNode.previousSibling.childNodes[0]).setAttribute("class", classVal);
                 }
             }
             Cursor.setCursor(info[0], info[1])
 
             let art_text_double = info[0].parentNode;
+
             if (art_text_double && Tool.hasClass(art_text_double, "art-hide")) {
                 if (art_text_double.previousSibling && Tool.hasClass(art_text_double.previousSibling, "art-text-double")) {
                     art_text_double = art_text_double.previousSibling;
                 } else if (art_text_double.nextSibling && Tool.hasClass(art_text_double.nextSibling, "art-text-double")) {
                     art_text_double = art_text_double.nextSibling;
+                } else if (art_text_double && Tool.hasClass(art_text_double, "art-text-parent")) {
+                    art_text_double = art_text_double.parentElement;
                 }
             }
 

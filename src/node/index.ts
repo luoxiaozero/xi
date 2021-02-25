@@ -1,6 +1,8 @@
 import ArtRender from "@/renders/artRender";
 import Cursor from "@/renders/artRender/cursor";
 import createCodeBlockTool from "@/renders/artRender/tool/codeBlockTool";
+import createMathBlockTool from "@/renders/artRender/tool/mathBlockTool";
+import createTableTool from "@/renders/artRender/tool/tableTool";
 
 class NodeWalker {
     current: VNode;
@@ -213,9 +215,9 @@ export default class VNode {
 
                 // } else if (tool == "toc") {
 
-                // } else if (tool == "table") {
-
-                // } 
+                else if (tool == "table") {
+                    createTableTool(this.dom);
+                }
                 else if (tool == "code_block_flow") {
                     this.dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
                     this.dom.setAttribute("contenteditable", "false");
@@ -233,6 +235,22 @@ export default class VNode {
                         let dom = this.dom, mdText = this.prev._literal;
                         let fun = () => { console.log("mermaid 执行"); ArtRender.plugins.mermaid(dom, mdText); };
                         return fun;
+                    }
+                } else if (tool === "math") {
+                    this.dom = document.createElement("span");
+                    this.dom.setAttribute("contenteditable", "false");
+                    this.dom.setAttribute("class", "art-shield");
+                    this.dom.style.position = "relative";
+                    this.dom.onclick = function () {
+                        Cursor.setCursor((this as HTMLSpanElement).nextSibling, 0);
+                    }
+                    if (ArtRender.plugins.katex) {
+                        let dom = this.dom, mdText = this.attrs.get("--math");
+                        let fun = () => ArtRender.plugins.katex(dom, mdText);
+                        let cla = this._next.attrs.get("class");
+                        cla += " art-hide";
+                        this._next.attrs.set("class", cla);
+                        return fun
                     }
                 }
                 return null;
@@ -264,6 +282,94 @@ export default class VNode {
                     code.innerHTML = md;
                 }
                 this.dom.appendChild(code);
+                break;
+            case "math":
+                this.dom = document.createElement("span");
+                break;
+            case "math_block":
+                this.dom = document.createElement("div");
+                this.dom.setAttribute("contenteditable", "false");
+
+                let div = document.createElement("div");
+                div.setAttribute("class", "art-md-math-block-main")
+                div.style.display = "none";
+                let math_tool = document.createElement("div");
+                createMathBlockTool(math_tool, "start");
+                div.appendChild(math_tool);
+
+                let pre = document.createElement("pre");
+                pre.setAttribute("contenteditable", "true");
+                
+                pre.style.outline = "none";
+                pre.innerText = this._literal;
+
+                pre.onblur = function () {
+                    (this as HTMLSpanElement).parentElement.style.display = "none";
+                    if (ArtRender.plugins.katex) {
+                        let mdText = (this as HTMLSpanElement).innerText;
+                        ArtRender.plugins.katex(((this as HTMLSpanElement).parentElement.nextElementSibling as HTMLDivElement), mdText);
+                    }
+                }
+                div.appendChild(pre);
+                math_tool = document.createElement("div");
+                createMathBlockTool(math_tool, "end");
+                div.appendChild(math_tool);
+                this.dom.appendChild(div);
+
+                div = document.createElement("div");
+                div.style.textAlign = "center";
+                div.onclick = function () {
+                    ((this as HTMLSpanElement).previousSibling as HTMLDivElement).style.display = "block";
+                    Cursor.setCursor(((this as HTMLSpanElement).previousSibling as HTMLDivElement).childNodes[0], 0)
+                }
+
+                if (ArtRender.plugins.katex) {
+                    let mdText = this._literal;
+                    ArtRender.plugins.katex(div, mdText);
+                }
+
+                
+                this.dom.appendChild(div);
+                break;
+            case "item_checkbox":
+                this.dom = document.createElement("input");
+                this.setAttrs();
+                break;
+            case "html_inline":
+                this.dom = document.createElement("span");
+                this.setAttrs();
+                this.dom.style.color = "#999";
+                this.dom.innerText = this._literal;
+                break;
+            case "html_block":
+                this.dom = document.createElement("div");
+                this.dom.setAttribute("contenteditable", "false");
+
+                div = document.createElement("div");
+                div.setAttribute("class", "art-md-html-block-main")
+                pre = document.createElement("pre");
+                pre.setAttribute("contenteditable", "true");
+                pre.style.outline = "none";
+                
+                pre.innerText = this._literal;
+                pre.onblur = function () {
+                    (this as HTMLSpanElement).parentElement.style.display = "none";
+                    ((this as HTMLSpanElement).parentElement.nextElementSibling as HTMLDivElement).style.display = "block";
+                    ((this as HTMLSpanElement).parentElement.nextElementSibling as HTMLDivElement).innerHTML = (this as HTMLSpanElement).innerText;
+                }
+                div.appendChild(pre);
+                this.dom.appendChild(div);
+
+                div = document.createElement("div");
+                div.onclick = function () {
+                    (this as HTMLSpanElement).style.display = "none";
+                    ((this as HTMLSpanElement).previousSibling as HTMLDivElement).style.display = "block";
+                    Cursor.setCursor(((this as HTMLSpanElement).previousSibling as HTMLDivElement), 0)
+                }
+                div.innerHTML = this._literal;
+
+                
+                this.dom.appendChild(div);
                 break;
             default:
                 switch (this._type) {
@@ -334,6 +440,12 @@ export default class VNode {
         switch (node._type) {
             case "document":
             case "block_quote":
+            case "table":
+            case "thead":
+            case "tbody":
+            case "tr":
+            case "th":
+            case "td":
             case "list":
             case "item":
             case "paragraph":
@@ -346,6 +458,7 @@ export default class VNode {
             case "delete":
             case "custom_inline":
             case "custom_block":
+            case "math":
                 return true;
             default:
                 return false;
@@ -459,6 +572,7 @@ export default class VNode {
         layer += 1;
         let md = "", node = this._firstChild;
         switch (this._type) {
+            case "html_inline":
             case "text":
                 return this._literal;
             case "softbreak":
@@ -525,7 +639,7 @@ export default class VNode {
         if (node.type != this._type)
             return false;
 
-        switch(this._type) {
+        switch (this._type) {
             case "text":
                 if (this._literal != node._literal)
                     return false;

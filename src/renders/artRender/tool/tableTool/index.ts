@@ -1,6 +1,6 @@
 import Cursor from '../../cursor';
 
-export default function initTableTool(root: HTMLElement): TableTool {
+export default function createTableTool(root: HTMLElement): TableTool {
     return new TableTool(root);
 }
 
@@ -9,6 +9,8 @@ export class TableTool {
     constructor(root: HTMLElement) {
         this.rootDom = root;
         root.innerHTML = '';
+        root.setAttribute("class", "art-shield art-tableTool");
+        root.setAttribute("contenteditable", "false");
         root.setAttribute('style', 'width:100%;visibility:hidden;font-size:14px;position:relative;margin-bottom: 2px;')
 
         root.appendChild(this.createAdjustSpan());

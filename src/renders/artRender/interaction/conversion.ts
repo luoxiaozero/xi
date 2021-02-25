@@ -1,4 +1,5 @@
 import VNode from "@/node";
+import Tool from "@/tool";
 
 /**
  * dom转虚拟节点 
@@ -63,8 +64,8 @@ export function domToNode(dom: HTMLElement): VNode {
             let code = dom.firstChild as HTMLElement;
             node._literal = code.innerText;
             let langs = code.getAttribute("class").split(/\s/), lang = "", match;
-            langs.forEach((value: string) => { 
-                if (match = value.match(/^lang-(.*?)$/)){
+            langs.forEach((value: string) => {
+                if (match = value.match(/^lang-(.*?)$/)) {
                     lang += match[1] + " ";
                 }
             })
@@ -89,9 +90,12 @@ export function domToNode(dom: HTMLElement): VNode {
         }
     }
 
-    for (let i = 0; i < dom.childNodes.length; i++) {
-        node.appendChild(domToNode(<HTMLElement>dom.childNodes[i]));
+    if (!Tool.hasClass(dom, "art-shield")) {
+        for (let i = 0; i < dom.childNodes.length; i++) {
+            node.appendChild(domToNode(<HTMLElement>dom.childNodes[i]));
+        }
     }
+
 
     return node;
 }

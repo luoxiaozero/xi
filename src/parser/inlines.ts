@@ -43,7 +43,10 @@ const C_DOUBLEQUOTE = 34;
 const C_EQUAL = 61;
 /**波浪号 ~ */
 const C_WAVES = 126;
+/**美元 $ */
+const C_DOLLAR = 36;
 
+const reItemCheckbox = /^\[(\s|x|X)\]/;
 
 
 // Some regexps used in inline parser:
@@ -105,7 +108,7 @@ var reSpaceAtEndOfLine = /^ *(?:\n|$)/;
 var reLinkLabel = /^\[(?:[^\\\[\]]|\\.){0,1000}\]/;
 
 // Matches a string of non-special characters.
-const reMain = /^[^\n`\[\]\\!<&*_'"~]+/m;
+const reMain = /^[^\n`\[\]\\!<&*_'"~$]+/m;
 
 var text = function (s) {
     var node = new VNode("text");
@@ -406,7 +409,7 @@ export default class InlineParser {
             this.pos -= numdelims;
             return false;
         }
-            
+
         var node = text(contents);
         block.appendChild(node);
 
@@ -865,6 +868,7 @@ export default class InlineParser {
             case C_BACKTICK:
                 res = this.parseBackticks(block);
                 break;
+            case C_DOLLAR:
             case C_WAVES:
             case C_ASTERISK:
             case C_UNDERSCORE:
@@ -958,8 +962,8 @@ export default class InlineParser {
 
                         opener_inl = opener.node;
                         closer_inl = closer.node;
-                        
-                        let art_mark = opener_inl._literal.length > closer_inl._literal.length ? closer_inl._literal: opener_inl._literal; 
+
+                        let art_mark = opener_inl._literal.length > closer_inl._literal.length ? closer_inl._literal : opener_inl._literal;
                         // remove used delimiters from stack elts and inlines
                         opener.numdelims -= use_delims;
                         closer.numdelims -= use_delims;
@@ -1002,7 +1006,62 @@ export default class InlineParser {
                             closer = tempstack;
                         }
                     }
-                } else if(closercc === C_WAVES) {
+                } else if (closercc === C_DOLLAR) {
+                    if (!opener_found) {
+                        closer = closer.next;
+                    } else {
+                        // calculate actual number of delimiters used from closer
+                        // 计算从closer开始使用的分隔符的实际数目
+                        use_delims =
+                            closer.numdelims >= 2 && opener.numdelims >= 2 ? 2 : 1;
+
+                        opener_inl = opener.node;
+                        closer_inl = closer.node;
+
+                        let art_mark = opener_inl._literal;
+                        // remove used delimiters from stack elts and inlines
+                        opener.numdelims -= use_delims;
+                        closer.numdelims -= use_delims;
+                        opener_inl._literal = opener_inl._literal.slice(
+                            0,
+                            opener_inl._literal.length - use_delims
+                        );
+                        closer_inl._literal = closer_inl._literal.slice(
+                            0,
+                            closer_inl._literal.length - use_delims
+                        );
+                        if (use_delims === 1) {
+                            let math = new VNode("math");
+                            tmp = opener_inl.next;
+                            while (tmp && tmp !== closer_inl) {
+                                next = tmp._next;
+                                tmp.unlink();
+                                math.appendChild(tmp);
+
+                                tmp = next;
+                            }
+
+                            opener_inl.insertAfter(math);
+
+                            // remove elts between opener and closer in delimiters stack
+                            removeDelimitersBetween(opener, closer);
+
+                            // if opener has 0 delims, remove it and the inline
+                            if (opener.numdelims === 0) {
+                                opener_inl.unlink();
+                                this.removeDelimiter(opener);
+                            }
+
+                            if (closer.numdelims === 0) {
+                                closer_inl.unlink();
+                                tempstack = closer.next;
+                                this.removeDelimiter(closer);
+                                closer = tempstack;
+                            }
+                        }
+
+                    }
+                } else if (closercc === C_WAVES) {
                     if (!opener_found) {
                         closer = closer.next;
                     } else {
@@ -1012,8 +1071,8 @@ export default class InlineParser {
 
                         opener_inl = opener.node;
                         closer_inl = closer.node;
-                        
-                        let art_mark = opener_inl._literal; 
+
+                        let art_mark = opener_inl._literal;
                         // remove used delimiters from stack elts and inlines
                         opener.numdelims -= use_delims;
                         closer.numdelims -= use_delims;
@@ -1106,6 +1165,19 @@ export default class InlineParser {
     // using refmap to resolve references.
     // 使用refmap来解析引用。
     public parseInlines(block: VNode) {
+        let match;
+        if (block.parent && block.parent.type === "item" && (match = block._string_content.match(reItemCheckbox))) {
+            console.log(match)
+            let item_checkbox = new VNode("item_checkbox");
+            item_checkbox.attrs.set("type", "checkbox");
+            item_checkbox.attrs.set("disabled", "disabled");
+            if (match[1] !== " ") {
+                item_checkbox.attrs.set("checked", "checked");
+            }
+            block.insertBefore(item_checkbox);
+            block._string_content = block._string_content.substring(3);
+        }
+
         this.subject = block._string_content.trim(); //  trim()方法用于删除字符串的头尾空白符，空白符包括：空格、制表符 tab、换行符等其他空白符等。
         this.pos = 0;
         this.delimiters = null;

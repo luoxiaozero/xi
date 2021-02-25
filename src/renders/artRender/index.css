@@ -17,6 +17,8 @@
 }
 
 .art-show-math {
+    top: 26px;
+    width: max-content;
     z-index: 5;
     position: absolute;
     padding: 13px 25px;
@@ -135,4 +137,65 @@
 
 .markdown-body h6::before {
     content: "H6";
+}
+.art-md-item-checkbox {
+    position: relative;
+    list-style-type: none;
+}
+.art-md-item-checkbox>input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-left: -1.25em;
+    margin-top: calc(1em - 7px);
+    border: none;
+}
+
+.art-md-table {
+    width: 100%;
+}
+
+.art-md-html-block-main::before,
+.art-md-math-block-main::before {
+    font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
+    position: absolute;
+    top: -20px;
+    right: 0;
+    background-color: #f6f8fa;
+    color: #777;
+    text-align: right;
+    font-size: 0.6em;
+    padding: 8px 20px 0;
+    line-height: 15px;
+    height: 15px;
+}
+
+
+
+.art-md-math-block-main {
+    position: relative;
+    background-color: #f6f8fa;
+    border-radius: 2px;
+    margin-bottom: 5px;
+}
+
+.art-md-html-block-main pre,
+.art-md-math-block-main pre{
+    overflow-x: auto;
+    padding: 0.1em 1em;
+    margin: 0;
+    font-size: 14px;
+}
+
+.art-md-math-block-main::before {
+    content: "公式";
+}
+
+.art-md-html-block-main {
+    
+    position: relative;
+}
+
+.art-md-html-block-main::before {
+    content: "HTML";
 }

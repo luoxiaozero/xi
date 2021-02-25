@@ -44,7 +44,21 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 
 ~~删除线~~
 
-数学公式：$x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}$
+#### 数学公式
+
+$x=\frac{-b\pm\sqrt{b^2-4ac}}{2a}$
+
+$\frac{1}{\Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{\frac25 \pi}} = 1+\frac{e^{-2\pi}}{1+\frac{e^{-4\pi}} {1+\frac{e^{-6\pi}}{1+\frac{e^{-8\pi}}{1+\cdots}}}}$
+
+$$
+\frac{1}{
+  \Bigl(\sqrt{\phi \sqrt{5}}-\phi\Bigr) e^{
+  \frac25 \pi}} = 1+\frac{e^{-2\pi}} {1+\frac{e^{-4\pi}} {
+    1+\frac{e^{-6\pi}}
+    {1+\frac{e^{-8\pi}}{1+\cdots}}
+  }
+}
+$$
 
 #### 横线
 
@@ -53,6 +67,13 @@ Markdown has a series of derivative versions to extend the functions of Markdown
 #### html
 
 <span style="color: #158bb8">html鸢尾蓝文字</span>
+
+<figure><table>
+<thead>
+<tr><th style='text-align:center;' >A</th><th style='text-align:left;' >B</th><th style='text-align:right;' >C</th></tr></thead>
+<tbody><tr><td style='text-align:center;' >100</td><td style='text-align:left;' >90</td><td style='text-align:right;' >80</td></tr></tbody>
+</table></figure>
+<hr />
 
 #### 链接 
 

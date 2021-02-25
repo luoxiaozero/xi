@@ -111,5 +111,7 @@ export {
     OPENTAG,
     CLOSETAG,
     ENTITY,
-    ESCAPABLE
+    ESCAPABLE,
+    TAGNAME,
+    ATTRIBUTE
 };

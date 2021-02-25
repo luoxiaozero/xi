@@ -16,6 +16,7 @@ import Operation from '@/node/operation';
 import { flowchartExport } from './plugins/flowchart';
 import { hljsExport } from './plugins/highlight';
 import { mermaidExport } from './plugins/mermaid';
+import { katexExport } from './plugins/katex';
 
 
 /**
@@ -133,9 +134,10 @@ export default class ArtRender implements Render {
 
 export let ArtRenderExport = {
     install: function (Art, options) {
-        //Core.use(flowchartExport);
-        //Core.use(hljsExport);
-        //Core.use(mermaidExport);
+        Core.use(flowchartExport);
+        Core.use(hljsExport);
+        Core.use(mermaidExport);
+        Core.use(katexExport);
         options['container'].bind('$artRender', ArtRender, [{ 'get': 'art' }], true);
     },
     created: function (art: Art, options) {

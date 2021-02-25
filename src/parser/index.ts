@@ -33,7 +33,7 @@ const reHtmlBlockClose = [
 
 const reThematicBreak = /^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$/;
 
-const reMaybeSpecial = /^[#`~*+_=<>0-9-]/;
+const reMaybeSpecial = /^[#`~*+_=<>0-9-|\$]/;
 
 const reNonSpace = /[^ \t\f\v\r\n]/;
 
@@ -45,11 +45,13 @@ const reATXHeadingMarker = /^#{1,6}(?:[ \t]+|$)/;
 
 const reCodeFence = /^`{3,}(?!.*`)|^~{3,}/;
 
+const reMathBlock = /^\$\$/;
+
 const reClosingCodeFence = /^(?:`{3,}|~{3,})(?= *$)/;
 
 const reTable = /^\|(\s*:?-{3,}:?\s*\|)+/;
 
-const reClosingTable = /^(?:`{3,}|~{3,})(?= *$)/;
+const reClosingTable = /^\|(.*?\|)+/;
 
 const reSetextHeadingLine = /^(?:=+|-+)[ \t]*$/;
 
@@ -385,6 +387,51 @@ const blocks = {
         },
         acceptsLines: true
     },
+    math_block: {
+        continue(parser: Parser, container: VNode) {
+            let ln = parser.currentLine;
+            let indent = parser.indent;
+            if (container._isFenced) {
+                // fenced
+                let match =
+                    indent <= 3 &&
+                    ln.charAt(parser.nextNonspace) === container._fenceChar &&
+                    ln.slice(parser.nextNonspace).match(reClosingCodeFence);
+                if (match && match[0].length >= container._fenceLength) {
+                    // closing fence - we're at end of line, so we can return
+                    parser.lastLineLength =
+                        parser.offset + indent + match[0].length;
+                    parser.finalize(container, parser.lineNumber);
+                    return 2;
+                } else {
+                    // skip optional spaces of fence offset
+                    let i = container._fenceOffset;
+                    while (i > 0 && isSpaceOrTab(peek(ln, parser.offset))) {
+                        parser.advanceOffset(1, true);
+                        i--;
+                    }
+                }
+            } else {
+                // indented
+                if (indent >= CODE_INDENT) {
+                    parser.advanceOffset(CODE_INDENT, true);
+                } else if (parser.blank) {
+                    parser.advanceNextNonspace();
+                } else {
+                    return 1;
+                }
+            }
+            return 0;
+        },
+        finalize(parser: Parser, block: VNode) {
+            return;
+        },
+        canContain() {
+            return false;
+        },
+        acceptsLines: true
+    },
+
     html_block: {
         continue(parser: Parser, container: VNode) {
             return parser.blank &&
@@ -396,6 +443,35 @@ const blocks = {
         finalize(parser: Parser, block: VNode) {
             block._literal = block._string_content.replace(/(\n *)+$/, "");
             block._string_content = null; // allow GC
+        },
+        canContain() {
+            return false;
+        },
+        acceptsLines: true
+    },
+    table: {
+        continue(parser: Parser, container: VNode) {
+            let ln = parser.currentLine;
+
+            let match = ln.slice(parser.nextNonspace).match(reClosingTable);
+            if (match) {
+                console.log(match)
+                let tbody = container.lastChild;
+                let tr = new VNode("tr", container.sourcepos);
+                tbody.appendChild(tr);
+                let str: string[] = match.input.split("|");
+                for (let i = 1; i < str.length - 1; i++) {
+                    let th = new VNode("td", container.sourcepos);
+                    th._string_content = str[i];
+                    tr.appendChild(th);
+                }
+                return 2;
+            }
+
+            return 1;
+        },
+        finalize(parser: Parser, block: VNode) {
+            return;
         },
         canContain() {
             return false;
@@ -436,6 +512,7 @@ const blocks = {
 // 0 = no match
 // 1 = matched container, keep going # 匹配的容器，继续
 // 2 = matched leaf, no more block starts # 匹配的叶子，没有更多的块开始
+// 3 = 表示我们已经完全处理了这一行，请继续。
 const blockStarts = [
     // block quote
     function (parser: Parser) {
@@ -579,6 +656,82 @@ const blockStarts = [
         }
     },
 
+    // Table
+    function (parser: Parser, container: VNode) {
+        let match, matchTable;
+        if (container.type === "paragraph") {
+            let str = container._string_content.split("\n");
+            let string_content = str[str.length - 2];
+
+            if (!parser.indented &&
+                container.type === "paragraph" &&
+                (match = string_content.match(reClosingTable)) &&
+                (matchTable = parser.currentLine
+                    .slice(parser.nextNonspace)
+                    .match(reTable)) &&
+                match.length === matchTable.length
+            ) {
+                parser.closeUnmatchedBlocks();
+
+                let table = new VNode("table", container.sourcepos);
+                let thead = new VNode("thead", container.sourcepos);
+                table.appendChild(thead);
+                let tr = new VNode("tr", container.sourcepos);
+                thead.appendChild(tr);
+                let str: string[] = match.input.split("|");
+                for (let i = 1; i < str.length - 1; i++) {
+                    let th = new VNode("th", container.sourcepos);
+                    th._string_content = str[i];
+                    tr.appendChild(th);
+                }
+                let tbody = new VNode("tbody", container.sourcepos);
+                table.appendChild(tbody);
+
+                container.insertAfter(table);
+                container._string_content = container._string_content.slice(0,
+                    container._string_content.length - match.input.length - 1)
+
+                parser.tip = table;
+                parser.advanceOffset(
+                    parser.currentLine.length - parser.offset,
+                    false
+                );
+                return 2;
+            }
+        }
+        return 0;
+    },
+
+    // math block
+    function (parser: Parser, container: VNode) {
+        let match;
+        if (
+            !parser.indented &&
+            (match = parser.currentLine
+                .slice(parser.nextNonspace)
+                .match(reMathBlock))
+        ) {
+            let currentLineNumbar = parser.currentLineNumbar + 1, match_2, str = "";
+            for (; currentLineNumbar < parser.lineLength; currentLineNumbar++) {
+                if (match_2 = parser.lines[currentLineNumbar].match(reMathBlock)) {
+                    let fenceLength = match[0].length;
+                    parser.closeUnmatchedBlocks();
+                    let container = parser.addChild("math_block", parser.nextNonspace);
+                    container._literal = str;
+                    parser.advanceNextNonspace();
+                    parser.advanceOffset(fenceLength, false);
+
+                    parser.currentLineNumbar = currentLineNumbar;
+                    return 3;
+                } else {
+                    str += parser.lines[currentLineNumbar] + "\n";
+                }
+            }
+
+        }
+        return 0;
+    },
+
     // thematic break
     function (parser: Parser) {
         if (
@@ -651,6 +804,9 @@ class Parser {
     blockStarts = blockStarts;
     tip: VNode;
     oldtip: VNode;
+    lines: string[];
+    lineLength: number;
+    currentLineNumbar: number;
     currentLine: string;
     lineNumber: number;
     offset: number;
@@ -792,7 +948,6 @@ class Parser {
     // then finalizing the document.
     // 然后确定 document 内容。
     public incorporateLine(ln: string) {
-        console.log("statr ==========================--==")
         let all_matched = true;
         let t;
 
@@ -820,21 +975,20 @@ class Parser {
         // 如果不是所有容器都匹配，则将all_matched设置为false。
         let lastChild: VNode;
         while ((lastChild = container.lastChild) && lastChild._open) {
-            console.log("while 1 test =-======")
             container = lastChild;
 
             this.findNextNonspace();
 
             switch (this.blocks[container.type].continue(this, container)) {
                 case 0: // we've matched, keep going # 我们已经匹配好了，继续
-                console.log("while 1 case 0test =-======")
+                    console.log("while 1 case 0test =-======")
                     break;
                 case 1: // we've failed to match a block # 我们没有匹配到一个block
-                console.log("while 1 case 1test =-======")
+                    console.log("while 1 case 1test =-======")
                     all_matched = false;
                     break;
                 case 2: // we've hit end of line for fenced code close and can return # 我们已经到达了fenced代码close的行尾，并且可以返回
-                console.log("while 1 case 2test =-======")
+                    console.log("while 1 case 2test =-======")
                     return;
                 default:
                     throw "continue returned illegal value, must be 0, 1, or 2";
@@ -861,6 +1015,7 @@ class Parser {
             console.log("while 3 test =-======")
             this.findNextNonspace();
 
+            console.log(this.indented, ln.slice(this.nextNonspace))
             // this is a little performance optimization:
             // 这是一个小小的性能优化:
             if (
@@ -883,6 +1038,8 @@ class Parser {
                     container = this.tip;
                     matchedLeaf = true;
                     break;
+                } else if (res === 3) {
+                    return;
                 } else {
                     i++;
                 }
@@ -1009,7 +1166,7 @@ class Parser {
         while ((event = walker.next())) {
             node = event.node;
             t = node.type;
-            if (!event.entering && (t === "paragraph" || t === "heading")) {
+            if (!event.entering && (t === "paragraph" || t === "heading" || t === "th" || t === "td")) {
                 this.inlineParser.parse(node);
             }
         }
@@ -1044,20 +1201,20 @@ class Parser {
         this.currentLine = "";
 
         // 准备输入
-        let lines = input.split(reLineEnding);
-        let len = lines.length;
+        this.lines = input.split(reLineEnding);
+        this.lineLength = this.lines.length;
         if (input.charCodeAt(input.length - 1) === C_NEWLINE) {
             // ignore last blank line created by final newline
             // 忽略由最后换行符创建的最后一个空行
-            len -= 1;
+            this.lineLength -= 1;
         }
 
         // 块解析
-        for (let i = 0; i < len; i++) {
-            this.incorporateLine(lines[i]);
+        for (this.currentLineNumbar = 0; this.currentLineNumbar < this.lineLength; this.currentLineNumbar++) {
+            this.incorporateLine(this.lines[this.currentLineNumbar]);
         }
         while (this.tip) {
-            this.finalize(this.tip, len);
+            this.finalize(this.tip, this.lineLength);
         }
 
         // 行解析
