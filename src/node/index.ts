@@ -299,7 +299,7 @@ export default class VNode {
 
                 let pre = document.createElement("pre");
                 pre.setAttribute("contenteditable", "true");
-                
+
                 pre.style.outline = "none";
                 pre.innerText = this._literal;
 
@@ -328,7 +328,7 @@ export default class VNode {
                     ArtRender.plugins.katex(div, mdText);
                 }
 
-                
+
                 this.dom.appendChild(div);
                 break;
             case "item_checkbox":
@@ -347,10 +347,11 @@ export default class VNode {
 
                 div = document.createElement("div");
                 div.setAttribute("class", "art-md-html-block-main")
+                div.style.display = "none";
                 pre = document.createElement("pre");
                 pre.setAttribute("contenteditable", "true");
                 pre.style.outline = "none";
-                
+
                 pre.innerText = this._literal;
                 pre.onblur = function () {
                     (this as HTMLSpanElement).parentElement.style.display = "none";
@@ -368,7 +369,7 @@ export default class VNode {
                 }
                 div.innerHTML = this._literal;
 
-                
+
                 this.dom.appendChild(div);
                 break;
             default:
@@ -568,13 +569,14 @@ export default class VNode {
         return new NodeWalker(this, selfFalg);
     }
 
-    public getMd(layer: number = 0): string {
-        layer += 1;
+    public getMd(): string {
         let md = "", node = this._firstChild;
         switch (this._type) {
             case "html_inline":
             case "text":
                 return this._literal;
+            case "html_block":
+                return this._literal + "\n";
             case "softbreak":
                 return "\n";
             case "thematic_break":
@@ -584,28 +586,116 @@ export default class VNode {
             case "code_block":
                 md += "```" + this._info + "\n";
                 md += this._literal;
-                md += "\n```\n"
+                md += "```\n"
+                return md;
+            case "math_block":
+                md += "$$\n";
+                md += this._literal;
+                md += "$$\n"
+                return md;
+            case "table":
+                let child = this.firstChild.firstChild.firstChild, mat, tableStr = "", child_2: VNode;
+                md += '|';
+                tableStr += "|";
+                while (child) {
+                    md += child.getMd() + '|';
+                    if (child.attrs.has("style") && (mat = child.attrs.get("style").match(/text-align:\s*?(left|center|right)/))) {
+                        switch (mat[1]) {
+                            case 'center': tableStr += ':---:|'; break;
+                            case 'left': tableStr += ':---|'; break;
+                            case 'right': tableStr += '---:|'; break;
+                            default: tableStr += ':---:'; break;
+                        }
+                    } else {
+                        tableStr += '---|';
+                    }
+                    child = child.next;
+                }
+                md += "\n" + tableStr + "\n";
+
+                child = this.lastChild.firstChild, mat;
+                while (child) {
+                    child_2 = child.firstChild;
+                    md += '|';
+                    while (child_2) {
+                        md += child_2.getMd() + '|';
+                        child_2 = child_2.next;
+                    }
+                    md += "\n";
+                    child = child.next;
+                }
                 return md;
             case "item":
-                if (this.parent.firstChild !== this) {
-                    md += "  ".repeat(layer / 2 - 1);
+                let str: string, spaceNumbar = "", flag = true;
+                child = this.parent;
+                while (child) {
+                    if (child.type === "list") {
+                        if (child._listData.type === "ordered") {
+                            spaceNumbar += "   ";
+                        } else {
+                            spaceNumbar += "  ";
+                        }
+                    } else if (child.type !== "item") {
+                        break;
+                    }
+                    child = child.parent;
                 }
 
-                if (this._listData.type === "ordered")
-                    md += this._listData.start + ". " + node.getMd(layer);
-                else
-                    md += this._listData.bulletChar + " " + node.getMd(layer);
+                if (this._listData.type === "ordered") {
+                    md += this._listData.start + ". ";
+                } else {
+                    md += this._listData.bulletChar + " ";
+                }
+
+                while (node) {
+                    switch (node.type) {
+                        case "list":
+                        case "block_quote":
+                        case "paragraph":
+                            str = node.getMd();
+                            let strs = str.substring(0, str.length - 1).split("\n");
+                            for (let i = 0; i < strs.length; i++) {
+                                if (flag) {
+                                    md += strs[i] + "\n";
+                                    flag = false;
+                                } else {
+                                    md += spaceNumbar + strs[i] + "\n"
+                                }
+                            }
+                            break;
+                        default:
+                            md += node.getMd();
+                    }
+                    node = node._next;
+                }
+                return md;
+            case "item_checkbox":
+                if (this.attrs.has("checked")) {
+                    md += "[x] ";
+                } else {
+                    md += "[ ] ";
+                }
                 return md;
             case "block_quote":
                 while (node) {
-                    md += "> " + node.getMd(layer);
+                    switch (node.type) {
+                        case "list":
+                        case "block_quote":
+                        case "paragraph":
+                            str = node.getMd();
+                            let strs = str.substring(0, str.length - 1).split("\n");
+                            strs.forEach(value => md += "> " + value + "\n");
+                            break;
+                        default:
+                            md += "> " + node.getMd();
+                    }
                     node = node._next;
                 }
                 return md;
             default:
                 if (VNode.isContainer(this)) {
                     while (node) {
-                        md += node.getMd(layer);
+                        md += node.getMd();
                         node = node._next;
                     }
                 }

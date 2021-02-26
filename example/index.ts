@@ -3,6 +3,7 @@ import './imgs/tu.jpg'
 import sample from './md/sample'
 import table from './md/table'
 import code_block from "./md/code_block"
+import list from "./md/list";
 
 let defaultMd = sample;
 
