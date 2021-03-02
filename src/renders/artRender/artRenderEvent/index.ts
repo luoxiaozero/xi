@@ -193,8 +193,8 @@ export default class ArtRenderEvent {
             html.innerHTML = str;
             let body = html.childNodes[1];
 
-            let location = _this.cursor.location;
-            console.log(location);
+            let pos = _this.cursor.pos;
+            
             let md = ""//domToMd(body as HTMLElement);
             console.log(md);
             md = md.replace(/(^\s*)|(\s*$)/g, "");

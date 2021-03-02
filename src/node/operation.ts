@@ -1,10 +1,10 @@
 import ArtRender from "@/renders/artRender";
-import { Location } from "@/renders/artRender/cursor";
+import { Position } from "@/renders/artRender/cursor";
 import VNode from ".";
 class OperationVNodeHead {
     prev: OperationVNodeHead;
     next: OperationVNodeHead;
-    location: Location;
+    pos: Position;
 
     first: OperationVNode;
     last: OperationVNode;
@@ -127,7 +127,7 @@ export default class Operation {
                     child = child.next;
                 }
             }
-            this.last.location = this.artRender.cursor.location;
+            this.last.pos = this.artRender.cursor.pos;
         }
     }
 
@@ -169,7 +169,7 @@ export default class Operation {
                 child = child.next;
             }
 
-            this.last.location = this.artRender.cursor.location;
+            this.last.pos = this.artRender.cursor.pos;
         }
     }
 
@@ -192,10 +192,10 @@ export default class Operation {
                 }
                 child = child.next;
             }
-            console.log(nodeHead.location, "----------------------")
-            nodeHead.location.anchorInlineOffset--;
-            nodeHead.location.focusInlineOffset--;
-            this.artRender.cursor.setSelection(nodeHead.location);
+            console.log(nodeHead.pos, "----------------------")
+            nodeHead.pos.inAnchorOffset--;
+            nodeHead.pos.inFocusOffset--;
+            this.artRender.cursor.setSelection(nodeHead.pos);
 
             this.last = this.last.prev;
         }

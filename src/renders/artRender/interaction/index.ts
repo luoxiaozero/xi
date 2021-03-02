@@ -66,10 +66,10 @@ export default class Interaction {
     }
 
     public domUpdateDoc() {
-        if (!this.cursor.location)
+        if (!this.cursor.pos)
             return;
 
-        let sub = this.cursor.location.anchorAlineOffset;
+        let sub = this.cursor.pos.rowAnchorOffset;
         if (sub == -1)
             return false;
 
@@ -78,7 +78,7 @@ export default class Interaction {
         while (--sub != -1) {
             node = node.next;
         }
-        console.log(node, domToNode(dom), this.artRender.cursor.location.anchorAlineOffset)
+
         if (this.behavior.type == "keyup" && this.behavior.key === "Enter") {
             this.operation.replace(domToNode(dom.previousSibling as HTMLElement), node.prev, false);
             this.operation.insertBefore(domToNode(dom), node, false);
@@ -116,9 +116,9 @@ export default class Interaction {
 
     /**摁键抬起时渲染 */
     keyup(): boolean {
-        if (!this.cursor.location)
+        if (!this.cursor.pos)
             return;
-        let sub = this.cursor.location.anchorAlineOffset;
+        let sub = this.cursor.pos.rowAnchorOffset;
         if (sub == -1)
             return false;
 
@@ -153,14 +153,14 @@ export default class Interaction {
 
     /**退格渲染 */
     backspace(): boolean {
-        let location = this.artRender.cursor.getSelection();
-        if (location) {
-            let dom = this.artRender.dom.childNodes[location.anchorAlineOffset];
+        let pos = this.artRender.cursor.getSelection();
+        if (pos) {
+            let dom = this.artRender.dom.childNodes[pos.rowAnchorOffset];
             if (dom.nodeName == 'PRE') {
-                if (location.anchorNode.previousSibling == null && location.anchorInlineOffset == 0)
+                if (pos.selection.anchorNode.previousSibling == null && pos.inAnchorOffset == 0)
                     return false;
             } else {
-                console.log("无执行", location)
+                console.log("无执行", pos)
             }
         }
         return true;
@@ -168,10 +168,10 @@ export default class Interaction {
 
     /**回车渲染 */
     enter(): boolean {
-        let location = this.cursor.location;
-        let { anchorNode, anchorOffset } = this.artRender.cursor.location;
-        if (location) {
-            let sub = this.cursor.location.anchorAlineOffset;
+        let pos = this.cursor.pos;
+        let { anchorNode, anchorOffset } = this.artRender.cursor.pos.selection;
+        if (pos) {
+            let sub = this.cursor.pos.rowAnchorOffset;
             if (sub == -1)
                 return false;
 
@@ -184,15 +184,15 @@ export default class Interaction {
             if (md.length && md.charCodeAt(md.length - 1) === 10)
                 md = md.substring(0, md.length - 1);
 
-            let dom = this.artRender.dom.childNodes[location.anchorAlineOffset] as HTMLElement;
+            let dom = this.artRender.dom.childNodes[pos.rowAnchorOffset] as HTMLElement;
             if (reThematicBreak.test(md)) {
                 console.log("thematic_break")
                 newNode = new VNode("thematic_break");
                 newNode.attrs.set("art-marker", md);
                 this.operation.replace(newNode, node);
                 this.operation.update();
-                this.cursor.location.focusInlineOffset = 0;
-                this.cursor.location.anchorInlineOffset = 0;
+                this.cursor.pos.inFocusOffset = 0;
+                this.cursor.pos.inAnchorOffset = 0;
                 return false;
             } else if (reCodeFence.test(md)) {
                 newNode = new VNode("code_block");
@@ -213,8 +213,8 @@ export default class Interaction {
                     this.operation.insertAfter(art_tool, newNode);
                 }
                 this.operation.update();
-                this.cursor.location.focusInlineOffset = 0;
-                this.cursor.location.anchorInlineOffset = 0;
+                this.cursor.pos.inFocusOffset = 0;
+                this.cursor.pos.inAnchorOffset = 0;
                 return false;
             } else if (anchorNode.parentNode.nodeName == 'BLOCKQUOTE' && anchorOffset == 0 && anchorNode.nodeName == 'P'
                 && anchorNode.childNodes.length == 1 && anchorNode.childNodes[0].nodeName == 'BR') {
@@ -291,11 +291,11 @@ export default class Interaction {
                 return false;
             } else if (dom.nodeName == 'PRE') {
                 let text = '\n\r';
-                let data = location.anchorNode.nodeValue;
+                let data = pos.selection.anchorNode.nodeValue;
                 console.log(data);
-                data = data.substring(0, location.anchorOffset) + text + data.substring(location.anchorOffset)
-                location.anchorNode.nodeValue = data;
-                Cursor.setCursor(location.anchorNode, location.anchorOffset + 1);
+                data = data.substring(0, pos.selection.anchorOffset) + text + data.substring(pos.selection.anchorOffset)
+                pos.selection.anchorNode.nodeValue = data;
+                Cursor.setCursor(pos.selection.anchorNode, pos.selection.anchorOffset + 1);
                 this.artRender.cursor.getSelection();
                 return false;
             } else {
@@ -322,8 +322,8 @@ export default class Interaction {
             this.operation.replace(newNode, node);
             this.operation.update();
 
-            this.cursor.location.focusInlineOffset -= 2;
-            this.cursor.location.anchorInlineOffset -= 2;
+            this.cursor.pos.inFocusOffset -= 2;
+            this.cursor.pos.inAnchorOffset -= 2;
         } else if ((match = md.match(reOrderedListMarker)) && md.charCodeAt(2) == 32) {
             newNode = new VNode("list");
             newNode.listType = "ordered";
@@ -333,8 +333,8 @@ export default class Interaction {
             this.operation.replace(newNode, node);
             this.operation.update();
 
-            this.cursor.location.focusInlineOffset -= 3;
-            this.cursor.location.anchorInlineOffset -= 3;
+            this.cursor.pos.inFocusOffset -= 3;
+            this.cursor.pos.inAnchorOffset -= 3;
         } else if ((match = md.match(reBlockQuote)) && md.charCodeAt(1) == 32) {
             newNode = new VNode("block_quote");
             newNode.appendChild(new VNode("paragraph"));
@@ -342,8 +342,8 @@ export default class Interaction {
             this.operation.replace(newNode, node);
             this.operation.update();
 
-            this.cursor.location.focusInlineOffset -= 2;
-            this.cursor.location.anchorInlineOffset -= 2;
+            this.cursor.pos.inFocusOffset -= 2;
+            this.cursor.pos.inAnchorOffset -= 2;
         } else if ((match = md.match(reATXHeadingMarker)) && md.charCodeAt(match[0].length) == 32) {
             newNode = new VNode("heading");
             newNode._level = match[0].length;

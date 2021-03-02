@@ -1,25 +1,20 @@
 import Tool from '@/tool';
 import ArtRender from '..';
 
-export class Location {
-    anchorInlineOffset: number;
-    focusInlineOffset: number;
-    anchorAlineOffset: number;
-    focusAlineOffset: number;
-    recentlyParentClassNode: Node;
-    anchorOffset: number;
-    anchorNode: Node;
-    focusNode: Node;
-    focusOffset: number;
-    isCollapsed: boolean;
+export class Position {
+    inAnchorOffset: number;
+    inFocusOffset: number;
+    rowAnchorOffset: number;
+    rowFocusOffset: number;
+    rowNode: Node;
     selection: Selection;
     constructor() {
-        this.recentlyParentClassNode = null;
+        this.rowNode = null;
     }
 
-    setParentClass(node: Node): boolean {
-        if (["P", "TH", "TR"].includes(node.nodeName) && this.recentlyParentClassNode == null) {
-            this.recentlyParentClassNode = node;
+    setRowNode(node: Node): boolean {
+        if (["P", "TH", "TR"].includes(node.nodeName) && this.rowNode === null) {
+            this.rowNode = node;
             return true;
         }
         return false;
@@ -42,39 +37,34 @@ export default class Cursor {
     /**挂载的DOM */
     mountDom: HTMLElement;
     /**光标位置 */
-    location: Location;
+    pos: Position;
     constructor(mountDom: HTMLElement) {
         this.mountDom = mountDom;
-        this.location = null;
+        this.pos = null;
     }
 
     /** 获取光标位置 */
-    public getSelection(): Location {
+    public getSelection(): Position {
         let { anchorNode, anchorOffset, focusNode, focusOffset, isCollapsed } = Cursor.sel;
 
         if (anchorNode && focusNode && anchorNode != this.mountDom) {
-            this.location = new Location();
-            this.location.selection = Cursor.sel;
-            this.location.anchorOffset = anchorOffset;
-            this.location.anchorNode = anchorNode;
-            this.location.focusOffset = focusOffset;
-            this.location.focusNode = focusNode;
-            this.location.isCollapsed = isCollapsed;
+            this.pos = new Position();
+            this.pos.selection = Cursor.sel;
 
             let node = anchorNode;
             let len = anchorOffset;
 
-            this.location.setParentClass(node.parentNode);
+            this.pos.setRowNode(node.parentNode);
             while (node.parentNode != this.mountDom) {
                 while (node.previousSibling) {
-                    this.location.setParentClass(node);
+                    this.pos.setRowNode(node);
                     node = node.previousSibling;
                     if (!Tool.hasClass(node as HTMLElement, 'art-shield'))
                         len += node.textContent.length;
                 }
                 node = node.parentNode;
             }
-            this.location.anchorInlineOffset = len;
+            this.pos.inAnchorOffset = len;
 
             let rootNodeSub = -1;
             for (let i = 0; i < this.mountDom.childNodes.length; i++) {
@@ -83,7 +73,7 @@ export default class Cursor {
                     break;
                 }
             }
-            this.location.anchorAlineOffset = rootNodeSub;
+            this.pos.rowAnchorOffset = rootNodeSub;
 
             let nodeF = focusNode;
             let lenF = focusOffset;
@@ -95,7 +85,7 @@ export default class Cursor {
                 }
                 nodeF = nodeF.parentNode;
             }
-            this.location.focusInlineOffset = lenF;
+            this.pos.inFocusOffset = lenF;
 
             let rootNodeSubF = -1;
             for (let i = 0; i < this.mountDom.childNodes.length; i++) {
@@ -104,16 +94,16 @@ export default class Cursor {
                     break;
                 }
             }
-            this.location.focusAlineOffset = rootNodeSubF;
+            this.pos.rowFocusOffset = rootNodeSubF;
             // let name = anchorNode.parentNode.nodeName;
             // if (anchorOffset == 0 && anchorNode.previousSibling == null &&
             //     (name == 'LI' || name == 'P' || name == 'TH' || name == 'TD')) {
             //     anchorNode = anchorNode.parentNode;
             // }
         } else {
-            this.location = null;
+            this.pos = null;
         }
-        return this.location;
+        return this.pos;
     }
 
     private searchNode(node: Node, len: number) {
@@ -200,11 +190,11 @@ export default class Cursor {
         }
         return false;
     }
-    public setSelection(location: Location = undefined) {
-        if (typeof location == undefined || !location) {
-            location = this.location;
+    public setSelection(pos: Position = undefined) {
+        if (typeof pos == undefined || !pos) {
+            pos = this.pos;
         }
-        if (!location) {
+        if (!pos) {
             return false;
         }
 
@@ -216,25 +206,31 @@ export default class Cursor {
             showNodeList[i].setAttribute("class", classVal);
         }
 
-        if (this.location && this.location.anchorInlineOffset == this.location.focusInlineOffset &&
-            this.location.anchorAlineOffset == this.location.focusAlineOffset) {
+        if (this.pos && this.pos.inAnchorOffset == this.pos.inFocusOffset &&
+            this.pos.rowAnchorOffset == this.pos.rowFocusOffset) {
             let info = null;
-            var pNode = this.mountDom.childNodes[this.location.focusAlineOffset] as HTMLElement;
-            var pLen = this.location.anchorInlineOffset;
+            var pNode = this.mountDom.childNodes[this.pos.rowFocusOffset] as HTMLElement;
+            var pLen = this.pos.inAnchorOffset;
             this.setTool(pNode as HTMLElement)
-            console.log(this.location)
+            console.log(this.pos)
             if (/art-shield/.test(pNode.className)) {
                 return null;
             }
             if (pNode.nodeName == 'HR') {
                 // 不可调优先度
                 info = [pNode, 0];
-            } else if (this.location.anchorOffset == 0 && (this.location.anchorNode.nodeName === "LI" || this.location.anchorNode.nodeName === "TH" ||
-                this.location.anchorNode.nodeName === "P" || this.location.anchorNode.nodeName === "TD")) {
+            } else if (this.pos.selection.anchorOffset == 0 && (this.pos.selection.anchorNode.nodeName === "LI" || 
+                this.pos.selection.anchorNode.nodeName === "TH" ||
+                this.pos.selection.anchorNode.nodeName === "P" || 
+                this.pos.selection.anchorNode.nodeName === "TD")) {
                 // 删除 this.location.anchorNode.nodeName === "DIV"
-                info = [this.location.anchorNode, 0];
-            } else if (this.location.anchorOffset == 0 && this.location.anchorNode.parentNode && ((this.location.anchorNode.parentNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.parentNode.nodeName == 'PRE') || this.location.anchorNode.nodeName == 'CODE' && this.location.anchorNode.parentNode.nodeName == 'PRE')) {
-                info = [this.location.anchorNode, 0]
+                info = [this.pos.selection.anchorNode, 0];
+            } else if (this.pos.selection.anchorOffset == 0 &&this.pos.selection.anchorNode.parentNode && 
+                ((this.pos.selection.anchorNode.parentNode.nodeName == 'CODE' && 
+                this.pos.selection.anchorNode.parentNode.parentNode.nodeName == 'PRE') || 
+                this.pos.selection.anchorNode.nodeName == 'CODE' && 
+                this.pos.selection.anchorNode.parentNode.nodeName == 'PRE')) {
+                info = [this.pos.selection.anchorNode, 0]
             } else {
                 info = this.searchNode(pNode, pLen);
             }
@@ -289,10 +285,8 @@ export default class Cursor {
     public moveCursor(direcction: string): boolean {
         switch (direcction) {
             case 'ArrowRight':
-                this.location.anchorOffset++;
-                this.location.focusOffset++;
-                this.location.anchorInlineOffset++;
-                this.location.focusInlineOffset++;
+                this.pos.inAnchorOffset++;
+                this.pos.inFocusOffset++;
                 break;
             default:
                 return false;
