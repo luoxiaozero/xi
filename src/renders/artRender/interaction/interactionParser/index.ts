@@ -14,7 +14,11 @@ export default class InteractionParser {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
             let text = new VNode("text");
-            text._literal = "![" + node.firstChild._literal;
+            
+            text._literal = "![";
+            if (node.firstChild) {
+                text._literal += node.firstChild._literal;
+            }
             text._literal += "](" + node._destination;
             if (node._title)
                 text._literal += "\"" + node._title + "\"";
@@ -173,7 +177,7 @@ export default class InteractionParser {
 
     private item(node: VNode, entering: boolean) {
         if (entering) {
-            if (node.firstChild.type === "item_checkbox") {
+            if (node.firstChild && node.firstChild.type === "item_checkbox") {
                 node.attrs.set("class", "art-md-item-checkbox");
                 node.firstChild.attrs.delete("disabled");
             }
