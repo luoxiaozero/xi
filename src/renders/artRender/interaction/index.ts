@@ -5,6 +5,7 @@ import { domToNode } from "./conversion";
 import Cursor from "../cursor";
 import Operation from "@/node/operation";
 import InteractionParser from "./interactionParser";
+import Tool from "@/tool";
 
 const reCodeFence = /^`{3,}(?!.*`)|^~{3,}/;
 const reBulletListMarker = /^[*+-]/;
@@ -37,7 +38,7 @@ export default class Interaction {
         this.behavior = { key, type };
         let state: boolean = true;
         this.cursor.getSelection();
-        console.log(key)
+        console.log(this.behavior, this.cursor.pos)
         if (type == 'keydown') {
             switch (key) {
                 case 'Backspace':
@@ -53,8 +54,9 @@ export default class Interaction {
                 case "Shift":
                     break;
                 case "Enter":
-                    
+
                 default:
+                    break;
                     this.domUpdateDoc();
                     state = this.keyup();
             }
@@ -97,7 +99,7 @@ export default class Interaction {
                         newNode._literal = dom.nodeValue;
                         newNode.dom = node.dom;
                         node.dom = new Text(node._literal);
-                        
+
                         this.operation.replace(newNode, node, false);
                         this.operation.update();
                     }
@@ -169,9 +171,9 @@ export default class Interaction {
     /**回车渲染 */
     enter(): boolean {
         let pos = this.cursor.pos;
-        let { anchorNode, anchorOffset } = this.artRender.cursor.pos.selection;
+        let { anchorNode, anchorOffset } = pos.selection;
         if (pos) {
-            let sub = this.cursor.pos.rowAnchorOffset;
+            let sub = pos.rowAnchorOffset;
             if (sub == -1)
                 return false;
 
@@ -185,7 +187,14 @@ export default class Interaction {
                 md = md.substring(0, md.length - 1);
 
             let dom = this.artRender.dom.childNodes[pos.rowAnchorOffset] as HTMLElement;
-            if (reThematicBreak.test(md)) {
+            if (Tool.hasClass(dom, "art-md-hr")) {
+                newNode = new VNode("paragraph");
+                newNode.appendChild(new VNode("linebreak"));
+                this.operation.replace(newNode, node);
+                this.operation.update();
+                Cursor.setCursor(newNode.dom, 0);
+                return false;
+            } else if (reThematicBreak.test(md)) {
                 console.log("thematic_break")
                 newNode = new VNode("thematic_break");
                 newNode.attrs.set("art-marker", md);
@@ -216,78 +225,192 @@ export default class Interaction {
                 this.cursor.pos.inFocusOffset = 0;
                 this.cursor.pos.inAnchorOffset = 0;
                 return false;
-            } else if (anchorNode.parentNode.nodeName == 'BLOCKQUOTE' && anchorOffset == 0 && anchorNode.nodeName == 'P'
-                && anchorNode.childNodes.length == 1 && anchorNode.childNodes[0].nodeName == 'BR') {
-                // blockquote 退出
-                let p = document.createElement('p');
-                p.innerHTML = '<br/>';
+            } else if (pos.rowNode && pos.rowNode.nodeName === "P" && pos.rowNode.parentNode.nodeName === "BLOCKQUOTE") {
+                let walker = node.walker(),
+                    event: { entering: boolean; node: VNode; }, rowVNode: VNode = null;
 
-                if (anchorNode.parentNode.nextSibling)
-                    anchorNode.parentNode.parentNode.insertBefore(p, anchorNode.parentNode.nextSibling);
-                else
-                    anchorNode.parentNode.parentNode.appendChild(p);
-                anchorNode.parentNode.removeChild(anchorNode);
+                while ((event = walker.next())) {
+                    if (event.entering && event.node.dom === pos.rowNode) {
+                        rowVNode = event.node;
+                        break;
+                    }
+                }
 
-                Cursor.setCursor(p, 0);
+                if (pos.rowNode.childNodes.length === 1 && pos.rowNode.childNodes[0].nodeName === "BR") {
+                    /**blockquote 退出 */
+                    if (rowVNode.parent.lastChild !== rowVNode) {
+                        let newNode_1 = new VNode("block_quote");
+                        let child = rowVNode.next;
+                        while (child) {
+                            this.operation.remove(child);
+                            newNode_1.appendChild(child);
+                            child = child.next;
+                        }
+                        this.operation.insertAfter(newNode_1, rowVNode.parent)
+                    }
+
+                    newNode = new VNode("paragraph");
+                    newNode.appendChild(new VNode("linebreak"));
+                    this.operation.insertAfter(newNode, rowVNode.parent)
+                    this.operation.remove(rowVNode);
+                    this.operation.update();
+
+                    Cursor.setCursor(newNode.dom, 0);
+                } else {
+                    /**blockquote 换行 */
+                    md = rowVNode.getMd();
+                    if (md.length && md.charCodeAt(md.length - 1) === 10)
+                        md = md.substring(0, md.length - 1);
+                    node = rowVNode;
+                    let newNode_1: VNode, before_str = md.substring(0, pos.rowNodeAnchorOffset), match;
+                    if (before_str) {
+                        newNode_1 = this.parser.inlineParse(before_str);
+                        this.operation.replace(newNode_1, node);
+                    } else {
+                        newNode_1 = new VNode("paragraph");
+                        newNode_1.appendChild(new VNode("linebreak"));
+                        this.operation.insertBefore(newNode_1, node);
+                    }
+
+                    let newNode_2: VNode, after_str = md.substring(pos.rowNodeAnchorOffset);
+                    if (after_str) {
+                        newNode_2 = this.parser.inlineParse(after_str);
+                    } else {
+                        newNode_2 = new VNode("paragraph");
+                        newNode_2.appendChild(new VNode("linebreak"));
+                    }
+                    this.operation.insertAfter(newNode_2, newNode_1);
+
+                    this.operation.update();
+                    Cursor.setCursor(newNode_2.dom, 0);
+                }
                 this.artRender.cursor.getSelection();
                 return false;
-            } else if (anchorNode.parentNode.parentNode.nodeName == 'BLOCKQUOTE' && anchorNode.nextSibling == null
-                && anchorOffset == (<Text>anchorNode).length) {
-                // ul ol中的blockquote添加新行
-                let p = document.createElement('p');
-                p.innerHTML = '<br/>';
+            } else if (pos.rowNode && pos.rowNode.nodeName === "P" && pos.rowNode.parentNode.nodeName === "LI") {
+                let walker = node.walker(),
+                    event: { entering: boolean; node: VNode; }, rowVNode: VNode = null;
 
-                if (anchorNode.parentNode.nextSibling)
-                    anchorNode.parentNode.parentNode.insertBefore(p, anchorNode.parentNode.nextSibling);
-                else
-                    anchorNode.parentNode.parentNode.appendChild(p);
+                while ((event = walker.next())) {
+                    if (event.entering && event.node.dom === pos.rowNode) {
+                        rowVNode = event.node;
+                        break;
+                    }
+                }
 
-                Cursor.setCursor(p, 0);
-                this.artRender.cursor.getSelection();
-                return false;
-            } else if (anchorOffset == 0 && anchorNode.nodeName == 'LI' && anchorNode.childNodes.length == 1
-                && anchorNode.childNodes[0].nodeName == 'BR') {
-                // li 退回到root
-                let p = document.createElement('p');
-                p.innerHTML = '<br/>';
+                if (pos.rowNode.childNodes.length === 1 && pos.rowNode.childNodes[0].nodeName === "BR") {
+                    /**li 退出 */
+                    if (rowVNode.parent.parent.lastChild !== rowVNode.parent) {
+                        let newNode_1 = new VNode("list");
+                        newNode_1.listType = rowVNode.parent.parent.listType;
+                        let child = rowVNode.parent.next, next: VNode;
+                        while (child) {
+                            next = child.next;
+                            this.operation.remove(child);
+                            newNode_1.appendChild(child);
+                            child = next;
+                        }
+                        this.operation.insertAfter(newNode_1, rowVNode.parent.parent)
+                    }
 
-                if (anchorNode.parentNode.nextSibling)
-                    anchorNode.parentNode.parentNode.insertBefore(p, anchorNode.parentNode.nextSibling);
-                else
-                    anchorNode.parentNode.parentNode.appendChild(p);
-                anchorNode.parentNode.removeChild(anchorNode);
+                    if (rowVNode.prev && rowVNode.prev.type !== "item_checkbox") {
+                        newNode = new VNode("item");
+                        newNode.appendChild(new VNode("paragraph"));
+                        newNode.firstChild.appendChild(new VNode("linebreak"));
+                        this.operation.insertAfter(newNode, rowVNode.parent)
+                        this.operation.remove(rowVNode);
+                        this.operation.update();
+                        Cursor.setCursor(newNode.dom, 0);
+                    } else {
+                        switch (rowVNode.parent.parent.parent.type) {
+                            case "document":
+                            case "block_quote":
+                            case "item":
+                                newNode = new VNode("paragraph");
+                                newNode.appendChild(new VNode("linebreak"));
+                                this.operation.insertAfter(newNode, rowVNode.parent.parent)
+                                this.operation.remove(rowVNode.parent);
+                                this.operation.update();
+                                Cursor.setCursor(newNode.dom, 0);
+                                break;
+                            default:
+                                console.log("error", rowVNode.parent.parent.parent.type);
+                        }
+                    }
 
-                Cursor.setCursor(p, 0);
-                this.artRender.cursor.getSelection();
-                return false;
-            } else if (anchorNode.nodeName == 'LI') {
-                // li [ul, ol]返回到li 新建一行p
-                let p = document.createElement('p');
-                p.innerHTML = '<br/>';
+                    this.artRender.cursor.getSelection();
+                } else if (rowVNode.prev && rowVNode.prev.type !== "item_checkbox") {
+                    /**li 中的 p 换行 */
+                    md = rowVNode.getMd();
+                    if (md.length && md.charCodeAt(md.length - 1) === 10)
+                        md = md.substring(0, md.length - 1);
 
-                if (anchorNode.parentNode.nextSibling)
-                    anchorNode.parentNode.parentNode.insertBefore(p, anchorNode);
-                else
-                    anchorNode.parentNode.parentNode.appendChild(p);
-                anchorNode.parentNode.removeChild(anchorNode);
+                    let newNode_1: VNode, _str: string;
+                    if (pos.rowNodeAnchorOffset === md.length) {
+                        newNode_1 = new VNode("paragraph");
+                        newNode_1.appendChild(new VNode("linebreak"));
+                        this.operation.insertAfter(newNode_1, rowVNode);
+                    } else if (pos.rowNodeAnchorOffset) {
+                        _str = md.substring(pos.rowNodeAnchorOffset);
+                        newNode_1 = this.parser.inlineParse(_str);
+                        this.operation.insertAfter(newNode_1, rowVNode);
 
-                Cursor.setCursor(p, 0);
-                this.artRender.cursor.getSelection();
-                return false;
-            } else if (anchorNode.nodeName == 'P' && anchorNode.parentNode.nodeName == 'LI'
-                && anchorNode.childNodes.length == 1 && anchorNode.childNodes[0].nodeName == 'BR') {
-                // 从li中的p退到li中 
-                let li = document.createElement('li');
-                li.innerHTML = '<p><br/></p>';
+                        _str = md.substring(0, pos.rowNodeAnchorOffset)
+                        newNode = this.parser.inlineParse(_str);
+                        this.operation.replace(newNode, rowVNode);
+                    } else {
+                        newNode_1 = new VNode("paragraph");
+                        newNode_1.appendChild(new VNode("linebreak"));
+                        this.operation.insertBefore(newNode_1, rowVNode);
+                        newNode_1 = rowVNode;
+                    }
 
-                if (anchorNode.parentNode.nextSibling)
-                    anchorNode.parentNode.parentNode.insertBefore(li, anchorNode.parentNode.nextSibling);
-                else
-                    anchorNode.parentNode.parentNode.appendChild(li);
-                anchorNode.parentNode.removeChild(anchorNode);
+                    this.operation.update();
+                    Cursor.setCursor(newNode_1.dom, 0);
+                } else {
+                    /**li 换行 */
+                    let newNode_1: VNode, _str: string;
 
-                Cursor.setCursor(li, 0);
-                this.artRender.cursor.getSelection();
+                    md = rowVNode.getMd();
+                    if (md.length && md.charCodeAt(md.length - 1) === 10)
+                        md = md.substring(0, md.length - 1);
+
+                    newNode = new VNode("item");
+                    if (rowVNode.prev && rowVNode.prev.type === "item_checkbox") {
+                        newNode.attrs.set("class", "art-md-item-checkbox");
+                        let item_checkbox = new VNode("item_checkbox");
+                        item_checkbox.attrs.set("type", "checkbox");
+                        if ((pos.rowNode.previousSibling as HTMLInputElement).checked) {
+                            item_checkbox.attrs.set("checked", "checked");
+                        }
+                        newNode.appendChild(item_checkbox);
+                    }
+                    if (pos.rowNodeAnchorOffset === md.length) {
+                        newNode_1 = new VNode("paragraph");
+                        newNode_1.appendChild(new VNode("linebreak"));
+                        newNode.appendChild(newNode_1);
+                        this.operation.insertAfter(newNode, rowVNode.parent);
+                        newNode = newNode_1;
+                    } else if (pos.rowNodeAnchorOffset) {
+                        _str = md.substring(pos.rowNodeAnchorOffset);
+                        newNode_1 = this.parser.inlineParse(_str);
+                        newNode.appendChild(newNode_1);
+                        this.operation.insertAfter(newNode, rowVNode.parent);
+                        newNode = newNode_1;
+
+                        _str = md.substring(0, pos.rowNodeAnchorOffset)
+                        newNode_1 = this.parser.inlineParse(_str);
+                        this.operation.replace(newNode_1, rowVNode);
+                    } else {
+                        newNode_1 = new VNode("paragraph");
+                        newNode_1.appendChild(new VNode("linebreak"));
+                        newNode.appendChild(newNode_1);
+                        this.operation.insertBefore(newNode, rowVNode);
+                        newNode = newNode_1;
+                    }
+
+                    this.operation.update();
+                    Cursor.setCursor(newNode.dom, 0);
+                }
                 return false;
             } else if (dom.nodeName == 'PRE') {
                 let text = '\n\r';
@@ -298,8 +421,39 @@ export default class Interaction {
                 Cursor.setCursor(pos.selection.anchorNode, pos.selection.anchorOffset + 1);
                 this.artRender.cursor.getSelection();
                 return false;
-            } else {
+            } else if (dom.nodeName === "P" || /^H[1-6]$/.test(dom.nodeName)) {
+                let _str: string, match, newNode_1;
+                if (pos.inAnchorOffset === md.length) {
+                    newNode = new VNode("paragraph");
+                    newNode.appendChild(new VNode("linebreak"));
+                    this.operation.insertAfter(newNode, node);
+                } else if (pos.inAnchorOffset) {
+                    _str = md.substring(pos.inAnchorOffset);
+                    newNode = this.parser.inlineParse(_str);
+                    this.operation.insertAfter(newNode, node);
 
+                    _str = md.substring(0, pos.inAnchorOffset);
+                    if ((match = _str.match(reATXHeadingMarker)) && _str.charCodeAt(match[0].length) == 32) {
+                        newNode_1 = new VNode("heading");
+                        newNode_1._level = match[0].length;
+                        newNode_1._string_content = _str.substring(match[0].length + 1);
+                        this.parser.parser.inlineParser.parse(newNode_1);
+                        this.parser.interactionParse(newNode_1);
+                    } else {
+                        newNode_1 = this.parser.inlineParse(_str);
+                    }
+                    this.operation.replace(newNode_1, node);
+                } else {
+                    newNode = new VNode("paragraph");
+                    newNode.appendChild(new VNode("linebreak"));
+                    this.operation.insertBefore(newNode, node);
+                }
+
+                this.operation.update();
+                Cursor.setCursor(newNode.dom, 0);
+                return false;
+            } else {
+                console.log("enter wu------------------")
             }
         }
 
@@ -452,7 +606,7 @@ export default class Interaction {
 
     diff(newNode: VNode, oldNode: VNode) {
         if (!oldNode.isEqual(newNode)) {
-            
+
         }
     }
 }

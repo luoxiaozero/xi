@@ -75,6 +75,12 @@ export default class Operation {
         this.addOperationVNode(new OperationVNode("insertAfter", newNode, refNode, renderFlag));
         refNode.insertAfter(newNode);
     }
+
+    remove(node: VNode, renderFlag: boolean = true) {
+        this.addOperationVNode(new OperationVNode("remove", node, null, renderFlag));
+        node.unlink();
+    }
+
     replace(newNode: VNode, oldNode: VNode, renderFlag: boolean = true) {
         this.addOperationVNode(new OperationVNode("replace", newNode, oldNode, renderFlag));
         oldNode.replace(newNode);
@@ -121,6 +127,8 @@ export default class Operation {
                         } else {
                             child.beNode.dom.parentElement.appendChild(child.node.dom);
                         }
+                    } else if (child.command === "remove") {
+                        child.node.dom.parentElement.removeChild(child.node.dom);
                     }
                     if (fun)
                         fun();

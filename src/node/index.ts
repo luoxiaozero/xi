@@ -200,7 +200,9 @@ export default class VNode {
                 this.dom = document.createElement("br");
                 return null;
             case "thematic_break":
-                this.dom = document.createElement("hr");
+                this.dom = document.createElement("div");
+                this.dom.setAttribute("class", "art-md-hr");
+                this.dom.appendChild(document.createElement("hr"));
                 return null;
             case "art_tool":
                 this.dom = document.createElement("div");
@@ -289,13 +291,14 @@ export default class VNode {
             case "math_block":
                 this.dom = document.createElement("div");
                 this.dom.setAttribute("contenteditable", "false");
+                this.dom.setAttribute("class", "art-md-math-block");
 
-                let div = document.createElement("div");
-                div.setAttribute("class", "art-md-math-block-main")
-                div.style.display = "none";
+                let main_div = document.createElement("div");
+                main_div.setAttribute("class", "art-md-math-block-main")
+                
                 let math_tool = document.createElement("div");
                 createMathBlockTool(math_tool, "start");
-                div.appendChild(math_tool);
+                main_div.appendChild(math_tool);
 
                 let pre = document.createElement("pre");
                 pre.setAttribute("contenteditable", "true");
@@ -304,19 +307,19 @@ export default class VNode {
                 pre.innerText = this._literal;
 
                 pre.onblur = function () {
-                    (this as HTMLSpanElement).parentElement.style.display = "none";
                     if (ArtRender.plugins.katex) {
                         let mdText = (this as HTMLSpanElement).innerText;
                         ArtRender.plugins.katex(((this as HTMLSpanElement).parentElement.nextElementSibling as HTMLDivElement), mdText);
+                        (this as HTMLSpanElement).parentElement.style.display = "none";
                     }
                 }
-                div.appendChild(pre);
+                main_div.appendChild(pre);
                 math_tool = document.createElement("div");
                 createMathBlockTool(math_tool, "end");
-                div.appendChild(math_tool);
-                this.dom.appendChild(div);
+                main_div.appendChild(math_tool);
+                this.dom.appendChild(main_div);
 
-                div = document.createElement("div");
+                let div = document.createElement("div");
                 div.style.textAlign = "center";
                 div.onclick = function () {
                     ((this as HTMLSpanElement).previousSibling as HTMLDivElement).style.display = "block";
@@ -324,8 +327,11 @@ export default class VNode {
                 }
 
                 if (ArtRender.plugins.katex) {
+                    main_div.style.display = "none";
                     let mdText = this._literal;
                     ArtRender.plugins.katex(div, mdText);
+                } else {
+                    main_div.style.display = "block";
                 }
 
 

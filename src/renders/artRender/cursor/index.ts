@@ -7,15 +7,34 @@ export class Position {
     rowAnchorOffset: number;
     rowFocusOffset: number;
     rowNode: Node;
+    rowNodeAnchorOffset: number;
     selection: Selection;
     constructor() {
         this.rowNode = null;
+        this.rowAnchorOffset = null;
     }
 
-    setRowNode(node: Node): boolean {
-        if (["P", "TH", "TR"].includes(node.nodeName) && this.rowNode === null) {
-            this.rowNode = node;
-            return true;
+    setRowNode(node: Node, offset: number): boolean {
+        if (this.rowNode === null) {
+            switch (node.nodeName) {
+                case "P":
+                case "TH":
+                case "TR":
+                    this.rowNode = node;
+                    this.rowNodeAnchorOffset = offset;
+                    return true;
+                case "LI":
+                    if (offset === 0) {
+                        if (node.firstChild.nodeName === "P")
+                            this.rowNode = node.firstChild;
+                        else if (node.firstChild.nextSibling.nodeName === "P")
+                            this.rowNode = node.firstChild.nextSibling;
+                        else
+                            this.rowNode = node;
+                        this.rowNodeAnchorOffset = 0;
+                        return true;
+                    }
+            }
         }
         return false;
     }
@@ -54,13 +73,14 @@ export default class Cursor {
             let node = anchorNode;
             let len = anchorOffset;
 
-            this.pos.setRowNode(node.parentNode);
             while (node.parentNode != this.mountDom) {
+                this.pos.setRowNode(node, len);
                 while (node.previousSibling) {
-                    this.pos.setRowNode(node);
                     node = node.previousSibling;
                     if (!Tool.hasClass(node as HTMLElement, 'art-shield'))
                         len += node.textContent.length;
+
+                    this.pos.setRowNode(node, len);
                 }
                 node = node.parentNode;
             }
@@ -219,17 +239,17 @@ export default class Cursor {
             if (pNode.nodeName == 'HR') {
                 // 不可调优先度
                 info = [pNode, 0];
-            } else if (this.pos.selection.anchorOffset == 0 && (this.pos.selection.anchorNode.nodeName === "LI" || 
+            } else if (this.pos.selection.anchorOffset == 0 && (this.pos.selection.anchorNode.nodeName === "LI" ||
                 this.pos.selection.anchorNode.nodeName === "TH" ||
-                this.pos.selection.anchorNode.nodeName === "P" || 
+                this.pos.selection.anchorNode.nodeName === "P" ||
                 this.pos.selection.anchorNode.nodeName === "TD")) {
                 // 删除 this.location.anchorNode.nodeName === "DIV"
                 info = [this.pos.selection.anchorNode, 0];
-            } else if (this.pos.selection.anchorOffset == 0 &&this.pos.selection.anchorNode.parentNode && 
-                ((this.pos.selection.anchorNode.parentNode.nodeName == 'CODE' && 
-                this.pos.selection.anchorNode.parentNode.parentNode.nodeName == 'PRE') || 
-                this.pos.selection.anchorNode.nodeName == 'CODE' && 
-                this.pos.selection.anchorNode.parentNode.nodeName == 'PRE')) {
+            } else if (this.pos.selection.anchorOffset == 0 && this.pos.selection.anchorNode.parentNode &&
+                ((this.pos.selection.anchorNode.parentNode.nodeName == 'CODE' &&
+                    this.pos.selection.anchorNode.parentNode.parentNode.nodeName == 'PRE') ||
+                    this.pos.selection.anchorNode.nodeName == 'CODE' &&
+                    this.pos.selection.anchorNode.parentNode.nodeName == 'PRE')) {
                 info = [this.pos.selection.anchorNode, 0]
             } else {
                 info = this.searchNode(pNode, pLen);
