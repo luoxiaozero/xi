@@ -194,7 +194,7 @@ export default class Interaction {
                 this.operation.update();
                 Cursor.setCursor(newNode.dom, 0);
                 return false;
-            } else if (reThematicBreak.test(md)) {
+            } else if (dom.nodeName === "P" && reThematicBreak.test(md)) {
                 console.log("thematic_break")
                 newNode = new VNode("thematic_break");
                 newNode.attrs.set("art-marker", md);
@@ -203,7 +203,7 @@ export default class Interaction {
                 this.cursor.pos.inFocusOffset = 0;
                 this.cursor.pos.inAnchorOffset = 0;
                 return false;
-            } else if (reCodeFence.test(md)) {
+            } else if (dom.nodeName === "P" && reCodeFence.test(md)) {
                 newNode = new VNode("code_block");
                 newNode.attrs.set("art-marker", md.match(reCodeFence)[0]);
                 newNode._literal = "\n";
@@ -412,13 +412,17 @@ export default class Interaction {
                     Cursor.setCursor(newNode.dom, 0);
                 }
                 return false;
-            } else if (dom.nodeName == 'PRE') {
-                let text = '\n\r';
-                let data = pos.selection.anchorNode.nodeValue;
-                console.log(data);
-                data = data.substring(0, pos.selection.anchorOffset) + text + data.substring(pos.selection.anchorOffset)
-                pos.selection.anchorNode.nodeValue = data;
-                Cursor.setCursor(pos.selection.anchorNode, pos.selection.anchorOffset + 1);
+            } else if (Tool.hasClass(dom, "art-md-CodeBlock")) {
+                let data = (pos.rowNode as HTMLElement).innerText, anchorOffset = pos.rowNodeAnchorOffset;
+                data = data.substring(0, anchorOffset) + "\n" + data.substring(anchorOffset)
+                newNode = new VNode("code_block");
+                newNode._info = node._info;
+                newNode._literal = data;
+                this.operation.replace(newNode, node);
+                this.operation.update();
+
+                anchorOffset += 1;
+                Cursor.setCursor(...Cursor.getNodeAndOffset(newNode.dom.childNodes[1].firstChild, anchorOffset));
                 this.artRender.cursor.getSelection();
                 return false;
             } else if (dom.nodeName === "P" || /^H[1-6]$/.test(dom.nodeName)) {
@@ -453,7 +457,7 @@ export default class Interaction {
                 Cursor.setCursor(newNode.dom, 0);
                 return false;
             } else {
-                console.log("enter wu------------------")
+                console.log("enter wu------------------", dom)
             }
         }
 

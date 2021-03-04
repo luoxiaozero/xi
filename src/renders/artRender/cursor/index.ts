@@ -20,6 +20,7 @@ export class Position {
                 case "P":
                 case "TH":
                 case "TR":
+                case "PRE":
                     this.rowNode = node;
                     this.rowNodeAnchorOffset = offset;
                     return true;
@@ -42,6 +43,28 @@ export class Position {
 
 export default class Cursor {
     static sel: Selection = window.getSelection();
+    static getNodeAndOffset(node: Node, offset: number): [Node, number] {
+        node = node.firstChild;
+        while(node) {
+            if (node instanceof Text) {
+                if (offset > node.data.length) {
+                    offset -= node.data.length;
+                    console.log(offset, node.data.length);
+                } else {
+                    return [node, offset];
+                }
+            } else {
+                let a = Cursor.getNodeAndOffset(node, offset);
+                if (a[0]) {
+                    return a;
+                } else {
+                    offset = a[1];
+                }
+            }
+            node = node.nextSibling;
+        }
+        return [null, offset];
+    }
     static setCursor(node: Node, offset: number): boolean {
         if (node == undefined && !node)
             return false;
@@ -57,9 +80,11 @@ export default class Cursor {
     mountDom: HTMLElement;
     /**光标位置 */
     pos: Position;
+    i: boolean;
     constructor(mountDom: HTMLElement) {
         this.mountDom = mountDom;
         this.pos = null;
+        this.i = true;
     }
 
     /** 获取光标位置 */
@@ -74,6 +99,10 @@ export default class Cursor {
             let len = anchorOffset;
 
             while (node.parentNode != this.mountDom) {
+                if (Tool.hasClass(node as HTMLElement, 'art-shield')) {
+                    this.pos = null;
+                    return this.pos;
+                }
                 this.pos.setRowNode(node, len);
                 while (node.previousSibling) {
                     node = node.previousSibling;
@@ -185,9 +214,10 @@ export default class Cursor {
         if (ArtRender.plugins.flowchart || ArtRender.plugins.mermaid) {
             tools = this.mountDom.getElementsByClassName('art-codeBlockBottomTool');
             for (let i = 0; i < tools.length; i++) {
-                if (alineDom == (<HTMLElement>tools[i].previousSibling)) {
-                    alineDom.style.display = 'inherit';
-                    (<HTMLDivElement>alineDom.nextSibling).style.border = '1px solid #999';
+                if (tools[i].innerHTML === "") {
+                } else if (alineDom.lastChild == tools[i]) {
+                    (<HTMLElement>tools[i]).style.border = "1px solid #999";
+                    (<HTMLElement>tools[i].previousSibling).style.display = "inherit";
                 } else {
                     (<HTMLElement>tools[i]).style.border = 'inherit';
                     (<HTMLElement>tools[i].previousSibling).style.display = 'none';
@@ -196,10 +226,8 @@ export default class Cursor {
             }
         }
 
-        if (alineDom.nodeName == "PRE") {
-            if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-codeBlockTool")) {
-                (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
-            }
+        if (Tool.hasClass(alineDom, "art-md-CodeBlock")) {
+            (<HTMLElement>alineDom.firstChild).style.visibility = "visible";
             return true;
         }
         if (alineDom.nodeName == "TABLE") {
@@ -226,8 +254,7 @@ export default class Cursor {
             showNodeList[i].setAttribute("class", classVal);
         }
 
-        if (this.pos && this.pos.inAnchorOffset == this.pos.inFocusOffset &&
-            this.pos.rowAnchorOffset == this.pos.rowFocusOffset) {
+        if (this.pos && this.pos.selection.isCollapsed) {
             let info = null;
             var pNode = this.mountDom.childNodes[this.pos.rowFocusOffset] as HTMLElement;
             var pLen = this.pos.inAnchorOffset;

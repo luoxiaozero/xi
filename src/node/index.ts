@@ -207,38 +207,16 @@ export default class VNode {
             case "art_tool":
                 this.dom = document.createElement("div");
                 let tool = this.attrs.get('--tool');
-                if (tool === "code_block") {
-                    let info_words = this.next._info ? this.next._info.split(/\s+/) : [];
-                    if (info_words.length > 0 && info_words[0].length > 0)
-                        createCodeBlockTool(this.dom, info_words[0]);
-                    else
-                        createCodeBlockTool(this.dom);
-                } //else if (tool == "math") {
+
+                //else if (tool == "math") {
 
                 // } else if (tool == "toc") {
 
-                else if (tool == "table") {
+                if (tool == "table") {
                     createTableTool(this.dom);
                 }
-                else if (tool == "code_block_flow") {
-                    this.dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
-                    this.dom.setAttribute("contenteditable", "false");
 
-                    if (ArtRender.plugins.flowchart) {
-                        let dom = this.dom, mdText = this.prev._literal;
-                        let fun = () => { console.log("flowchar 执行"); ArtRender.plugins.flowchart(dom, mdText); };
-                        return fun;
-                    }
-                } else if (tool == "code_block_mermaid") {
-                    this.dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
-                    this.dom.setAttribute("contenteditable", "false");
-
-                    if (ArtRender.plugins.mermaid) {
-                        let dom = this.dom, mdText = this.prev._literal;
-                        let fun = () => { console.log("mermaid 执行"); ArtRender.plugins.mermaid(dom, mdText); };
-                        return fun;
-                    }
-                } else if (tool === "math") {
+                else if (tool === "math") {
                     this.dom = document.createElement("span");
                     this.dom.setAttribute("contenteditable", "false");
                     this.dom.setAttribute("class", "art-shield");
@@ -269,21 +247,57 @@ export default class VNode {
                     this.dom.title = this._title;
                 break;
             case "code_block":
-                this.dom = document.createElement("pre");
-                let code = document.createElement("code");
+                this.dom = document.createElement("div");
+                this.dom.setAttribute("class", "art-md-CodeBlock");
+                this.dom.setAttribute("contenteditable", "false");
 
-                let lang, md = this._literal;
-                let info_words = this._info ? this._info.split(/\s+/) : [];
+                let info_words = this._info ? this._info.split(/\s+/) : [], lang = '', dom: HTMLElement, code = document.createElement("code");
                 if (info_words.length > 0 && info_words[0].length > 0) {
                     code.setAttribute("class", "lang-" + info_words[0]);
-                    lang = info_words[0].match(/lang-(.*?)(\s|$)/);
+                    lang = info_words[0];
+                    // lang = info_words[0].match(/lang-(.*?)(\s|$)/);
                 }
+
+                dom = document.createElement("div");
+                createCodeBlockTool(dom, lang);
+                this.dom.appendChild(dom);
+
+                dom = document.createElement("pre");
+                dom.setAttribute("contenteditable", "true");
+                dom.style.outline = "none";
+                dom.appendChild(code);
+                this.dom.appendChild(dom);
+                let mdText = this._literal;
                 if (ArtRender.plugins.hljs) {
-                    ArtRender.plugins.hljs(code, md, lang);
+                    ArtRender.plugins.hljs(code, mdText, lang);
                 } else {
-                    code.innerHTML = md;
+                    code.innerHTML = mdText;
                 }
-                this.dom.appendChild(code);
+
+                switch (lang) {
+                    case "flow":
+                        dom = document.createElement("div");
+                        dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
+                        this.dom.appendChild(dom);
+
+                        if (ArtRender.plugins.flowchart) {
+                            let fun = () => ArtRender.plugins.flowchart(dom, mdText);
+                            return fun;
+                        }
+                        break;
+                    case "mermaid":
+                        dom = document.createElement("div");
+                        dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
+                        this.dom.appendChild(dom);
+
+                        if (ArtRender.plugins.mermaid) {
+                            let fun = () => ArtRender.plugins.mermaid(dom, mdText);;
+                            return fun;
+                        }
+                        break;
+                    default:
+                        console.log("InteractionParser:" + info_words[0]);
+                }
                 break;
             case "math":
                 this.dom = document.createElement("span");
