@@ -45,7 +45,7 @@ export default class Cursor {
     static sel: Selection = window.getSelection();
     static getNodeAndOffset(node: Node, offset: number): [Node, number] {
         node = node.firstChild;
-        while(node) {
+        while (node) {
             if (node instanceof Text) {
                 if (offset > node.data.length) {
                     offset -= node.data.length;
@@ -155,7 +155,7 @@ export default class Cursor {
         return this.pos;
     }
 
-    private searchNode(node: Node, len: number) {
+    private searchNode(node: Node, len: number): [Node, number] {
         if (node.childNodes.length == 1 && node.childNodes[0].nodeName == '#text') {
             if (len <= node.childNodes[0].textContent.length)
                 return [node.childNodes[0], len];
@@ -187,6 +187,22 @@ export default class Cursor {
         for (let i = 0; i < tools.length; i++) {
             (<HTMLElement>tools[i]).style.visibility = 'hidden';
             (<HTMLElement>tools[i].nextSibling).style.borderColor = '#9990';
+        }
+
+        tools = this.mountDom.getElementsByClassName("art-display");
+        for (let i = 0; i < tools.length; i++) {
+            if (Tool.hasClass(tools[i] as HTMLElement, "art-md-html-block-main")) {
+                if (alineDom !== (<HTMLElement>tools[i]).parentElement) {
+                    ((<HTMLElement>tools[i]).nextSibling as HTMLElement).style.display = "block";
+                    (<HTMLElement>tools[i]).classList.replace("art-display", "art-display-none");
+                }
+            }  else if(Tool.hasClass(alineDom, "art-md-MathBlock")) {
+                if (alineDom !== (<HTMLElement>tools[i]).parentElement) {
+                    (<HTMLElement>tools[i]).classList.replace("art-display", "art-display-none");
+                }
+            } else {
+                (<HTMLElement>tools[i]).classList.replace("art-display", "art-display-none");
+            }
         }
 
         if (Tool.hasClass(alineDom, 'art-shield')) {
@@ -253,7 +269,7 @@ export default class Cursor {
         }
 
         if (this.pos && this.pos.selection.isCollapsed) {
-            let info = null;
+            let info: [Node, number] = null;
             var pNode = this.mountDom.childNodes[this.pos.rowFocusOffset] as HTMLElement;
             var pLen = this.pos.inAnchorOffset;
             this.setTool(pNode as HTMLElement)
@@ -288,7 +304,7 @@ export default class Cursor {
                 classVal = classVal.replace("art-show-math", "");
                 showNodeList[i].setAttribute("class", classVal);
             }
-            if (info[0].nodeName == '#text' && Tool.hasClass(info[0].parentNode, 'art-md-math')) {
+            if (info[0].nodeName == '#text' && Tool.hasClass(info[0].parentNode as HTMLElement, 'art-md-math') && info[0].parentNode.previousSibling.childNodes[0]) {
                 let classVal = (<HTMLSpanElement>info[0].parentNode.previousSibling.childNodes[0]).getAttribute("class");
                 if (classVal == null || classVal.indexOf('art-show-math') < 0) {
                     classVal += ' art-show-math';
@@ -297,32 +313,32 @@ export default class Cursor {
             }
             Cursor.setCursor(info[0], info[1])
 
-            let art_text_double = info[0].parentNode;
+            let art_text_double = info[0].parentNode as HTMLElement;
 
             if (art_text_double && Tool.hasClass(art_text_double, "art-hide")) {
-                if (art_text_double.previousSibling && Tool.hasClass(art_text_double.previousSibling, "art-text-double")) {
-                    art_text_double = art_text_double.previousSibling;
-                } else if (art_text_double.nextSibling && Tool.hasClass(art_text_double.nextSibling, "art-text-double")) {
-                    art_text_double = art_text_double.nextSibling;
+                if (art_text_double.previousSibling && Tool.hasClass(art_text_double.previousSibling as HTMLElement, "art-text-double")) {
+                    art_text_double = art_text_double.previousSibling as HTMLElement;
+                } else if (art_text_double.nextSibling && Tool.hasClass(art_text_double.nextSibling as HTMLElement, "art-text-double")) {
+                    art_text_double = art_text_double.nextSibling as HTMLElement;
                 } else if (art_text_double && Tool.hasClass(art_text_double, "art-text-parent")) {
                     art_text_double = art_text_double.parentElement;
                 }
             }
 
             if (art_text_double && Tool.hasClass(art_text_double, "art-text-double")) {
-                let classVal = art_text_double.nextSibling.getAttribute("class");
+                let classVal = (art_text_double.nextSibling as HTMLElement).getAttribute("class");
                 classVal = classVal.replace("art-hide", "art-show");
-                art_text_double.nextSibling.setAttribute("class", classVal);
+                (art_text_double.nextSibling as HTMLElement).setAttribute("class", classVal);
 
-                classVal = art_text_double.previousSibling.getAttribute("class");
+                classVal = (art_text_double.previousSibling as HTMLElement).getAttribute("class");
                 classVal = classVal.replace("art-hide", "art-show");
-                art_text_double.previousSibling.setAttribute("class", classVal);
+                (art_text_double.previousSibling as HTMLElement).setAttribute("class", classVal);
             }
 
-            if (info[0].nodeName === "#text" && Tool.hasClass(info[0].parentNode, "art-hide")) {
-                let classVal = info[0].parentNode.getAttribute("class");
+            if (info[0].nodeName === "#text" && Tool.hasClass(info[0].parentNode as HTMLElement, "art-hide")) {
+                let classVal = info[0].parentElement.getAttribute("class");
                 classVal = classVal.replace("art-hide", "art-show");
-                info[0].parentNode.setAttribute("class", classVal);
+                info[0].parentElement.setAttribute("class", classVal);
             }
         }
     }

@@ -442,6 +442,32 @@ export default class Interaction {
                 Cursor.setCursor(...Cursor.getNodeAndOffset(newNode.dom.childNodes[1].firstChild, anchorOffset));
                 this.artRender.cursor.getSelection();
                 return false;
+            } else if (Tool.hasClass(dom, "art-md-MathBlock")) {
+                let data = (pos.rowNode as HTMLElement).innerText, anchorOffset = pos.rowNodeAnchorOffset;
+                data = data.substring(0, anchorOffset) + "\n" + data.substring(anchorOffset)
+                newNode = new VNode("math_block");
+                newNode._literal = data;
+                this.operation.replace(newNode, node);
+                this.operation.update();
+
+                anchorOffset += 1;
+                (<HTMLElement>newNode.dom.firstChild).classList.replace("art-display-none", "art-display");
+                Cursor.setCursor(...Cursor.getNodeAndOffset(newNode.dom.firstChild.childNodes[1], anchorOffset));
+                this.artRender.cursor.getSelection();
+                return false;
+            } else if (Tool.hasClass(dom, "art-md-HtmlBlock")) {
+                let data = (pos.rowNode as HTMLElement).innerText, anchorOffset = pos.rowNodeAnchorOffset;
+                data = data.substring(0, anchorOffset) + "\n" + data.substring(anchorOffset)
+                newNode = new VNode("html_block");
+                newNode._literal = data;
+                this.operation.replace(newNode, node);
+                this.operation.update();
+
+                anchorOffset += 1;
+                (<HTMLElement>newNode.dom.firstChild).classList.replace("art-display-none", "art-display");
+                Cursor.setCursor(...Cursor.getNodeAndOffset(newNode.dom.firstChild, anchorOffset));
+                this.artRender.cursor.getSelection();
+                return false;
             } else if (dom.nodeName === "P" || /^H[1-6]$/.test(dom.nodeName)) {
                 let _str: string, match, newNode_1;
                 if (pos.inAnchorOffset === md.length) {

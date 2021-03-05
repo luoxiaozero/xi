@@ -12,6 +12,10 @@
     vertical-align: middle;
 }
 
+.art-display-none {
+    display: none;
+}
+
 .art-show {
     color: #ccc;
 }
@@ -155,6 +159,10 @@
     width: 100%;
 }
 
+.art-md-MathBlock, .art-md-HtmlBlock {
+    margin: 12px 0 8px;
+}
+
 .art-md-html-block-main::before,
 .art-md-math-block-main::before {
     font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
@@ -171,7 +179,6 @@
 }
 
 
-
 .art-md-math-block-main {
     position: relative;
     background-color: #f6f8fa;
@@ -179,7 +186,7 @@
     margin-bottom: 5px;
 }
 
-.art-md-html-block-main pre,
+.art-md-html-block-main,
 .art-md-math-block-main pre{
     overflow-x: auto;
     padding: 0.1em 1em;
@@ -190,10 +197,12 @@
 .art-md-math-block-main::before {
     content: "公式";
 }
-
-.art-md-html-block-main {
-    
+.art-md-HtmlBlock {
     position: relative;
+}
+.art-md-HtmlBlock pre {
+    position: static;
+    
 }
 
 .art-md-html-block-main::before {

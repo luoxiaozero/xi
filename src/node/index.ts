@@ -300,21 +300,17 @@ export default class VNode {
                 break;
             case "math_block":
                 this.dom = document.createElement("div");
-                this.dom.setAttribute("contenteditable", "false");
-                this.dom.setAttribute("class", "art-md-math-block");
+                this.dom.setAttribute("class", "art-md-MathBlock");
 
                 let main_div = document.createElement("div");
-                main_div.setAttribute("class", "art-md-math-block-main")
+                main_div.setAttribute("class", "art-md-math-block-main");
 
                 let math_tool = document.createElement("div");
                 createMathBlockTool(math_tool, "start");
                 main_div.appendChild(math_tool);
 
                 let pre = document.createElement("pre");
-                pre.setAttribute("contenteditable", "true");
-
-                pre.style.outline = "none";
-                pre.innerText = this._literal;
+                pre.innerHTML = this._literal;
 
                 pre.onblur = function () {
                     if (ArtRender.plugins.katex) {
@@ -330,14 +326,16 @@ export default class VNode {
                 this.dom.appendChild(main_div);
 
                 let div = document.createElement("div");
+                div.setAttribute("contenteditable", "false");
                 div.style.textAlign = "center";
                 div.onclick = function () {
-                    ((this as HTMLSpanElement).previousSibling as HTMLDivElement).style.display = "block";
-                    Cursor.setCursor(((this as HTMLSpanElement).previousSibling as HTMLDivElement).childNodes[0], 0)
+                    
+                    ((this as HTMLSpanElement).previousSibling as HTMLDivElement).classList.replace("art-display-none", "art-display");
+                    Cursor.setCursor(((this as HTMLSpanElement).previousSibling as HTMLDivElement).childNodes[1].firstChild, 0);
                 }
 
                 if (ArtRender.plugins.katex) {
-                    main_div.style.display = "none";
+                    main_div.classList.add("art-display-none");
                     let mdText = this._literal;
                     ArtRender.plugins.katex(div, mdText);
                 } else {
@@ -359,32 +357,22 @@ export default class VNode {
                 break;
             case "html_block":
                 this.dom = document.createElement("div");
-                this.dom.setAttribute("contenteditable", "false");
+                this.dom.setAttribute("class", "art-md-HtmlBlock")
 
-                div = document.createElement("div");
-                div.setAttribute("class", "art-md-html-block-main")
-                div.style.display = "none";
                 pre = document.createElement("pre");
-                pre.setAttribute("contenteditable", "true");
-                pre.style.outline = "none";
-
-                pre.innerText = this._literal;
-                pre.onblur = function () {
-                    (this as HTMLSpanElement).parentElement.style.display = "none";
-                    ((this as HTMLSpanElement).parentElement.nextElementSibling as HTMLDivElement).style.display = "block";
-                    ((this as HTMLSpanElement).parentElement.nextElementSibling as HTMLDivElement).innerHTML = (this as HTMLSpanElement).innerText;
-                }
-                div.appendChild(pre);
-                this.dom.appendChild(div);
+                pre.setAttribute("class", "art-md-html-block-main art-display-none");
+                let text = new Text(this._literal);
+                pre.appendChild(text);
+                this.dom.appendChild(pre);
 
                 div = document.createElement("div");
+                div.setAttribute("contenteditable", "false");
                 div.onclick = function () {
                     (this as HTMLSpanElement).style.display = "none";
-                    ((this as HTMLSpanElement).previousSibling as HTMLDivElement).style.display = "block";
-                    Cursor.setCursor(((this as HTMLSpanElement).previousSibling as HTMLDivElement), 0)
+                    ((this as HTMLSpanElement).previousSibling as HTMLDivElement).classList.replace("art-display-none", "art-display");
+                    Cursor.setCursor(((this as HTMLSpanElement).previousSibling as HTMLDivElement), 0);
                 }
                 div.innerHTML = this._literal;
-
 
                 this.dom.appendChild(div);
                 break;
