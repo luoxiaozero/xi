@@ -212,11 +212,7 @@ export default class VNode {
 
                 // } else if (tool == "toc") {
 
-                if (tool == "table") {
-                    createTableTool(this.dom);
-                }
-
-                else if (tool === "math") {
+                if (tool === "math") {
                     this.dom = document.createElement("span");
                     this.dom.setAttribute("contenteditable", "false");
                     this.dom.setAttribute("class", "art-shield");
@@ -309,7 +305,7 @@ export default class VNode {
 
                 let main_div = document.createElement("div");
                 main_div.setAttribute("class", "art-md-math-block-main")
-                
+
                 let math_tool = document.createElement("div");
                 createMathBlockTool(math_tool, "start");
                 main_div.appendChild(math_tool);
@@ -392,6 +388,31 @@ export default class VNode {
 
                 this.dom.appendChild(div);
                 break;
+            case "table":
+                this.dom = document.createElement("div");
+                this.dom.setAttribute("class", "art-md-Table");
+
+                dom = document.createElement("div");
+                this.dom.appendChild(dom);
+                createTableTool(dom);
+
+                dom = document.createElement("table");
+
+                this.dom.appendChild(dom);
+                this.attrs.forEach((value, key) => {
+                    (<HTMLElement>dom).setAttribute(key, value);
+                });
+
+                let child = this.firstChild, fun: Function;
+                while (child) {
+                    fun = child.newDom();
+                    dom.appendChild(child.dom);
+                    if (fun)
+                        fun();
+                    child = child.next;
+                }
+                
+                return null;
             default:
                 switch (this._type) {
                     case "heading":

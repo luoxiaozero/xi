@@ -19,7 +19,7 @@ export class Position {
             switch (node.nodeName) {
                 case "P":
                 case "TH":
-                case "TR":
+                case "TD":
                 case "PRE":
                     this.rowNode = node;
                     this.rowNodeAnchorOffset = offset;
@@ -230,10 +230,8 @@ export default class Cursor {
             (<HTMLElement>alineDom.firstChild).style.visibility = "visible";
             return true;
         }
-        if (alineDom.nodeName == "TABLE") {
-            if (Tool.hasClass(alineDom.previousSibling as HTMLElement, "art-tableTool")) {
-                (<HTMLElement>alineDom.previousSibling).style.visibility = 'visible';
-            }
+        if (Tool.hasClass(alineDom, "art-md-Table")) {
+            (<HTMLElement>alineDom.firstChild).style.visibility = "visible";
             return true;
         }
         return false;

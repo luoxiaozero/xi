@@ -225,6 +225,23 @@ export default class Interaction {
                 this.cursor.pos.inFocusOffset = 0;
                 this.cursor.pos.inAnchorOffset = 0;
                 return false;
+            } else if (pos.rowNode && ["TD", "TH"].includes(pos.rowNode.nodeName)) {
+                if (pos.rowNode.parentElement.nextSibling || pos.rowNode.nodeName === "TH") {
+                    let subscript = 0, child = pos.rowNode.previousSibling;
+                    while (child) {
+                        subscript += 1;
+                        child = child.previousSibling;
+                    }
+                    if (pos.rowNode.nodeName === "TH") {
+                        Cursor.setCursor(pos.rowNode.parentElement.parentElement.nextSibling.firstChild.childNodes[subscript], 0);
+                    } else{
+                        Cursor.setCursor(pos.rowNode.parentElement.nextSibling.childNodes[subscript], 0);
+                    }
+                    
+                } else {
+                    Cursor.setCursor(node.next.dom, 0);
+                }
+                return false;
             } else if (pos.rowNode && pos.rowNode.nodeName === "P" && pos.rowNode.parentNode.nodeName === "BLOCKQUOTE") {
                 let walker = node.walker(),
                     event: { entering: boolean; node: VNode; }, rowVNode: VNode = null;
