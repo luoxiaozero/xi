@@ -69,7 +69,16 @@ export default class Interaction {
     }
 
     updateNode(dom: HTMLElement, node: VNode) {
-        if ((node.type === "softbreak" || node.type === "text") && dom instanceof Text) {
+        if (Tool.hasClass(dom, "art-md-html-inline")) {
+            if (node._literal != dom.innerText) {
+                let newNode = new VNode("html_inline");
+                newNode._literal = dom.innerText;
+                newNode.dom = node.dom;
+                this.operation.replace(newNode, node, false);
+                this.operation.update();
+            }
+            return;
+        } else if ((node.type === "softbreak" || node.type === "text") && dom instanceof Text) {
             if (node._literal === null && dom.data === '\n') {
 
             } else if (node._literal && node._literal != dom.data) {

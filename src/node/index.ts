@@ -347,6 +347,7 @@ export default class VNode {
             case "html_inline":
                 this.dom = document.createElement("span");
                 this.setAttrs();
+                this.dom.classList.add("art-md-html-inline");
                 this.dom.style.color = "#999";
                 this.dom.innerText = this._literal;
                 break;
