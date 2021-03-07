@@ -13,6 +13,7 @@ const reOrderedListMarker = /^(\d{1,9})([.)])/;
 const reATXHeadingMarker = /^#{1,6}/;
 const reThematicBreak = /^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$/;
 const reBlockQuote = /^>/;
+const reClosingTable = /^\|(.*?\|)+/;
 
 export default class Interaction {
     artRender: ArtRender;
@@ -171,7 +172,6 @@ export default class Interaction {
     /**回车渲染 */
     enter(): boolean {
         let pos = this.cursor.pos;
-        let { anchorNode, anchorOffset } = pos.selection;
         if (pos) {
             let sub = pos.rowAnchorOffset;
             if (sub == -1)
@@ -241,6 +241,35 @@ export default class Interaction {
                 } else {
                     Cursor.setCursor(node.next.dom, 0);
                 }
+                return false;
+            } else if (dom.nodeName === "P" && reClosingTable.test(md)) {
+                // 生成table
+                let table = new VNode("table");
+                let thead = new VNode("thead");
+                let tbody = new VNode("tbody");
+                table.appendChild(thead);
+                table.appendChild(tbody);
+
+                let tr1 = new VNode("tr");
+                let tr2 = new VNode("tr");
+                let arry = md.split('|');
+                for (let i = 1, len = arry.length - 1; i < len; i++) {
+                    let th = new VNode("th");
+                    th._string_content = arry[i];
+                    this.parser.inlineParse(th);
+                    tr1.appendChild(th)
+
+                    newNode = new VNode("td");
+                    newNode.appendChild(new VNode("linebreak"));
+                    tr2.appendChild(newNode);
+                }
+                thead.appendChild(tr1);
+                tbody.appendChild(tr2);
+                this.operation.insertAfter(table, node);
+                this.operation.remove(node);
+                this.operation.update();
+
+                Cursor.setCursor(tr2.firstChild.dom, 0);
                 return false;
             } else if (pos.rowNode && pos.rowNode.nodeName === "P" && pos.rowNode.parentNode.nodeName === "BLOCKQUOTE") {
                 let walker = node.walker(),

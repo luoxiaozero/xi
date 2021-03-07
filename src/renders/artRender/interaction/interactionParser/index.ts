@@ -4,7 +4,7 @@ import { OPENTAG, CLOSETAG, TAGNAME, ATTRIBUTE } from "@/parser/common"
 
 export default class InteractionParser {
     public parser: Parser;
-    private html_inlines: { name: string, open: boolean, attrs: Map<string, string>, node: VNode} [];
+    private html_inlines: { name: string, open: boolean, attrs: Map<string, string>, node: VNode }[];
     constructor(options) {
         this.parser = new Parser(options);
     }
@@ -14,7 +14,7 @@ export default class InteractionParser {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
             let text = new VNode("text");
-            
+
             text._literal = "![";
             if (node.firstChild) {
                 text._literal += node.firstChild._literal;
@@ -94,21 +94,21 @@ export default class InteractionParser {
         if (entering) {
             const reHtmlOpenTag = new RegExp("^<(" + TAGNAME + ")(" + ATTRIBUTE + "*)\\s*/?>");
             const reHtmlCloseTag = new RegExp("^</(" + TAGNAME + ")\\s*[>]");
-            let match, info: { name: string, open: boolean, attrs: Map<string, string>, node: VNode} = Object();
+            let match, info: { name: string, open: boolean, attrs: Map<string, string>, node: VNode } = Object();
             if (match = node._literal.match(reHtmlOpenTag)) {
                 info.name = match[1];
                 info.open = true;
                 info.attrs = new Map();
                 info.node = node;
                 let m;
-                while(m = match[2].match(/\s*(.*?)="(.*?)"/)) {
+                while (m = match[2].match(/\s*(.*?)="(.*?)"/)) {
                     info.attrs.set(m[1], m[2]);
                     match[2] = match[2].replace(m[0], "");
                 }
                 this.html_inlines.push(info);
             } else if (match = node._literal.match(reHtmlCloseTag)) {
                 let name = match[1];
-                
+
                 for (let i = this.html_inlines.length - 1; i >= 0; i--) {
                     console.log(node, this.html_inlines[i].node)
                     if (node.parent !== this.html_inlines[i].node.parent) {
@@ -122,7 +122,7 @@ export default class InteractionParser {
                         while (child && child !== this.html_inlines[i].node) {
                             prev = child.prev;
                             tag.prependChild(child);
-    
+
                             child = prev;
                         }
                         node.insertBefore(tag);
@@ -260,16 +260,6 @@ export default class InteractionParser {
             node.insertAfter(span);
         }
     }
-    
-    private table(node: VNode, entering: boolean) {
-        if (entering) {
-            node.attrs.set("class", "art-md-table");
-
-            let art_tool = new VNode("art_tool");
-            art_tool.attrs.set("--tool", "table");
-            node.insertBefore(art_tool);
-        }
-    }
 
     public interactionParse(ast: VNode) {
         let walker = ast.walker(),
@@ -293,9 +283,14 @@ export default class InteractionParser {
         return doc;
     }
 
-    public inlineParse(input: string): VNode {
-        let doc = new VNode("paragraph");
-        doc._string_content = input;
+    public inlineParse(input: string | VNode): VNode {
+        let doc;
+        if (typeof (input) === "string") {
+            doc = new VNode("paragraph");
+            doc._string_content = input;
+        } else {
+            doc = input as VNode;
+        }
         this.parser.inlineParser.parse(doc);
         this.interactionParse(doc);
 
