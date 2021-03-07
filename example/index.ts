@@ -6,7 +6,7 @@ import code_block from "./md/code_block"
 import list from "./md/list";
 import blockquote from "./md/blockquote";
 
-let defaultMd = list
+let defaultMd = sample;
 
 window.onload = function () {
     const art: ArtText = new ArtText({ defaultMd: defaultMd }).mount('#art');

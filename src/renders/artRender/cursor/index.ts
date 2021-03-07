@@ -17,12 +17,6 @@ export class Position {
     setRowNode(node: Node, offset: number): boolean {
         if (this.rowNode === null) {
             switch (node.nodeName) {
-                case "DIV":
-                    if (Tool.hasClass(node as HTMLElement, "art-md-Hr")) {
-                        this.rowNode = node.firstChild;
-                        this.rowNodeAnchorOffset = 0;
-                    }
-                    break;
                 case "H1":
                 case "H2":
                 case "H3":
@@ -37,11 +31,18 @@ export class Position {
                     this.rowNode = node;
                     this.rowNodeAnchorOffset = offset;
                     return true;
+                case "DIV":
+                    if (Tool.hasClass(node as HTMLElement, "art-md-Hr")) {
+                        this.rowNode = node.firstChild;
+                        this.rowNodeAnchorOffset = 0;
+                        return true;
+                    }
+                    break;
                 case "LI":
                     if (offset === 0) {
-                        if (node.firstChild.nodeName === "P")
-                            this.rowNode = node.firstChild;
-                        else if (node.firstChild.nextSibling.nodeName === "P")
+                        if (node.firstChild.nodeName === "INPUT" && node.firstChild.nextSibling)
+                            this.rowNode = node.firstChild.nextSibling;
+                        else if (node.firstChild.nextSibling)
                             this.rowNode = node.firstChild.nextSibling;
                         else
                             this.rowNode = node;
@@ -49,7 +50,6 @@ export class Position {
                         return true;
                     }
                     break;
-
             }
         }
         return false;
@@ -58,6 +58,8 @@ export class Position {
 
 export default class Cursor {
     static sel: Selection = window.getSelection();
+
+    /**获取节点的具体节点及光标 */
     static getNodeAndOffset(node: Node, offset: number): [Node, number] {
         node = node.firstChild;
         while (node) {
@@ -80,6 +82,8 @@ export default class Cursor {
         }
         return [null, offset];
     }
+
+    /**设置光标 */
     static setCursor(node: Node, offset: number): boolean {
         if (node == undefined && !node)
             return false;
@@ -95,16 +99,14 @@ export default class Cursor {
     mountDom: HTMLElement;
     /**光标位置 */
     pos: Position;
-    i: boolean;
     constructor(mountDom: HTMLElement) {
         this.mountDom = mountDom;
         this.pos = null;
-        this.i = true;
     }
 
     /** 获取光标位置 */
-    public getSelection(): Position {
-        let { anchorNode, anchorOffset, focusNode, focusOffset, isCollapsed } = Cursor.sel;
+    getSelection(): Position {
+        let { anchorNode, anchorOffset, focusNode, focusOffset } = Cursor.sel;
 
         if (anchorNode && focusNode && anchorNode != this.mountDom) {
             this.pos = new Position();
@@ -119,7 +121,7 @@ export default class Cursor {
                     this.pos = null;
                     return this.pos;
                 }
-
+                this.pos.setRowNode(node, len);
                 while (node.previousSibling) {
                     node = node.previousSibling;
                     if (!Tool.hasClass(node as HTMLElement, 'art-shield'))
@@ -169,13 +171,31 @@ export default class Cursor {
 
     private searchNode(node: Node, len: number): [Node, number] {
         if (node.childNodes.length == 1 && node.childNodes[0].nodeName == '#text') {
-            if (len <= node.childNodes[0].textContent.length)
+            if (len < node.childNodes[0].textContent.length)
                 return [node.childNodes[0], len];
-            else
+            else if (len === node.childNodes[0].textContent.length) {
+                if (this.pos.rowNodeAnchorOffset === 0) {
+                    while (node) {
+                        if (node.nextSibling) {
+                            node = node.nextSibling;
+                            break;
+                        } else {
+                            node = node.parentNode;
+                        }
+                    }
+                    if (node.nodeName === "LI") {
+                        if (node.firstChild.nodeName === "INPUT" && node.firstChild.nextSibling) {
+                            node = node.firstChild.nextSibling;
+                        } else {
+                            node = node.firstChild;
+                        }
+                    }
+                    return [node, 0];
+                }
+                return [node.childNodes[0], len];
+            } else
                 len -= node.textContent.length;
-        }
-
-        else {
+        } else {
             for (let i = 0; i < node.childNodes.length; i++) {
                 if (Tool.hasClass(node.childNodes[i] as HTMLElement, 'art-shield'))
                     continue;
@@ -194,6 +214,7 @@ export default class Cursor {
         }
         return null
     }
+
     private setTool(alineDom: HTMLElement): boolean {
         let tools = this.mountDom.getElementsByClassName('art-tocTool');
         for (let i = 0; i < tools.length; i++) {
@@ -264,7 +285,8 @@ export default class Cursor {
         }
         return false;
     }
-    public setSelection(pos: Position = undefined) {
+
+    setSelection(pos: Position = undefined) {
         if (typeof pos == undefined || !pos) {
             pos = this.pos;
         }
@@ -282,34 +304,22 @@ export default class Cursor {
 
         if (this.pos && this.pos.selection.isCollapsed) {
             let info: [Node, number] = null;
-            var pNode = this.mountDom.childNodes[this.pos.rowFocusOffset] as HTMLElement;
-            var pLen = this.pos.inAnchorOffset;
+            let pNode = this.mountDom.childNodes[this.pos.rowFocusOffset] as HTMLElement;
+            let pLen = this.pos.inAnchorOffset;
             this.setTool(pNode as HTMLElement)
             console.log(this.pos)
-            if (/art-shield/.test(pNode.className)) {
+            if (Tool.hasClass(pNode, "art-shield")) {
                 return null;
             }
-            if (pNode.nodeName == 'HR') {
+            if (Tool.hasClass(pNode , "art-md-Hr")) {
                 // 不可调优先度
-                info = [pNode, 0];
-            } else if (this.pos.selection.anchorOffset == 0 && (this.pos.selection.anchorNode.nodeName === "LI" ||
-                this.pos.selection.anchorNode.nodeName === "TH" ||
-                this.pos.selection.anchorNode.nodeName === "P" ||
-                this.pos.selection.anchorNode.nodeName === "TD")) {
-                // 删除 this.location.anchorNode.nodeName === "DIV"
-                info = [this.pos.selection.anchorNode, 0];
-            } else if (this.pos.selection.anchorOffset == 0 && this.pos.selection.anchorNode.parentNode &&
-                ((this.pos.selection.anchorNode.parentNode.nodeName == 'CODE' &&
-                    this.pos.selection.anchorNode.parentNode.parentNode.nodeName == 'PRE') ||
-                    this.pos.selection.anchorNode.nodeName == 'CODE' &&
-                    this.pos.selection.anchorNode.parentNode.nodeName == 'PRE')) {
-                info = [this.pos.selection.anchorNode, 0]
+                info = [pNode.firstChild, 0];
             } else {
                 info = this.searchNode(pNode, pLen);
             }
             console.log(info);
             if (info === null)
-                return null
+                return null;
             let showNodeList = this.mountDom.getElementsByClassName("art-show-math");
             for (let i = showNodeList.length - 1; i >= 0; i--) {
                 let classVal = showNodeList[i].getAttribute("class");
@@ -355,12 +365,12 @@ export default class Cursor {
         }
     }
 
-    public moveCursor(direcction: string): boolean {
+    moveCursor(direcction: string): boolean {
         switch (direcction) {
             case 'ArrowRight':
-                this.pos.inAnchorOffset++;
-                this.pos.inFocusOffset++;
-                break;
+            // this.pos.inAnchorOffset++;
+            // this.pos.inFocusOffset++;
+            // break;
             default:
                 return false;
         }
