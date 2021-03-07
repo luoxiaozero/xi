@@ -156,14 +156,34 @@ export default class Interaction {
 
     /**退格渲染 */
     backspace(): boolean {
-        let pos = this.artRender.cursor.getSelection();
+        let pos = this.cursor.pos;
         if (pos) {
-            let dom = this.artRender.dom.childNodes[pos.rowAnchorOffset];
-            if (dom.nodeName == 'PRE') {
-                if (pos.selection.anchorNode.previousSibling == null && pos.inAnchorOffset == 0)
+            let sub = pos.rowAnchorOffset;
+            if (sub == -1)
+                return false;
+
+            let node = this.artRender.doc.firstChild, i = sub, newNode: VNode;
+            while (--i != -1) {
+                node = node.next;
+            }
+
+            let dom = this.artRender.dom.childNodes[pos.rowAnchorOffset] as HTMLElement;
+            if (Tool.hasClass(dom, "art-md-MathBlock")) {
+                if ((pos.rowNode as HTMLElement).innerHTML == '\n') {
+                    this.operation.remove(node);
+                    this.operation.update();
                     return false;
-            } else {
-                console.log("无执行", pos)
+                } else if (pos.rowNodeAnchorOffset === 0) {
+                    return false;
+                }
+            } else if (Tool.hasClass(dom, "art-md-CodeBlock")) {
+                if ((pos.rowNode as HTMLElement).innerText == '\n') {
+                    this.operation.remove(node);
+                    this.operation.update();
+                    return false;
+                } else if (pos.rowNodeAnchorOffset === 0) {
+                    return false;
+                }
             }
         }
         return true;

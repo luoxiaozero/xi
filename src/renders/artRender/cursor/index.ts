@@ -103,7 +103,7 @@ export default class Cursor {
                     this.pos = null;
                     return this.pos;
                 }
-                this.pos.setRowNode(node, len);
+                
                 while (node.previousSibling) {
                     node = node.previousSibling;
                     if (!Tool.hasClass(node as HTMLElement, 'art-shield'))
@@ -112,6 +112,7 @@ export default class Cursor {
                     this.pos.setRowNode(node, len);
                 }
                 node = node.parentNode;
+                this.pos.setRowNode(node, len);
             }
             this.pos.inAnchorOffset = len;
 
