@@ -9,6 +9,15 @@ export default class InteractionParser {
         this.parser = new Parser(options);
     }
 
+    text(node: VNode, entering: boolean) {
+        if (entering) {
+            if (node.prev && node.prev.type === "text") {
+                node._literal = node.prev._literal + node._literal;
+                node.prev.unlink();
+            }
+        }
+    }
+
     public image(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");

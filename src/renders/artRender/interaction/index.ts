@@ -35,7 +35,7 @@ export default class Interaction {
      * @param key 键值 
      * @param type 摁键行为
      */
-    public render(key: string, type: string): boolean {
+    public render(key: string, type: string, event?: KeyboardEvent | any): boolean {
         this.behavior = { key, type };
         let state: boolean = true;
         this.cursor.getSelection();
@@ -48,17 +48,17 @@ export default class Interaction {
                 case 'Enter':
                     state = this.enter();
                     break;
+                default:
+                    state = this.keydown();
             }
         } else if (type == 'keyup') {
             switch (key) {
                 case "Control":
                 case "Shift":
-                    break;
                 case "Enter":
-
-                default:
                     break;
-                    this.domUpdateDoc();
+                case "Backspace":
+                default:
                     state = this.keyup();
             }
         }
@@ -68,101 +68,126 @@ export default class Interaction {
         return state;
     }
 
-    public domUpdateDoc() {
-        if (!this.cursor.pos)
-            return;
-
-        let sub = this.cursor.pos.rowAnchorOffset;
-        if (sub == -1)
-            return false;
-
-        let dom = this.artRender.dom.childNodes[sub] as HTMLElement;
-        let node = this.artRender.doc.firstChild;
-        while (--sub != -1) {
-            node = node.next;
-        }
-
-        if (this.behavior.type == "keyup" && this.behavior.key === "Enter") {
-            this.operation.replace(domToNode(dom.previousSibling as HTMLElement), node.prev, false);
-            this.operation.insertBefore(domToNode(dom), node, false);
-        } else {
-            // this.operation.insertBefore(domToNode(dom), node, false);
-            this.updateNode(dom, node);
-        }
-    }
-
     updateNode(dom: HTMLElement, node: VNode) {
-        switch (dom.nodeName) {
-            case "#text":
-                if (node.type == "text") {
-                    if (node._literal != dom.nodeValue) {
-                        let newNode = new VNode("text");
-                        newNode._literal = dom.nodeValue;
-                        newNode.dom = node.dom;
-                        node.dom = new Text(node._literal);
+        if ((node.type === "softbreak" || node.type === "text") && dom instanceof Text) {
+            if (node._literal === null && dom.data === '\n') {
 
-                        this.operation.replace(newNode, node, false);
-                        this.operation.update();
-                    }
-                } else {
-                    throw "class Interaction 的 updateNode 方法";
-                }
-                return;
+            } else if (node._literal && node._literal != dom.data) {
+                console.log(node._literal, dom.data, "00")
+                let newNode = new VNode("text");
+                newNode._literal = dom.data;
+                newNode.dom = node.dom;
+                node.dom = new Text(node._literal);
+
+                this.operation.replace(newNode, node, false);
+                this.operation.update();
+            }
+            return;
+        } else if (node.type === "text" || node.type === "softbreak") {
+            this.operation.remove(node, false);
+            this.operation.update();
+            return;
+        } else if (dom instanceof Text) {
+            let newNode;
+            if (dom.data === '\n') {
+                newNode = new VNode("softbreak");
+            } else {
+                newNode = new VNode("text");
+                newNode._literal = dom.data;
+            }
+            newNode.dom = dom;
+
+            this.operation.insertBefore(newNode, node, false);
+            this.operation.update();
+
+            return;
         }
 
-        let child = node.firstChild;
-        for (let i = 0; i < dom.childNodes.length && child; i++) {
+        let child = node.firstChild, i = 0, next;
+        for (; i < dom.childNodes.length && child; i++, child = next) {
+            next = child.next;
             this.updateNode(<HTMLElement>dom.childNodes[i], child);
-            child = child.next;
+        }
+
+        for (; i < dom.childNodes.length; i++) {
+            if (dom.childNodes[i] instanceof Text) {
+                let text = new VNode("text");
+                text.dom = dom.childNodes[i] as Text;
+                text._literal = (dom.childNodes[i] as Text).data;
+                this.operation.appendChild(node, text, false);
+                this.operation.update();
+            }
+        }
+
+        for (; child; child = next) {
+            next = child.next;
+            this.operation.remove(child, false);
+            this.operation.update();
         }
     }
 
     /**摁键抬起时渲染 */
     keyup(): boolean {
-        if (!this.cursor.pos)
-            return;
-        let sub = this.cursor.pos.rowAnchorOffset;
-        if (sub == -1)
-            return false;
+        let pos = this.cursor.pos;
+        if (pos && pos.rowAnchorOffset > -1) {
+            let node = this.artRender.doc.firstChild, i = pos.rowAnchorOffset, newNode: VNode;
+            while (--i !== -1) {
+                node = node.next;
+            }
 
-        let node = this.artRender.doc.firstChild, i = sub;
-        while (--i != -1) {
-            node = node.next;
+            switch (node.type) {
+                case "thematic_break":
+                    return false;
+                case "code_block":
+                    this.code_block(node, pos.rowNode as HTMLElement);
+                    break;
+                case "math_blcok":
+                    this.math_block(node, pos.rowNode as HTMLElement);
+                    break;
+                case "html_block":
+                    this.html_block(node, pos.rowNode as HTMLElement);
+                    break;
+                case "paragraph":
+                case "heading":
+                    this.paragraph(node, pos.rowNode as HTMLElement);
+                    break;
+                case "list":
+                    this.list(node, pos.rowNode as HTMLElement);
+                    break;
+                case "block_quote":
+                    this.block_quote(node, pos.rowNode as HTMLElement);
+                    break;
+                case "table":
+                    this.table(node, pos.rowNode as HTMLElement);
+                    break;
+            }
         }
 
-        if (this.behavior.key === "Enter") {
-            this.process_keyup(node.prev);
-            this.process_keyup(node);
-        } else {
-            this.process_keyup(node);
-        }
-
-        return false;
+        return true;
     }
 
-    process_keyup(node: VNode) {
-        if (node.type == "thematic_break") {
-            return null;
-        } else if (node.type == "code_block") {
-            this.code_block(node);
-        } else if (node.type === "paragraph" || node.type === "heading") {
-            this.paragraph(node);
-        } else if (node.type === "list") {
-            this.list(node);
-        } else if (node.type === "block_quote") {
-            this.block_quote(node);
+    keydown(): boolean {
+        let pos = this.cursor.pos;
+        if (pos && pos.rowAnchorOffset > -1) {
+            let node = this.artRender.doc.firstChild, i = pos.rowAnchorOffset;
+            while (--i != -1) {
+                node = node.next;
+            }
+
+            if (node.type == "thematic_break") {
+                return false;
+            }
         }
+
+        return true;
     }
 
     /**退格渲染 */
     backspace(): boolean {
         let pos = this.cursor.pos;
-        if (pos) {
-            let sub = pos.rowAnchorOffset;
-            if (sub == -1)
-                return false;
+        if (pos && pos.rowAnchorOffset !== -1) {
 
-            let node = this.artRender.doc.firstChild, i = sub, newNode: VNode;
+            let node = this.artRender.doc.firstChild, i = pos.rowAnchorOffset, newNode: VNode;
             while (--i != -1) {
                 node = node.next;
             }
@@ -184,6 +209,40 @@ export default class Interaction {
                 } else if (pos.rowNodeAnchorOffset === 0) {
                     return false;
                 }
+            } else if (Tool.hasClass(dom, "art-md-Hr")) {
+                newNode = new VNode("paragraph");
+                newNode.appendChild(new VNode("linebreak"));
+                this.operation.replace(newNode, node);
+                this.operation.update();
+                return false;
+            } else if (pos.rowNode.nodeName === "P" && pos.rowNode.childNodes.length === 1 &&
+                pos.rowNode.firstChild.nodeName === "BR" && pos.rowNode.parentElement.nodeName === "LI") {
+                let walker = node.walker(),
+                    event: { entering: boolean; node: VNode; },
+                    selectNode: VNode;
+                while ((event = walker.next())) {
+                    if (event.entering && event.node.dom === pos.rowNode) {
+                        selectNode = event.node;
+                        break;
+                    }
+                }
+                if (selectNode.parent.prev) {
+                    newNode = new VNode("paragraph");
+                    newNode.appendChild(new VNode("linebreak"));
+                    this.operation.appendChild(selectNode.parent.prev, newNode);
+                    this.operation.remove(selectNode.parent);
+                    this.operation.update();
+                    Cursor.setCursor(newNode.dom, 0);
+                } else {
+                    newNode = new VNode("paragraph");
+                    newNode.appendChild(new VNode("linebreak"));
+                    this.operation.insertBefore(newNode, selectNode.parent.parent);
+                    this.operation.remove(selectNode.parent);
+                    this.operation.update();
+                    Cursor.setCursor(newNode.dom, 0);
+                }
+                
+                return false;
             }
         }
         return true;
@@ -254,10 +313,10 @@ export default class Interaction {
                     }
                     if (pos.rowNode.nodeName === "TH") {
                         Cursor.setCursor(pos.rowNode.parentElement.parentElement.nextSibling.firstChild.childNodes[subscript], 0);
-                    } else{
+                    } else {
                         Cursor.setCursor(pos.rowNode.parentElement.nextSibling.childNodes[subscript], 0);
                     }
-                    
+
                 } else {
                     Cursor.setCursor(node.next.dom, 0);
                 }
@@ -556,7 +615,8 @@ export default class Interaction {
         return true;
     }
 
-    public paragraph(node: VNode): void {
+    paragraph(node: VNode, dom: HTMLElement): void {
+        this.updateNode(dom, node);
         let md = node.getMd(), match: RegExpMatchArray, newNode: VNode;
         console.log(md);
         if (md.length && md.charCodeAt(md.length - 1) === 10)
@@ -567,8 +627,13 @@ export default class Interaction {
             newNode = new VNode("list");
             newNode.listType = "bullet";
             newNode.appendChild(new VNode("item"));
-            newNode.firstChild.appendChild(new VNode("paragraph"));
-            newNode.firstChild.firstChild.appendChild(new VNode("linebreak"));
+            if (md = md.substring(2)) {
+                newNode.firstChild.appendChild(this.parser.inlineParse(md));
+            } else {
+                newNode.firstChild.appendChild(new VNode("paragraph"));
+                newNode.firstChild.firstChild.appendChild(new VNode("linebreak"));
+            }
+
             this.operation.replace(newNode, node);
             this.operation.update();
 
@@ -578,8 +643,12 @@ export default class Interaction {
             newNode = new VNode("list");
             newNode.listType = "ordered";
             newNode.appendChild(new VNode("item"));
-            newNode.firstChild.appendChild(new VNode("paragraph"));
-            newNode.firstChild.firstChild.appendChild(new VNode("linebreak"));
+            if (md = md.substring(3)) {
+                newNode.firstChild.appendChild(this.parser.inlineParse(md));
+            } else {
+                newNode.firstChild.appendChild(new VNode("paragraph"));
+                newNode.firstChild.firstChild.appendChild(new VNode("linebreak"));
+            }
             this.operation.replace(newNode, node);
             this.operation.update();
 
@@ -587,8 +656,12 @@ export default class Interaction {
             this.cursor.pos.inAnchorOffset -= 3;
         } else if ((match = md.match(reBlockQuote)) && md.charCodeAt(1) == 32) {
             newNode = new VNode("block_quote");
-            newNode.appendChild(new VNode("paragraph"));
-            newNode.firstChild.appendChild(new VNode("linebreak"));
+            if (md = md.substring(2)) {
+                newNode.appendChild(this.parser.inlineParse(md));
+            } else {
+                newNode.appendChild(new VNode("paragraph"));
+                newNode.firstChild.appendChild(new VNode("linebreak"));
+            }
             this.operation.replace(newNode, node);
             this.operation.update();
 
@@ -610,28 +683,29 @@ export default class Interaction {
         }
     }
 
-    public list(node: VNode): void {
+    list(node: VNode, dom: HTMLElement): void {
         let child = node.firstChild, next: VNode;
         while (child) {
             next = child.next;
-            this.item(child);
+            this.item(child, dom);
             child = next;
         }
     }
 
-    public item(node: VNode) {
+    item(node: VNode, dom: HTMLElement) {
         let child = node.firstChild, next: VNode;
         while (child) {
             next = child.next;
             switch (child.type) {
                 case "list":
-                    this.list(child);
+                    this.list(child, dom);
                     break;
                 case "paragraph":
-                    this.paragraph(child);
+                    if (child.dom === dom)
+                        this.paragraph(child, dom);
                     break;
                 case "block_quote":
-                    this.block_quote(child);
+                    this.block_quote(child, dom);
                     break;
                 case "item_checkbox":
                     break;
@@ -641,31 +715,22 @@ export default class Interaction {
             }
             child = next;
         }
-
-        // } else if (vnode.nodeName == 'ul' && /^\[x|X\]\s/.test(li.getMd())) {
-        //     let p = new VNode('p', {}, [new VNode('input', { type: 'checkbox', checked: 'checked' }), ...inline(li.getMd().substring(4))]);
-        //     li.replaceAllChild([p]);
-        // } else if (vnode.nodeName == 'ul' && /^\[\s\]\s/.test(li.getMd())) {
-        //     let p = new VNode('p', {}, [new VNode('input', { type: 'checkbox' }), ...inline(li.getMd().substring(4))]);
-        //     li.replaceAllChild([p]);
-        // } else if (li.childNodes[0].nodeName == 'p' && (<VNode>li.childNodes[0]).childNodes[0].nodeName == 'input') {
-        //     (<VNode>li.childNodes[0]).replaceAllChild([(<VNode>li.childNodes[0]).childNodes[0], ...inline(li.childNodes[0].getMd())]);
-        // }
     }
 
-    public block_quote(node: VNode) {
+    block_quote(node: VNode, dom: HTMLElement) {
         let child = node.firstChild, next: VNode;
         while (child) {
             next = child.next;
             switch (child.type) {
                 case "list":
-                    this.list(child);
+                    this.list(child, dom);
                     break;
                 case "paragraph":
-                    this.paragraph(child);
+                    if (child.dom === dom)
+                        this.paragraph(child, dom);
                     break;
                 case "block_quote":
-                    this.block_quote(child);
+                    this.block_quote(child, dom);
                     break;
                 default:
                     throw "Interction class: block_quote 中不存在" + child.type + "类型";
@@ -674,30 +739,68 @@ export default class Interaction {
         }
     }
 
-    public code_block(node: VNode) {
-        let code = node.dom.firstChild as HTMLElement;
-
-        let lang;
-        let info_words = node._info ? node._info.split(/\s+/) : [];
-        if (info_words.length > 0 && info_words[0].length > 0) {
-            code.setAttribute("class", "lang-" + info_words[0]);
-            lang = info_words[0].match(/lang-(.*?)(\s|$)/);
-        }
-
-        if (node.next.type == "art_tool") {
-            let tool = node.next.attrs.get('--tool');
-            if (tool == "code_block_flow" && ArtRender.plugins.flowchart) {
-                ArtRender.plugins.flowchart(node.next.dom, node._literal);
-            } else if (tool == "code_block_mermaid" && ArtRender.plugins.mermaid) {
-                ArtRender.plugins.mermaid(node.next.dom, node._literal);
+    table(node: VNode, dom: HTMLElement) {
+        let selectNode = node;
+        if (node.firstChild.dom === dom.parentElement.parentElement) {
+            let child = node.firstChild.firstChild.firstChild;
+            while (child) {
+                if (child.dom === dom) {
+                    selectNode = child;
+                    break;
+                }
+                child = child.next;
+            }
+        } else {
+            let child = node.lastChild.firstChild, child_2;
+            while (child) {
+                child_2 = child.firstChild;
+                while (child_2) {
+                    if (child_2.dom === dom) {
+                        selectNode = child_2;
+                        break;
+                    }
+                    child_2 = child_2.next;
+                }
+                if (child_2) {
+                    break;
+                }
+                child = child.next;
             }
         }
 
-        if (ArtRender.plugins.hljs) {
-            ArtRender.plugins.hljs(code, node._literal, lang);
-        } else {
-            code.innerHTML = node._literal;
-        }
+        this.updateNode(dom, selectNode);
+        let newNode = new VNode(selectNode.type), md = selectNode.getMd();
+        if (md.length && md.charCodeAt(md.length - 1) === 10)
+            md = md.substring(0, md.length - 1);
+        newNode._string_content = md;
+        this.parser.inlineParse(newNode);
+        this.operation.replace(newNode, selectNode);
+        this.operation.update();
+    }
+
+    code_block(node: VNode, dom: HTMLElement) {
+        let code = dom.firstChild as HTMLElement;
+        let newNode = new VNode("code_block");
+        newNode._literal = code.innerText;
+        newNode._info = "";
+        let cls = code.className.match(/lang-(.*?)(\s|$)/g);;
+        cls.forEach(value => newNode._info += value.substring(5));
+        this.operation.replace(newNode, node);
+        this.operation.update();
+    }
+
+    math_block(node: VNode, dom: HTMLElement) {
+        let newNode = new VNode("math_block");
+        newNode._literal = dom.innerText;
+        this.operation.replace(newNode, node);
+        this.operation.update();
+    }
+
+    html_block(node: VNode, dom: HTMLElement) {
+        let newNode = new VNode("html_block");
+        newNode._literal = dom.innerText;
+        this.operation.replace(newNode, node);
+        this.operation.update();
     }
 
     diff(newNode: VNode, oldNode: VNode) {

@@ -201,17 +201,12 @@ export default class VNode {
                 return null;
             case "thematic_break":
                 this.dom = document.createElement("div");
-                this.dom.setAttribute("class", "art-md-hr");
+                this.dom.setAttribute("class", "art-md-Hr");
                 this.dom.appendChild(document.createElement("hr"));
                 return null;
             case "art_tool":
                 this.dom = document.createElement("div");
                 let tool = this.attrs.get('--tool');
-
-                //else if (tool == "math") {
-
-                // } else if (tool == "toc") {
-
                 if (tool === "math") {
                     this.dom = document.createElement("span");
                     this.dom.setAttribute("contenteditable", "false");
@@ -613,6 +608,16 @@ export default class VNode {
             case "code":
                 return this._literal;
             case "code_block":
+                if (this.dom) {
+                    let code = this.dom.childNodes[1].firstChild as HTMLElement, _this = this, _info = "";
+                    let cls = code.className.match(/lang-(.*?)(\s|$)/g);
+                    if (cls) {
+                        cls.forEach(value => _info += value.substring(5));
+                        this._info = _info;
+                    }
+                        
+                }
+        
                 md += "```" + this._info + "\n";
                 md += this._literal;
                 md += "```\n"

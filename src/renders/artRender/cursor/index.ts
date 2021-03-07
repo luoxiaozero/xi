@@ -17,10 +17,23 @@ export class Position {
     setRowNode(node: Node, offset: number): boolean {
         if (this.rowNode === null) {
             switch (node.nodeName) {
+                case "DIV":
+                    if (Tool.hasClass(node as HTMLElement, "art-md-Hr")) {
+                        this.rowNode = node.firstChild;
+                        this.rowNodeAnchorOffset = 0;
+                    }
+                    break;
+                case "H1":
+                case "H2":
+                case "H3":
+                case "H4":
+                case "H5":
+                case "H6":
                 case "P":
                 case "TH":
                 case "TD":
                 case "PRE":
+                case "HR":
                     this.rowNode = node;
                     this.rowNodeAnchorOffset = offset;
                     return true;
@@ -35,6 +48,8 @@ export class Position {
                         this.rowNodeAnchorOffset = 0;
                         return true;
                     }
+                    break;
+
             }
         }
         return false;
@@ -97,13 +112,14 @@ export default class Cursor {
 
             let node = anchorNode;
             let len = anchorOffset;
-
+            if (node.parentNode === this.mountDom)
+                this.pos.setRowNode(node, len);
             while (node.parentNode != this.mountDom) {
                 if (Tool.hasClass(node as HTMLElement, 'art-shield')) {
                     this.pos = null;
                     return this.pos;
                 }
-                
+
                 while (node.previousSibling) {
                     node = node.previousSibling;
                     if (!Tool.hasClass(node as HTMLElement, 'art-shield'))
@@ -145,11 +161,6 @@ export default class Cursor {
                 }
             }
             this.pos.rowFocusOffset = rootNodeSubF;
-            // let name = anchorNode.parentNode.nodeName;
-            // if (anchorOffset == 0 && anchorNode.previousSibling == null &&
-            //     (name == 'LI' || name == 'P' || name == 'TH' || name == 'TD')) {
-            //     anchorNode = anchorNode.parentNode;
-            // }
         } else {
             this.pos = null;
         }
@@ -197,7 +208,7 @@ export default class Cursor {
                     ((<HTMLElement>tools[i]).nextSibling as HTMLElement).style.display = "block";
                     (<HTMLElement>tools[i]).classList.replace("art-display", "art-display-none");
                 }
-            }  else if(Tool.hasClass(alineDom, "art-md-MathBlock")) {
+            } else if (Tool.hasClass(alineDom, "art-md-MathBlock")) {
                 if (alineDom !== (<HTMLElement>tools[i]).parentElement) {
                     (<HTMLElement>tools[i]).classList.replace("art-display", "art-display-none");
                 }

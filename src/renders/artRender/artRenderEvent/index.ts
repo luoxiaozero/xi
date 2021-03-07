@@ -101,18 +101,9 @@ export default class ArtRenderEvent {
         } else if (/^Arrow(Right|Left|Up|Down)$/.test(key) && _this.artRender.cursor.moveCursor(key)) {
             e.preventDefault();
             return false;
-        } else if (key == 'Enter') {
-            // 回车时渲染
-            if (!_this.artRender.interaction.render(key, 'keydown')) {
-                e.preventDefault();
-                return false;
-            }
-        } else if (key == 'Backspace') {
-            // 退格时渲染
-            if (!_this.artRender.interaction.render(key, 'keydown')) {
-                e.preventDefault();
-                return false;
-            }
+        } else if (!_this.artRender.interaction.render(key, 'keydown')){
+            e.preventDefault();
+            return false;
         }
         return true;
     }
@@ -137,7 +128,7 @@ export default class ArtRenderEvent {
         }
         if (!_this.isComposition) {
             // 输入法不为连续时，如中文输入时
-            _this.artRender.interaction.render(key, 'keyup');
+            _this.artRender.interaction.render(key, 'keyup', e);
         }
     }
 
