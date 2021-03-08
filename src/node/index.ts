@@ -289,8 +289,6 @@ export default class VNode {
                             return fun;
                         }
                         break;
-                    default:
-                        console.log("InteractionParser:" + info_words[0]);
                 }
                 break;
             case "math":

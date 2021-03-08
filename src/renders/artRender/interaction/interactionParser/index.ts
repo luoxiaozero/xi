@@ -18,7 +18,7 @@ export default class InteractionParser {
         }
     }
 
-    public image(node: VNode, entering: boolean) {
+    image(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -41,7 +41,7 @@ export default class InteractionParser {
 
     }
 
-    public heading(node: VNode, entering: boolean) {
+    heading(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -59,7 +59,7 @@ export default class InteractionParser {
         }
     }
 
-    public link(node: VNode, entering: boolean) {
+    link(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -79,7 +79,7 @@ export default class InteractionParser {
         }
     }
 
-    public code(node: VNode, entering: boolean) {
+    code(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -99,7 +99,7 @@ export default class InteractionParser {
         }
     }
 
-    private html_inline(node: VNode, entering: boolean) {
+    html_inline(node: VNode, entering: boolean) {
         if (entering) {
             const reHtmlOpenTag = new RegExp("^<(" + TAGNAME + ")(" + ATTRIBUTE + "*)\\s*/?>");
             const reHtmlCloseTag = new RegExp("^</(" + TAGNAME + ")\\s*[>]");
@@ -119,14 +119,12 @@ export default class InteractionParser {
                 let name = match[1];
 
                 for (let i = this.html_inlines.length - 1; i >= 0; i--) {
-                    console.log(node, this.html_inlines[i].node)
                     if (node.parent !== this.html_inlines[i].node.parent) {
 
                     }
                     if (name === this.html_inlines[i].name) {
                         let tag = new VNode(name);
                         tag.attrs = this.html_inlines[i].attrs;
-                        console.log(this.html_inlines[i]);
                         let child = node.prev, prev;
                         while (child && child !== this.html_inlines[i].node) {
                             prev = child.prev;
@@ -149,17 +147,10 @@ export default class InteractionParser {
                 }
             }
 
-            console.log(node, match, info)
         }
     }
 
-    private html_block(node: VNode, entering: boolean) {
-        if (entering) {
-            console.log(node)
-        }
-    }
-
-    private item(node: VNode, entering: boolean) {
+    item(node: VNode, entering: boolean) {
         if (entering) {
             if (node.firstChild && node.firstChild.type === "item_checkbox") {
                 node.attrs.set("class", "art-md-item-checkbox");
@@ -168,7 +159,7 @@ export default class InteractionParser {
         }
     }
 
-    private math(node: VNode, entering: boolean) {
+    math(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -206,7 +197,7 @@ export default class InteractionParser {
         }
     }
 
-    public emph(node: VNode, entering: boolean) {
+    emph(node: VNode, entering: boolean) {
         if (entering) {
             if (node.firstChild.type === "strong")
                 return;
@@ -230,7 +221,7 @@ export default class InteractionParser {
         }
     }
 
-    public strong(node: VNode, entering: boolean) {
+    strong(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -250,7 +241,7 @@ export default class InteractionParser {
         }
     }
 
-    public delete(node: VNode, entering: boolean) {
+    delete(node: VNode, entering: boolean) {
         if (entering) {
             let span = new VNode("span");
             span.attrs.set("class", "art-meta art-hide");
@@ -270,6 +261,7 @@ export default class InteractionParser {
         }
     }
 
+    /**交互解释 */
     public interactionParse(ast: VNode) {
         let walker = ast.walker(),
             event: { entering: boolean; node: VNode; },
@@ -285,15 +277,16 @@ export default class InteractionParser {
         }
     }
 
+    /**行交互解释 */
     public parse(input: string): VNode {
         let doc = this.parser.parse(input);
         this.interactionParse(doc);
-
         return doc;
     }
 
+    /**行内交互解释 */
     public inlineParse(input: string | VNode): VNode {
-        let doc;
+        let doc: VNode;
         if (typeof (input) === "string") {
             doc = new VNode("paragraph");
             doc._string_content = input;

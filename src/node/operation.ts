@@ -109,7 +109,6 @@ export default class Operation {
                         child = child.next;
                         continue;
                     }
-                    console.log("asdad update")
                     fun = null;
                     if (child.command == "appendChild") {
                         fun = child.node.newDom();

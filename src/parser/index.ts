@@ -455,7 +455,7 @@ const blocks = {
 
             let match = ln.slice(parser.nextNonspace).match(reClosingTable);
             if (match) {
-                console.log(match)
+                // // console(match)
                 let tbody = container.lastChild;
                 let tr = new VNode("tr", container.sourcepos);
                 tbody.appendChild(tr);
@@ -576,7 +576,7 @@ const blockStarts = [
             container._fenceLength = fenceLength;
             container._fenceChar = match[0][0];
             container._fenceOffset = parser.indent;
-            console.log(container)
+            // console(container)
             parser.advanceNextNonspace();
             parser.advanceOffset(fenceLength, false);
             return 2;
@@ -981,14 +981,14 @@ class Parser {
 
             switch (this.blocks[container.type].continue(this, container)) {
                 case 0: // we've matched, keep going # 我们已经匹配好了，继续
-                    console.log("while 1 case 0test =-======")
+                    // console("while 1 case 0test =-======")
                     break;
                 case 1: // we've failed to match a block # 我们没有匹配到一个block
-                    console.log("while 1 case 1test =-======")
+                    // console("while 1 case 1test =-======")
                     all_matched = false;
                     break;
                 case 2: // we've hit end of line for fenced code close and can return # 我们已经到达了fenced代码close的行尾，并且可以返回
-                    console.log("while 1 case 2test =-======")
+                    // console("while 1 case 2test =-======")
                     return;
                 default:
                     throw "continue returned illegal value, must be 0, 1, or 2";
@@ -999,7 +999,7 @@ class Parser {
             }
         }
 
-        console.log(" 2 test =-======")
+        // console(" 2 test =-======")
         this.allClosed = container === this.oldtip;
         this.lastMatchedContainer = container;
 
@@ -1012,17 +1012,17 @@ class Parser {
         // adding children to the last matched container:
         // 向最后一个匹配的容器添加子容器:
         while (!matchedLeaf) {
-            console.log("while 3 test =-======")
+            // console("while 3 test =-======")
             this.findNextNonspace();
 
-            console.log(this.indented, ln.slice(this.nextNonspace))
+            // console(this.indented, ln.slice(this.nextNonspace))
             // this is a little performance optimization:
             // 这是一个小小的性能优化:
             if (
                 !this.indented &&
                 !reMaybeSpecial.test(ln.slice(this.nextNonspace))
             ) {
-                console.log("while 3 1 test =-======")
+                // console("while 3 1 test =-======")
                 this.advanceNextNonspace();
                 break;
             }
@@ -1030,7 +1030,7 @@ class Parser {
             let i = 0;
             while (i < startsLen) {
                 let res = starts[i](this, container);
-                console.log("while 3 2 while test =-======", i, res)
+                // console("while 3 2 while test =-======", i, res)
                 if (res === 1) {
                     container = this.tip;
                     break;
@@ -1044,7 +1044,7 @@ class Parser {
                     i++;
                 }
             }
-            console.log("while 3 3 while test =-======", i === startsLen)
+            // console("while 3 3 while test =-======", i === startsLen)
 
             if (i === startsLen) {
                 // nothing matched
@@ -1053,7 +1053,7 @@ class Parser {
             }
         }
 
-        console.log(" 4 test =-======", this)
+        // console(" 4 test =-======", this)
         // What remains at the offset is a text line.  Add the text to the
         // 在偏移量处剩下的是一个文本行。将文本添加到
         // appropriate container.
@@ -1065,13 +1065,13 @@ class Parser {
             // lazy paragraph continuation # 懒惰的段落延续
             this.addLine();
         } else {
-            console.log(" 5 else test =-======", this.blank, container.lastChild)
+            // console(" 5 else test =-======", this.blank, container.lastChild)
             // not a lazy continuation
 
             // finalize any blocks not matched # 最后确定任何不匹配的块
             this.closeUnmatchedBlocks();
             if (this.blank && container.lastChild) {
-                console.log(" 5 1 if test =-======")
+                // console(" 5 1 if test =-======")
                 container.lastChild._lastLineBlank = true;
             }
 
@@ -1095,7 +1095,7 @@ class Parser {
                         container.sourcepos[0][0] === this.lineNumber)
                 );
 
-            console.log(" 5 2 test =-======", lastLineBlank, container.type, container._string_content)
+            // console(" 5 2 test =-======", lastLineBlank, container.type, container._string_content)
             // propagate lastLineBlank up through parents:
             // 通过父类传播 lastLineBlank:
             let cont = container;
@@ -1103,12 +1103,12 @@ class Parser {
                 cont._lastLineBlank = lastLineBlank;
                 cont = cont.parent;
             }
-            console.log(" 5 2.1 if test =-======", container._string_content)
+            // console(" 5 2.1 if test =-======", container._string_content)
 
             if (this.blocks[t].acceptsLines) {
-                console.log(" 5 3 if test =-======")
+                // console(" 5 3 if test =-======")
                 this.addLine();
-                console.log(" 5 3.1 if test =-======", container._string_content)
+                // console(" 5 3.1 if test =-======", container._string_content)
                 // if HtmlBlock, check for end condition # 如果是HtmlBlock，检查结束条件
                 if (
                     t === "html_block" &&
@@ -1118,19 +1118,19 @@ class Parser {
                         this.currentLine.slice(this.offset)
                     )
                 ) {
-                    console.log(" 5 3 0 if test =-======")
+                    // console(" 5 3 0 if test =-======")
                     this.lastLineLength = ln.length;
                     this.finalize(container, this.lineNumber);
                 }
             } else if (this.offset < ln.length && !this.blank) {
-                console.log(" 5 3 elseif test =-======", lastLineBlank, container.type)
+                // console(" 5 3 elseif test =-======", lastLineBlank, container.type)
                 // create paragraph container for line # 为行创建段落容器
                 container = this.addChild("paragraph", this.offset);
                 this.advanceNextNonspace();
                 this.addLine();
             }
         }
-        console.log(" 6 test =-======", container.type, container._string_content)
+        // console(" 6 test =-======", container.type, container._string_content)
         this.lastLineLength = ln.length;
     }
 

@@ -23,7 +23,7 @@ export default class ArtRenderEvent {
     /**添加所有事件 */
     public attachAllEvent() {
         this.artRender.dom.onmousedown = function (evt) {
-            console.log(evt);
+            // console.log(evt);
 
         }
         this.artRender.dom.setAttribute('contenteditable', 'true');

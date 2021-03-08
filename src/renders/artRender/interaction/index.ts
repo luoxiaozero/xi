@@ -39,7 +39,7 @@ export default class Interaction {
         this.behavior = { key, type };
         let state: boolean = true;
         this.cursor.getSelection();
-        console.log(this.behavior, this.cursor.pos)
+        console.log(this.behavior)
         if (type == 'keydown') {
             switch (key) {
                 case 'Backspace':
@@ -279,7 +279,7 @@ export default class Interaction {
                         break;
                     }
                 }
-                console.log(pos.rowNode, selectNode)
+     
                 newNode = new VNode("paragraph");
                 newNode.appendChild(new VNode("linebreak"));
                 this.operation.replace(newNode, selectNode.parent);
@@ -319,7 +319,6 @@ export default class Interaction {
                 Cursor.setCursor(newNode.dom, 0);
                 return false;
             } else if (dom.nodeName === "P" && reThematicBreak.test(md)) {
-                console.log("thematic_break")
                 newNode = new VNode("thematic_break");
                 newNode.attrs.set("art-marker", md);
                 this.operation.replace(newNode, node);
@@ -503,7 +502,7 @@ export default class Interaction {
                                 Cursor.setCursor(newNode.dom, 0);
                                 break;
                             default:
-                                console.log("error", rowVNode.parent.parent.parent.type);
+                                throw  "error:" + rowVNode.parent.parent.parent.type;
                         }
                     }
 
@@ -662,17 +661,8 @@ export default class Interaction {
     }
 
     paragraph(node: VNode, dom: HTMLElement): void {
-        
         this.updateNode(dom, node);
-
-                let walker = node.walker(), event: { entering: boolean; node: VNode; };
-                while ((event = walker.next())) {
-                    if (event.entering ) {
-                        console.log(event.node);
-                    }
-                }
         let md = node.getMd(), match: RegExpMatchArray, newNode: VNode;
-        console.log(md, md.charCodeAt(md.length - 1), md.charCodeAt(md.length - 2));
         if (md.length && md.charCodeAt(md.length - 1) === 10)
             md = md.substring(0, md.length - 1);
         if (md == "" || md == "\n" || reCodeFence.test(md) || reThematicBreak.test(md))

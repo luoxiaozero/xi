@@ -1167,7 +1167,6 @@ export default class InlineParser {
     public parseInlines(block: VNode) {
         let match;
         if (block.parent && block.parent.type === "item" && (match = block._string_content.match(reItemCheckbox))) {
-            console.log(match)
             let item_checkbox = new VNode("item_checkbox");
             item_checkbox.attrs.set("type", "checkbox");
             item_checkbox.attrs.set("disabled", "disabled");
