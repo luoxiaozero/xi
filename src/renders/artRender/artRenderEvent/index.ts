@@ -41,9 +41,9 @@ export default class ArtRenderEvent {
         this.addDOMEvent('keyup', this.keyup);
 
         // 连续输开始
-        this.addDOMEvent('compositionstart', (e: CompositionEvent, _this: ArtRenderEvent) => _this.isComposition = true);
+        this.addDOMEvent('compositionstart', (e: CompositionEvent, _this: ArtRenderEvent) => {_this.isComposition = true; });
         // 连续输结束
-        this.addDOMEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) => _this.isComposition = false);
+        this.addDOMEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) => {_this.isComposition = false; });
 
         this.addDOMEvent('click', this.click);
         this.addDOMEvent('contextmenu', this.contextmenu);
@@ -101,7 +101,7 @@ export default class ArtRenderEvent {
         } else if (/^Arrow(Right|Left|Up|Down)$/.test(key) && _this.artRender.cursor.moveCursor(key)) {
             e.preventDefault();
             return false;
-        } else if (!_this.artRender.interaction.render(key, 'keydown')){
+        } else if (!_this.isComposition && !_this.artRender.interaction.render(key, "keydown")){
             e.preventDefault();
             return false;
         }
@@ -127,9 +127,9 @@ export default class ArtRenderEvent {
             }
         }
         if (!_this.isComposition) {
-            // 输入法不为连续时，如中文输入时
-            _this.artRender.interaction.render(key, 'keyup', e);
+            return _this.artRender.interaction.render(key, 'keyup', e);
         }
+        return true;
     }
 
     /**左点击 */

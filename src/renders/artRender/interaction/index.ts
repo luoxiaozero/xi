@@ -62,7 +62,6 @@ export default class Interaction {
                     state = this.keyup();
             }
         }
-
         this.cursor.setSelection();
         this.artRender.artText.get<EventCenter>('$eventCenter').emit('artRender-render')
         return state;
@@ -78,11 +77,21 @@ export default class Interaction {
                 this.operation.update();
             }
             return;
-        } else if ((node.type === "softbreak" || node.type === "text") && dom instanceof Text) {
-            if (node._literal === null && dom.data === '\n') {
-
-            } else if (node._literal && node._literal != dom.data) {
-                console.log(node._literal, dom.data, "00")
+        } else if (node.type === "softbreak" && Tool.hasClass(dom, "art-md-softbreak")) {
+            if (dom.innerText !== '\n') {
+                let newNode = new VNode("text");
+                newNode._literal = dom.innerText;
+                
+                let softbreak = new VNode("softbreak");
+                this.operation.replace(softbreak, node);
+                this.operation.insertAfter(newNode, softbreak);
+                this.operation.update();
+                this.cursor.pos.inAnchorOffset++;
+                this.cursor.pos.inFocusOffset++;
+            }
+            return;
+        } else if (node.type === "text" && dom instanceof Text) {
+            if (node._literal && node._literal != dom.data) {
                 let newNode = new VNode("text");
                 newNode._literal = dom.data;
                 newNode.dom = node.dom;
@@ -97,7 +106,7 @@ export default class Interaction {
             this.operation.update();
             return;
         } else if (dom instanceof Text) {
-            let newNode;
+            let newNode: VNode;
             if (dom.data === '\n') {
                 newNode = new VNode("softbreak");
             } else {
@@ -112,13 +121,13 @@ export default class Interaction {
             return;
         }
 
-        let child = node.firstChild, i = 0, next;
-        for (; i < dom.childNodes.length && child; i++, child = next) {
+        let child = node.firstChild, i = 0, next: VNode, len = dom.childNodes.length ;
+        for (; i < len && child; i++, child = next) {
             next = child.next;
             this.updateNode(<HTMLElement>dom.childNodes[i], child);
         }
 
-        for (; i < dom.childNodes.length; i++) {
+        for (; i < len; i++) {
             if (dom.childNodes[i] instanceof Text) {
                 let text = new VNode("text");
                 text.dom = dom.childNodes[i] as Text;
@@ -224,8 +233,11 @@ export default class Interaction {
                 this.operation.replace(newNode, node);
                 this.operation.update();
                 return false;
-            } else if (pos.rowNode.nodeName === "P" && pos.rowNode.childNodes.length === 1 &&
-                pos.rowNode.firstChild.nodeName === "BR" && pos.rowNode.parentElement.nodeName === "LI") {
+            } else if (pos.rowNode.nodeName === "P" &&
+                (!pos.rowNode.previousSibling || pos.rowNode.previousSibling.nodeName === "INPUT") &&
+                pos.rowNode.childNodes.length === 1 &&
+                pos.rowNode.firstChild.nodeName === "BR" &&
+                pos.rowNode.parentElement.nodeName === "LI") {
                 let walker = node.walker(),
                     event: { entering: boolean; node: VNode; },
                     selectNode: VNode;
@@ -250,8 +262,32 @@ export default class Interaction {
                     this.operation.update();
                     Cursor.setCursor(newNode.dom, 0);
                 }
-                
+
                 return false;
+            } else if (pos.rowNode.nodeName === "P" &&
+                pos.rowNode.childNodes.length === 1 &&
+                pos.rowNode.firstChild.nodeName === "BR" &&
+                pos.rowNode.parentNode.childNodes.length === 1 &&
+                pos.rowNode.parentNode.nodeName === "BLOCKQUOTE") {
+
+                let walker = node.walker(),
+                    event: { entering: boolean; node: VNode; },
+                    selectNode: VNode;
+                while ((event = walker.next())) {
+                    if (event.entering && event.node.dom === pos.rowNode) {
+                        selectNode = event.node;
+                        break;
+                    }
+                }
+                console.log(pos.rowNode, selectNode)
+                newNode = new VNode("paragraph");
+                newNode.appendChild(new VNode("linebreak"));
+                this.operation.replace(newNode, selectNode.parent);
+                this.operation.update();
+                Cursor.setCursor(newNode.dom, 0);
+                return false;
+            } else {
+                console.log('wu ------------------------- keydown back')
             }
         }
         return true;
@@ -615,6 +651,7 @@ export default class Interaction {
 
                 this.operation.update();
                 Cursor.setCursor(newNode.dom, 0);
+                this.cursor.getSelection();
                 return false;
             } else {
                 console.log("enter wu------------------", dom)
@@ -625,9 +662,17 @@ export default class Interaction {
     }
 
     paragraph(node: VNode, dom: HTMLElement): void {
+        
         this.updateNode(dom, node);
+
+                let walker = node.walker(), event: { entering: boolean; node: VNode; };
+                while ((event = walker.next())) {
+                    if (event.entering ) {
+                        console.log(event.node);
+                    }
+                }
         let md = node.getMd(), match: RegExpMatchArray, newNode: VNode;
-        console.log(md);
+        console.log(md, md.charCodeAt(md.length - 1), md.charCodeAt(md.length - 2));
         if (md.length && md.charCodeAt(md.length - 1) === 10)
             md = md.substring(0, md.length - 1);
         if (md == "" || md == "\n" || reCodeFence.test(md) || reThematicBreak.test(md))
@@ -687,6 +732,13 @@ export default class Interaction {
             this.operation.update();
         } else {
             let newNode = this.parser.inlineParse(md);
+            if (md.charCodeAt(md.length - 1) === 10) {
+                let span = new VNode("softbreak");
+                span.attrs.set("class", "art-emptyline");
+                newNode.appendChild(span);
+                this.cursor.pos.inFocusOffset++;
+                this.cursor.pos.inAnchorOffset++;
+            }
             this.operation.replace(newNode, node);
             this.operation.update();
         }

@@ -31,6 +31,13 @@ export class Position {
                     this.rowNode = node;
                     this.rowNodeAnchorOffset = offset;
                     return true;
+                case "BLOCKQUOTE":
+                    if (offset === 0) {
+                        this.rowNode = node.firstChild;
+                        this.rowNodeAnchorOffset = 0;
+                        return true;
+                    }
+                    break;
                 case "DIV":
                     if (Tool.hasClass(node as HTMLElement, "art-md-Hr")) {
                         this.rowNode = node.firstChild;
@@ -87,7 +94,7 @@ export default class Cursor {
     static setCursor(node: Node, offset: number): boolean {
         if (node == undefined && !node)
             return false;
-        console.log(Cursor.sel)
+
         let range = Cursor.sel.getRangeAt(0).cloneRange();
         range.setStart(node, offset);
         range.collapse(true);
@@ -114,8 +121,8 @@ export default class Cursor {
 
             let node = anchorNode;
             let len = anchorOffset;
-            if (node.parentNode === this.mountDom)
-                this.pos.setRowNode(node, len);
+            
+            this.pos.setRowNode(node, len);
             while (node.parentNode != this.mountDom) {
                 if (Tool.hasClass(node as HTMLElement, 'art-shield')) {
                     this.pos = null;
@@ -202,6 +209,17 @@ export default class Cursor {
                 if (node.childNodes[i].textContent.length < len) {
                     len -= node.childNodes[i].textContent.length;
                 } else if (node.childNodes[i].nodeName === "#text") {
+                    if (this.pos.rowNodeAnchorOffset === 0) {
+                        while (node) {
+                            if (node.nextSibling) {
+                                node = node.nextSibling;
+                                break;
+                            } else {
+                                node = node.parentNode;
+                            }
+                        }
+                        return [node, 0];
+                    }
                     return [node.childNodes[i], len]
                 } else {
                     return this.searchNode(node.childNodes[i], len)
@@ -301,7 +319,7 @@ export default class Cursor {
             classVal = classVal.replace("art-show", "art-hide");
             showNodeList[i].setAttribute("class", classVal);
         }
-
+        
         if (this.pos && this.pos.selection.isCollapsed) {
             let info: [Node, number] = null;
             let pNode = this.mountDom.childNodes[this.pos.rowFocusOffset] as HTMLElement;
@@ -317,6 +335,7 @@ export default class Cursor {
             } else {
                 info = this.searchNode(pNode, pLen);
             }
+            
             console.log(info);
             if (info === null)
                 return null;
@@ -333,7 +352,10 @@ export default class Cursor {
                     (<HTMLSpanElement>info[0].parentNode.previousSibling.childNodes[0]).setAttribute("class", classVal);
                 }
             }
-            Cursor.setCursor(info[0], info[1])
+            
+            /**光标不移动不设置，设置后输入法有问题 */
+            if (info[0] !== this.pos.selection.anchorNode && info[1] !== this.pos.selection.anchorOffset)
+                Cursor.setCursor(info[0], info[1])
 
             let art_text_double = info[0].parentNode as HTMLElement;
 

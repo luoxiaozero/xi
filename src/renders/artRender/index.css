@@ -208,3 +208,7 @@
 .art-md-html-block-main::before {
     content: "HTML";
 }
+
+.art-emptyline {
+    display: block;
+}

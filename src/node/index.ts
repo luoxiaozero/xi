@@ -16,7 +16,7 @@ class NodeWalker {
         this.selfFalg = selfFalg;
     }
 
-    public next() {
+    public next(): { entering:boolean, node: VNode } {
         var cur = this.current;
         var entering = this.entering;
 
@@ -189,7 +189,10 @@ export default class VNode {
                 this.dom = new Text(this._literal);
                 return null;
             case "softbreak":
-                this.dom = new Text("\n");
+                this.dom = document.createElement("span");
+                this.setAttrs();
+                this.dom.classList.add("art-md-softbreak");
+                this.dom.appendChild(new Text("\n"));
                 return null;
             case "code":
                 this.dom = document.createElement("code");
