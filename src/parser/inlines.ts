@@ -709,7 +709,7 @@ export default class InlineParser {
 
     // Attempt to parse an entity.
     /**尝试解析一个实体。 */
-    public parseEntity(block: VNode):boolean {
+    public parseEntity(block: VNode): boolean {
         let m: string;
         if ((m = this.match(reEntityHere))) {
             //block.appendChild(text(decodeHTML(m)));

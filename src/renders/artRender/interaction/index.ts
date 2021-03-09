@@ -85,16 +85,16 @@ export default class Interaction {
             if (md !== dom.innerText) {
                 this.artRender.refmap.delete(md.match(reLinkLabel)[1]);
                 if (this.parser.parser.inlineParser.parseReference(dom.innerText, refmap)) {
-                    let def_link = new VNode("def_link");
-                    def_link._literal = dom.innerText.match(reLinkLabel)[1];
-                    def_link._title = refmap.get(def_link._literal).title;
-                    def_link._destination = refmap.get(def_link._literal).destination;
-                    this.artRender.refmap.set(def_link._literal, refmap.get(def_link._literal));
-                    console.log(node, dom.innerText, md);
-                    this.operation.replace(def_link, node);
+                    let newNode = new VNode("def_link");
+                    newNode._literal = dom.innerText.match(reLinkLabel)[1];
+                    newNode._title = refmap.get(newNode._literal).title;
+                    newNode._destination = refmap.get(newNode._literal).destination;
+                    this.artRender.refmap.set(newNode._literal, refmap.get(newNode._literal));
+
+                    this.operation.replace(newNode, node);
                     this.operation.update();
-                    this.artRender.refmap.set(def_link._literal, refmap.get(def_link._literal));
-                    return def_link;
+                    this.artRender.refmap.set(newNode._literal, refmap.get(newNode._literal));
+                    return newNode;
                 } else {
                     let newNode = new VNode("paragraph"), text = new VNode("text");
                     text._literal = dom.innerText;
@@ -315,7 +315,8 @@ export default class Interaction {
                 this.operation.update();
                 Cursor.setCursor(newNode.dom, 0);
                 return false;
-            } else if ((["paragraph", "heading"].includes(node.type) || Tool.hasClass(dom, "art-md-DefLink")) && node.prev) {
+            } else if (pos.selection.isCollapsed && pos.inAnchorOffset === 0 &&
+                (["paragraph", "heading"].includes(node.type) || Tool.hasClass(dom, "art-md-DefLink")) && node.prev) {
                 if (node.prev.type === "thematic_break") {
                     this.operation.remove(node.prev);
                     this.operation.update();
@@ -745,9 +746,9 @@ export default class Interaction {
 
     paragraph(node: VNode, dom: HTMLElement): void {
         let temp = this.updateNode(dom, node);
-        if (temp) 
+        if (temp)
             node = temp;
-        
+
         let md = node.getMd(), match: RegExpMatchArray, newNode: VNode, refmap = new Map<string, { destination: string, title: string }>();;
         if (md.length && md.charCodeAt(md.length - 1) === 10)
             md = md.substring(0, md.length - 1);
@@ -807,14 +808,16 @@ export default class Interaction {
             this.operation.replace(newNode, node);
             this.operation.update();
         } else if (this.parser.parser.inlineParser.parseReference(md, refmap)) {
-            newNode = new VNode("def_link");
-            newNode._literal = md.match(reLinkLabel)[1];
-            let _literal = newNode._literal;
-            newNode._title = refmap.get(_literal)?.title;
-            newNode._destination = refmap.get(_literal)?.destination;
-            this.artRender.refmap.set(_literal, refmap.get(newNode._literal));
-            this.operation.replace(newNode, node);
-            this.operation.update();
+            if ((!temp || temp && temp.type !== "def_link")) {
+                newNode = new VNode("def_link");
+                newNode._literal = md.match(reLinkLabel)[1];
+                let _literal = newNode._literal;
+                newNode._title = refmap.get(_literal)?.title;
+                newNode._destination = refmap.get(_literal)?.destination;
+                this.artRender.refmap.set(_literal, refmap.get(newNode._literal));
+                this.operation.replace(newNode, node);
+                this.operation.update();
+            } 
         } else {
             let newNode = this.parser.inlineParse(md);
             if (md.charCodeAt(md.length - 1) === 10) {

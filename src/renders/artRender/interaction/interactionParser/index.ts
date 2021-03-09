@@ -28,14 +28,35 @@ export default class InteractionParser {
             if (node.firstChild) {
                 text._literal += node.firstChild._literal;
             }
-            text._literal += "](" + node._destination;
-            if (node._title)
-                text._literal += "\"" + node._title + "\"";
 
-            text._literal += ")";
+            if (node._info && node._info["type"]) {
+                switch (node._info["type"]) {
+                    case "deflink":
+                        text._literal += '][' + node._info.destination + ']';
+                        node.attrs.set("art-data-ref", node._info.destination);
+                        if (!node._destination) {
+                            span.attrs.set("class", "art-meta");
+                            span.attrs.set("style", "color: #c7c7c7");
+                            node._destination = "";
+                        }
+                        break;
+                    default:
+                        text._literal += "](" + node._destination;
+                        if (node._title)
+                            text._literal += "\"" + node._title + "\"";
+                        text._literal += ")";
+                        break;
+                }
+            } else {
+                text._literal += "](" + node._destination;
+                if (node._title)
+                    text._literal += "\"" + node._title + "\"";
+                text._literal += ")";
+            }
+
             span.appendChild(text);
             node.insertBefore(span);
-            //node.firstChild.unlink();
+            node.firstChild.unlink();
 
             node.attrs.set("contenteditable", "false");
         }
@@ -76,7 +97,7 @@ export default class InteractionParser {
             let text_after = new VNode("text");
 
             if (node._info && node._info["type"]) {
-                switch(node._info["type"]) {
+                switch (node._info["type"]) {
                     case "deflink":
                         text_after._literal = '][' + node._info.destination + ']';
                         node._destination = "#";
@@ -95,7 +116,7 @@ export default class InteractionParser {
             } else {
                 text_after._literal = '](' + node._destination + ')';
             }
-            
+
             span_after.appendChild(text_after);
             node.insertAfter(span_after);
         }

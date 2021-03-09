@@ -236,10 +236,10 @@ export default class VNode {
                 break;
             case "image":
                 this.dom = document.createElement("img");
-                (<HTMLImageElement>this.dom).src = this._destination;
+                this.dom.setAttribute("src", this._destination);
                 if (this._title)
                     this.dom.title = this._title;
-                console.log(this.firstChild)
+                this.setAttrs();
                 return;
             case "code_block":
                 this.dom = document.createElement("div");

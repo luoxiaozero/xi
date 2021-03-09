@@ -18,6 +18,48 @@ import { hljsExport } from './plugins/highlight';
 import { mermaidExport } from './plugins/mermaid';
 import { katexExport } from './plugins/katex';
 
+export class RefMap {
+    refmap: Map<string, { destination: string, title: string }>;
+    constructor() {
+        this.refmap = new Map();
+    }
+
+    setRefMap(refmap: Map<string, { destination: string, title: string }>) {
+        this.refmap = refmap;
+    }
+
+    set(key: string, value: { destination: string, title: string }): Map<string, { destination: string, title: string }> {
+        let all = document.querySelectorAll("*[art-data-ref=\"" +  key +"\"]");
+        all.forEach(dom => {
+            if (dom.tagName === "IMG") {
+                dom.previousElementSibling.setAttribute("class", "art-meta art-hide");
+                dom.previousElementSibling.setAttribute("style", "");
+                dom.setAttribute("src", value.destination);
+            }
+        })
+        return this.refmap.set(key, value);
+    }
+
+    get(key: string): { destination: string, title: string } {
+        return this.refmap.get(key);
+    }
+
+    has(key: string): boolean {
+        return this.refmap.has(key);
+    }
+
+    delete(key: string): boolean {
+        let all = document.querySelectorAll("*[art-data-ref=\"" +  key +"\"]");
+        all.forEach(dom => {
+            if (dom.tagName === "IMG") {
+                dom.previousElementSibling.setAttribute("class", "art-meta");
+                dom.previousElementSibling.setAttribute("style", "color: #c7c7c7");
+                dom.setAttribute("src", "");
+            }
+        })
+        return this.refmap.delete(key);
+    }
+}
 
 /**
  * 默认的渲染器
@@ -44,7 +86,7 @@ export default class ArtRender implements Render {
     renderEvent: ArtRenderEvent;
 
     doc: VNode;
-    refmap: Map<string, { destination: string, title: string}>;
+    refmap: RefMap;
     interaction: Interaction;
     parser: InteractionParser;
     operation: Operation;
@@ -70,6 +112,7 @@ export default class ArtRender implements Render {
         this.parser = new InteractionParser({});
         this.interaction = new Interaction(this);
 
+        this.refmap = new RefMap();
         this.doc = new VNode('document', [[1, 1], [0, 0]]);
         this.doc.dom = this.dom;
         ArtRender.artRenders.push(this);
@@ -107,7 +150,7 @@ export default class ArtRender implements Render {
 
     public setMd(md: string): void {
         this.doc = this.parser.parse(md);
-        this.refmap = this.parser.parser.refmap;
+        this.refmap.setRefMap(this.parser.parser.refmap);
         this.doc.dom = this.dom;
         this.doc.dom.innerHTML = "";
 
