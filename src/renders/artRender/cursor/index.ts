@@ -43,6 +43,10 @@ export class Position {
                         this.rowNode = node.firstChild;
                         this.rowNodeAnchorOffset = 0;
                         return true;
+                    } else if (Tool.hasClass(node as HTMLElement, "art-md-DefLink")) {
+                        this.rowNode = node;
+                        this.rowNodeAnchorOffset = offset;
+                        return true;
                     }
                     break;
                 case "LI":
@@ -354,7 +358,7 @@ export default class Cursor {
             }
             
             /**光标不移动不设置，设置后输入法有问题 */
-            if (info[0] !== this.pos.selection.anchorNode && info[1] !== this.pos.selection.anchorOffset)
+            if (info[0] !== this.pos.selection.anchorNode || info[1] !== this.pos.selection.anchorOffset)
                 Cursor.setCursor(info[0], info[1])
 
             let art_text_double = info[0].parentNode as HTMLElement;

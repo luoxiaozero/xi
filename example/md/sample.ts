@@ -77,11 +77,21 @@ $$
 
 #### 链接 
 
+<https://www.baidu.com>
+
 [Title](URL)
+
+[T][12]
+
+[12]: sdfdsfsdf
 
 #### 图片
 
 ![ad](imgs/tu--imgs.jpg)
+
+![I][1]
+
+[1]: https://dss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=2037944103,1592597017&fm=26&gp=0.jpg
 
 #### 无序列表
 

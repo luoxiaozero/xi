@@ -11,6 +11,8 @@ const C_LESSTHAN = 60;
 const C_SPACE = 32;
 const C_OPEN_BRACKET = 91;
 
+const reLinkLabel = /^\[((?:[^\\\[\]]|\\.){0,1000})\]/;
+
 const reHtmlBlockOpen = [
     /./, // dummy for 0
     /^<(?:script|pre|textarea|style)(?:\s|>|$)/i,
@@ -58,8 +60,8 @@ const reSetextHeadingLine = /^(?:=+|-+)[ \t]*$/;
 const reLineEnding = /\r\n|\n|\r/;
 
 // Returns true if string contains only space characters.
-// 如果字符串只包含空格字符则返回true。
-function isBlank(s: string) {
+/**如果字符串只包含空格字符则返回true。 */ 
+function isBlank(s: string): boolean {
     return !reNonSpace.test(s);
 }
 
@@ -478,15 +480,22 @@ const blocks = {
         },
         acceptsLines: true
     },
+    def_link: {
+        continue(parser: Parser, container: VNode) {
+            return 1;
+        },
+    },
     paragraph: {
         continue(parser: Parser) {
             return parser.blank ? 1 : 0;
         },
         finalize(parser: Parser, block: VNode) {
-            let pos: number;
-            let hasReferenceDefs = false;
+            let pos: number, 
+                hasReferenceDefs = false,
+                _string_content: string;
 
             // try parsing the beginning as link reference definitions:
+            // 尝试将开头解析为链接引用定义:
             while (
                 peek(block._string_content, 0) === C_OPEN_BRACKET &&
                 (pos = parser.inlineParser.parseReference(
@@ -494,11 +503,16 @@ const blocks = {
                     parser.refmap
                 ))
             ) {
+                _string_content = block._string_content.slice(0, pos);
                 block._string_content = block._string_content.slice(pos);
                 hasReferenceDefs = true;
             }
             if (hasReferenceDefs && isBlank(block._string_content)) {
-                block.unlink();
+                let def_link = new VNode("def_link");
+                def_link._literal = _string_content.match(reLinkLabel)[1];
+                def_link._title = parser.refmap.get(def_link._literal).title;
+                def_link._destination = parser.refmap.get(def_link._literal).destination;
+                block.replace(def_link);
             }
         },
         canContain() {
@@ -820,7 +834,7 @@ class Parser {
     partiallyConsumedTab: boolean;
     allClosed: boolean;
     lastMatchedContainer: VNode;
-    refmap: {};
+    refmap: Map<string, { destination: string, title: string}>;
     lastLineLength: number;
     inlineParser: InlineParser;
     options: any;
@@ -840,7 +854,7 @@ class Parser {
         this.partiallyConsumedTab = false;
         this.allClosed = true;
         this.lastMatchedContainer = this.doc;
-        this.refmap = {};
+        this.refmap = new Map();
         this.lastLineLength = 0;
         this.inlineParser = new InlineParser(options),
             this.options = options || {};
@@ -1192,7 +1206,7 @@ class Parser {
     public parse(input: string): VNode {
         this.doc = new VNode('document', [[1, 1], [0, 0]]);
         this.tip = this.doc;
-        this.refmap = {};
+        this.refmap = new Map();
         this.lineNumber = 0;
         this.lastLineLength = 0;
         this.offset = 0;

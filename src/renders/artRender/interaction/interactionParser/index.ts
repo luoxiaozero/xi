@@ -35,6 +35,7 @@ export default class InteractionParser {
             text._literal += ")";
             span.appendChild(text);
             node.insertBefore(span);
+            //node.firstChild.unlink();
 
             node.attrs.set("contenteditable", "false");
         }
@@ -61,21 +62,42 @@ export default class InteractionParser {
 
     link(node: VNode, entering: boolean) {
         if (entering) {
-            let span = new VNode("span");
-            span.attrs.set("class", "art-meta art-hide");
-            let text = new VNode("text");
-            text._literal = '[';
-            span.appendChild(text);
-            node.insertBefore(span);
+            let span_before = new VNode("span");
+            span_before.attrs.set("class", "art-meta art-hide");
+            let text_before = new VNode("text");
+            text_before._literal = '[';
+            span_before.appendChild(text_before);
+            node.insertBefore(span_before);
 
             node.attrs.set("class", "art-text-double");
 
-            span = new VNode("span");
-            span.attrs.set("class", "art-meta art-hide");
-            text = new VNode("text");
-            text._literal = '](' + node._destination + ')';
-            span.appendChild(text);
-            node.insertAfter(span);
+            let span_after = new VNode("span");
+            span_after.attrs.set("class", "art-meta art-hide");
+            let text_after = new VNode("text");
+
+            if (node._info && node._info["type"]) {
+                switch(node._info["type"]) {
+                    case "deflink":
+                        text_after._literal = '][' + node._info.destination + ']';
+                        node._destination = "#";
+                        node.attrs.set("art-data-ref", node._info.destination);
+                        break;
+                    case "autolink":
+                        text_before._literal = "<"
+                        span_before.attrs.set("class", "art-meta");
+                        text_after._literal = ">"
+                        span_after.attrs.set("class", "art-meta");
+                        break;
+                    default:
+                        text_after._literal = '](' + node._destination + ')';
+                        break;
+                }
+            } else {
+                text_after._literal = '](' + node._destination + ')';
+            }
+            
+            span_after.appendChild(text_after);
+            node.insertAfter(span_after);
         }
     }
 

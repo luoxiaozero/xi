@@ -51,17 +51,17 @@ const reItemCheckbox = /^\[(\s|x|X)\]/;
 
 // Some regexps used in inline parser:
 
-var ESCAPABLE = common.ESCAPABLE;
-var ESCAPED_CHAR = "\\\\" + ESCAPABLE;
+const ESCAPABLE = common.ESCAPABLE;
+const ESCAPED_CHAR = "\\\\" + ESCAPABLE;
 
-var ENTITY = common.ENTITY;
-var reHtmlTag = common.reHtmlTag;
+const ENTITY = common.ENTITY;
+const reHtmlTag = common.reHtmlTag;
 
 const rePunctuation = new RegExp(
     /[!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u0AF0\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166D\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E42\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65]|\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC9\uDDCD\uDDDB\uDDDD-\uDDDF\uDE38-\uDE3D\uDEA9]|\uD805[\uDCC6\uDDC1-\uDDD7\uDE41-\uDE43\uDF3C-\uDF3E]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD82F\uDC9F|\uD836[\uDE87-\uDE8B]/
 );
 
-var reLinkTitle = new RegExp(
+const reLinkTitle = new RegExp(
     '^(?:"(' +
     ESCAPED_CHAR +
     '|[^"\\x00])*"' +
@@ -75,61 +75,59 @@ var reLinkTitle = new RegExp(
     "|[^()\\x00])*\\))"
 );
 
-var reLinkDestinationBraces = /^(?:<(?:[^<>\n\\\x00]|\\.)*>)/;
+const reLinkDestinationBraces = /^(?:<(?:[^<>\n\\\x00]|\\.)*>)/;
 
-var reEscapable = new RegExp("^" + ESCAPABLE);
+const reEscapable = new RegExp("^" + ESCAPABLE);
 
-var reEntityHere = new RegExp("^" + ENTITY, "i");
+const reEntityHere = new RegExp("^" + ENTITY, "i");
 
-var reTicks = /`+/;
+const reTicks = /`+/;
 
-var reTicksHere = /^`+/;
+const reTicksHere = /^`+/;
 
-var reEllipses = /\.\.\./g;
+const reEllipses = /\.\.\./g;
 
-var reDash = /--+/g;
+const reDash = /--+/g;
 
-var reEmailAutolink = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>/;
+const reEmailAutolink = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>/;
 
-var reAutolink = /^<[A-Za-z][A-Za-z0-9.+-]{1,31}:[^<>\x00-\x20]*>/i;
+const reAutolink = /^<[A-Za-z][A-Za-z0-9.+-]{1,31}:[^<>\x00-\x20]*>/i;
 
 const reSpnl = /^ *(?:\n *)?/;
 
-var reWhitespaceChar = /^[ \t\n\x0b\x0c\x0d]/;
+const reWhitespaceChar = /^[ \t\n\x0b\x0c\x0d]/;
 
 const reUnicodeWhitespaceChar = /^\s/;
 
-var reFinalSpace = / *$/;
+const reFinalSpace = / *$/;
 
-var reInitialSpace = /^ */;
+const reInitialSpace = /^ */;
 
-var reSpaceAtEndOfLine = /^ *(?:\n|$)/;
+const reSpaceAtEndOfLine = /^ *(?:\n|$)/;
 
-var reLinkLabel = /^\[(?:[^\\\[\]]|\\.){0,1000}\]/;
+const reLinkLabel = /^\[(?:[^\\\[\]]|\\.){0,1000}\]/;
 
 // Matches a string of non-special characters.
 const reMain = /^[^\n`\[\]\\!<&*_'"~$]+/m;
 
-var text = function (s) {
+function text(s: string): VNode {
     var node = new VNode("text");
     node._literal = s;
     return node;
-};
+}
 
 // normalize a reference in reference link (remove []s, trim,
 // collapse internal space, unicode case fold.
 // See commonmark/commonmark.js#168.
-var normalizeReference = function (string) {
+export function normalizeReference(string: string): string {
     return string
         .slice(1, string.length - 1)
         .trim()
         .replace(/[ \t\r\n]+/, " ")
-        .toLowerCase()
-        .toUpperCase();
 };
 
 
-var removeDelimitersBetween = function (bottom, top) {
+function removeDelimitersBetween(bottom, top) {
     if (bottom.next !== top) {
         bottom.next = top;
         top.previous = bottom;
@@ -160,14 +158,14 @@ export default class InlineParser {
     delimiters: Delimiters; // 分隔符
     brackets: any;
     pos: number;
-    refmap: {};
+    refmap: Map<string, { destination: string, title: string }>;
     options: { smart };
     constructor(options = { smart: '' }) {
         this.subject = '';
         this.delimiters = null; // used by handleDelim method # 用 handleDelim 方法
         this.brackets = null;
         this.pos = 0;
-        this.refmap = {};
+        this.refmap = new Map();
         this.options = options
     }
 
@@ -210,7 +208,7 @@ export default class InlineParser {
 
     // Parse zero or more space characters, including at most one newline
     // 解析0个或多个空格字符，最多包含一个换行符
-    public spnl() {
+    public spnl(): boolean {
         this.match(reSpnl);
         return true;
     }
@@ -278,13 +276,13 @@ export default class InlineParser {
     };
 
     // Attempt to parse an autolink (URL or email in pointy brackets).
-    public parseAutolink(block: VNode) {
-        var m;
-        var dest;
-        var node;
+    /**尝试解析autolink(尖括号中的URL或电子邮件)。 */
+    public parseAutolink(block: VNode): boolean {
+        let m: string, dest: string, node: VNode;
         if ((m = this.match(reEmailAutolink))) {
             dest = m.slice(1, m.length - 1);
             node = new VNode("link");
+            node._info = { type: "autolink" }
             node._destination = normalizeURI("mailto:" + dest);
             node._title = "";
             node.appendChild(text(dest));
@@ -293,6 +291,7 @@ export default class InlineParser {
         } else if ((m = this.match(reAutolink))) {
             dest = m.slice(1, m.length - 1);
             node = new VNode("link");
+            node._info = { type: "autolink" }
             node._destination = normalizeURI(dest);
             node._title = "";
             node.appendChild(text(dest));
@@ -304,12 +303,13 @@ export default class InlineParser {
     }
 
     // Attempt to parse a raw HTML tag.
-    public parseHtmlTag(block: VNode) {
-        var m = this.match(reHtmlTag);
+    /**尝试解析一个原始的HTML标记。 */
+    public parseHtmlTag(block: VNode): boolean {
+        let m = this.match(reHtmlTag);
         if (m === null) {
             return false;
         } else {
-            var node = new VNode("html_inline");
+            let node = new VNode("html_inline");
             node._literal = m;
             block.appendChild(node);
             return true;
@@ -451,6 +451,7 @@ export default class InlineParser {
 
     // Attempt to parse link destination, returning the string or
     // null if no match.
+    /**尝试解析链接目的地，返回字符串或如果没有匹配则为空 */
     public parseLinkDestination() {
         var res = this.match(reLinkDestinationBraces);
         if (res === null) {
@@ -501,8 +502,9 @@ export default class InlineParser {
     }
 
     // Attempt to parse a link label, returning number of characters parsed.
-    public parseLinkLabel() {
-        var m = this.match(reLinkLabel);
+    /**尝试解析一个链接标签，返回解析的字符数。 */
+    parseLinkLabel(): number {
+        let m = this.match(reLinkLabel);
         if (m === null || m.length > 1001) {
             return 0;
         } else {
@@ -511,6 +513,7 @@ export default class InlineParser {
     }
 
     // Add open bracket to delimiter stack and add a text node to block's children.
+    /**向分隔符堆栈添加左括号，并向块的子节点添加文本节点。 */
     public parseOpenBracket(block: VNode) {
         var startpos = this.pos;
         this.pos += 1;
@@ -546,14 +549,14 @@ export default class InlineParser {
     // stack.  Add either a link or image, or a plain [ character,
     // to block's children.  If there is a matching delimiter,
     // remove it from the delimiter stack.
+    /**
+     * 尝试将右括号与分隔符中的开口相匹配堆栈。
+     * 添加一个链接或图像，或一个普通字符，阻止儿童。
+     * 如果有匹配的分隔符，从分隔符堆栈中删除它。 
+     * */
     public parseCloseBracket(block: VNode) {
-        var startpos;
-        var is_image;
-        var dest;
-        var title;
-        var matched = false;
-        var reflabel;
-        var opener;
+        let startpos: number, is_image: boolean, dest: string, title: string,
+            link_type: string = "link", matched = false, reflabel: string, opener;
 
         this.pos += 1;
         startpos = this.pos;
@@ -607,31 +610,45 @@ export default class InlineParser {
             // Next, see if there's a link label
             var beforelabel = this.pos;
             var n = this.parseLinkLabel();
+            let isDeflink = false;
             if (n > 2) {
                 reflabel = this.subject.slice(beforelabel, beforelabel + n);
+                /**一个中括号时不生成节点 */
+                if (beforelabel > 0 && this.subject.substring(0, beforelabel).match(/\[(?:[^\\\[\]]|\\.){0,1000}\]$/)) {
+                    isDeflink = true;
+                }
             } else if (!opener.bracketAfter) {
                 // Empty or missing second label means to use the first label as the reference.
                 // The reference must not contain a bracket. If we know there's a bracket, we don't even bother checking it.
                 reflabel = this.subject.slice(opener.index, startpos);
+                if (this.pos !== beforelabel && opener.index > 0 && this.subject.substring(0, opener.index).match(/\[(?:[^\\\[\]]|\\.){0,1000}\]$/)) {
+                    isDeflink = true;
+                }
             }
             if (n === 0) {
                 // If shortcut reference link, rewind before spaces we skipped.
                 this.pos = savepos;
             }
 
-            if (reflabel) {
+            if (reflabel && isDeflink) {
                 // lookup rawlabel in refmap
-                var link = this.refmap[normalizeReference(reflabel)];
-                if (link) {
+                /**在refmap中查找rawlabel */
+                if (this.refmap.has(normalizeReference(reflabel))) {
+                    let link = this.refmap.get(normalizeReference(reflabel));
                     dest = link.destination;
                     title = link.title;
-                    matched = true;
                 }
+                link_type = "deflink";
+                matched = true;
             }
         }
 
         if (matched) {
             var node = new VNode(is_image ? "image" : "link");
+            node._info = { type: link_type, destination: "" }
+
+            if (reflabel)
+                node._info.destination = normalizeReference(reflabel);
             node._destination = dest;
             node._title = title || "";
 
@@ -691,8 +708,9 @@ export default class InlineParser {
     }
 
     // Attempt to parse an entity.
-    public parseEntity(block) {
-        var m;
+    /**尝试解析一个实体。 */
+    public parseEntity(block: VNode):boolean {
+        let m: string;
         if ((m = this.match(reEntityHere))) {
             //block.appendChild(text(decodeHTML(m)));
             block.appendChild(text(m));
@@ -704,17 +722,20 @@ export default class InlineParser {
 
     // Parse a run of ordinary characters, or a single character with
     // a special meaning in markdown, as a plain string.
-    public parseString(block) {
-        var m;
+    /**
+     * 解析一系列普通字符，或单个字符markdown的特殊含义，
+     * 作为普通字符串。 
+     * */
+    public parseString(block: VNode) {
+        let m: string;
         if ((m = this.match(reMain))) {
             if (this.options.smart) {
                 block.appendChild(
                     text(
-                        m
-                            .replace(reEllipses, "\u2026")
-                            .replace(reDash, function (chars) {
-                                var enCount = 0;
-                                var emCount = 0;
+                        m.replace(reEllipses, "\u2026").replace(reDash,
+                            function (chars) {
+                                let enCount = 0;
+                                let emCount = 0;
                                 if (chars.length % 3 === 0) {
                                     // If divisible by 3, use all em dashes
                                     emCount = chars.length / 3;
@@ -768,14 +789,15 @@ export default class InlineParser {
     }
 
     // Attempt to parse a link reference, modifying refmap.
-    public parseReference(s, refmap) {
+    // 尝试解析一个链接引用，修改refmap。
+    public parseReference(s: string, refmap: Map<string, { destination: string, title: string }>) {
         this.subject = s;
         this.pos = 0;
-        var rawlabel;
-        var dest;
-        var title;
-        var matchChars;
-        var startpos = this.pos;
+        let rawlabel: string;
+        let dest: string;
+        let title: string;
+        let matchChars: number;
+        let startpos = this.pos;
 
         // label:
         matchChars = this.parseLinkLabel();
@@ -842,8 +864,8 @@ export default class InlineParser {
             return 0;
         }
 
-        if (!refmap[normlabel]) {
-            refmap[normlabel] = { destination: dest, title: title };
+        if (!refmap.has(normlabel)) {
+            refmap.set(normlabel, { destination: dest, title: title });
         }
         return this.pos - startpos;
     }
@@ -1178,6 +1200,7 @@ export default class InlineParser {
         }
 
         this.subject = block._string_content.trim(); //  trim()方法用于删除字符串的头尾空白符，空白符包括：空格、制表符 tab、换行符等其他空白符等。
+        // this.subject = block._string_content;
         this.pos = 0;
         this.delimiters = null;
         this.brackets = null;

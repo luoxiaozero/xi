@@ -29,6 +29,7 @@
     background: #fff;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
 }
+
 .art-editor li>p>input {
     position: absolute;
     margin-left: -1.15em;
@@ -105,12 +106,7 @@
     position: relative;
 }
 
-.markdown-body h1::before,
-.markdown-body h2::before,
-.markdown-body h3::before,
-.markdown-body h4::before,
-.markdown-body h5::before,
-.markdown-body h6::before {
+.markdown-body h1::before, .markdown-body h2::before, .markdown-body h3::before, .markdown-body h4::before, .markdown-body h5::before, .markdown-body h6::before {
     position: absolute;
     color: rgba(88, 96, 105, 0.36);
     font-weight: 400;
@@ -142,10 +138,12 @@
 .markdown-body h6::before {
     content: "H6";
 }
+
 .art-md-item-checkbox {
     position: relative;
     list-style-type: none;
 }
+
 .art-md-item-checkbox>input {
     position: absolute;
     top: 0;
@@ -155,7 +153,7 @@
     border: none;
 }
 
-.art-md-Table table{
+.art-md-Table table {
     width: 100%;
 }
 
@@ -163,8 +161,7 @@
     margin: 12px 0 8px;
 }
 
-.art-md-html-block-main::before,
-.art-md-math-block-main::before {
+.art-md-html-block-main::before, .art-md-math-block-main::before {
     font-family: "Source Sans Pro", "Helvetica Neue", Arial, sans-serif;
     position: absolute;
     top: -20px;
@@ -178,7 +175,6 @@
     height: 15px;
 }
 
-
 .art-md-math-block-main {
     position: relative;
     background-color: #f6f8fa;
@@ -186,8 +182,7 @@
     margin-bottom: 5px;
 }
 
-.art-md-html-block-main,
-.art-md-math-block-main pre{
+.art-md-html-block-main, .art-md-math-block-main pre {
     overflow-x: auto;
     padding: 0.1em 1em;
     margin: 0;
@@ -197,16 +192,31 @@
 .art-md-math-block-main::before {
     content: "公式";
 }
+
 .art-md-HtmlBlock {
     position: relative;
 }
+
 .art-md-HtmlBlock pre {
     position: static;
-    
 }
 
 .art-md-html-block-main::before {
     content: "HTML";
+}
+
+.art-md-DefLink {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.art-md-DefLink-name {
+    font-weight: 700;
+}
+
+.art-md-DefLink-title,
+.art-md-DefLink-url {
+    color: #c7c7cc;
 }
 
 .art-emptyline {

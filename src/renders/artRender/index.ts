@@ -44,6 +44,7 @@ export default class ArtRender implements Render {
     renderEvent: ArtRenderEvent;
 
     doc: VNode;
+    refmap: Map<string, { destination: string, title: string}>;
     interaction: Interaction;
     parser: InteractionParser;
     operation: Operation;
@@ -106,6 +107,7 @@ export default class ArtRender implements Render {
 
     public setMd(md: string): void {
         this.doc = this.parser.parse(md);
+        this.refmap = this.parser.parser.refmap;
         this.doc.dom = this.dom;
         this.doc.dom.innerHTML = "";
 

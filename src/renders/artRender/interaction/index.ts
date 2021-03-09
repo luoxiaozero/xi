@@ -6,6 +6,7 @@ import Cursor from "../cursor";
 import Operation from "@/node/operation";
 import InteractionParser from "./interactionParser";
 import Tool from "@/tool";
+import { normalizeReference } from "@/parser/inlines";
 
 const reCodeFence = /^`{3,}(?!.*`)|^~{3,}/;
 const reBulletListMarker = /^[*+-]/;
@@ -14,6 +15,7 @@ const reATXHeadingMarker = /^#{1,6}/;
 const reThematicBreak = /^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$/;
 const reBlockQuote = /^>/;
 const reClosingTable = /^\|(.*?\|)+/;
+const reLinkLabel = /^\[((?:[^\\\[\]]|\\.){0,1000})\]/;
 
 export default class Interaction {
     artRender: ArtRender;
@@ -67,7 +69,7 @@ export default class Interaction {
         return state;
     }
 
-    updateNode(dom: HTMLElement, node: VNode) {
+    updateNode(dom: HTMLElement, node: VNode): VNode {
         if (Tool.hasClass(dom, "art-md-html-inline")) {
             if (node._literal != dom.innerText) {
                 let newNode = new VNode("html_inline");
@@ -77,11 +79,37 @@ export default class Interaction {
                 this.operation.update();
             }
             return;
+        } else if (node.type === "def_link") {
+            let md = node.getMd(), refmap = new Map<string, { destination: string, title: string }>();
+            md = md.substring(0, md.length - 1);
+            if (md !== dom.innerText) {
+                this.artRender.refmap.delete(md.match(reLinkLabel)[1]);
+                if (this.parser.parser.inlineParser.parseReference(dom.innerText, refmap)) {
+                    let def_link = new VNode("def_link");
+                    def_link._literal = dom.innerText.match(reLinkLabel)[1];
+                    def_link._title = refmap.get(def_link._literal).title;
+                    def_link._destination = refmap.get(def_link._literal).destination;
+                    this.artRender.refmap.set(def_link._literal, refmap.get(def_link._literal));
+                    console.log(node, dom.innerText, md);
+                    this.operation.replace(def_link, node);
+                    this.operation.update();
+                    this.artRender.refmap.set(def_link._literal, refmap.get(def_link._literal));
+                    return def_link;
+                } else {
+                    let newNode = new VNode("paragraph"), text = new VNode("text");
+                    text._literal = dom.innerText;
+                    newNode.appendChild(text);
+                    this.operation.replace(newNode, node);
+                    this.operation.update();
+                    return newNode;
+                }
+            }
+            return;
         } else if (node.type === "softbreak" && Tool.hasClass(dom, "art-md-softbreak")) {
             if (dom.innerText !== '\n') {
                 let newNode = new VNode("text");
                 newNode._literal = dom.innerText;
-                
+
                 let softbreak = new VNode("softbreak");
                 this.operation.replace(softbreak, node);
                 this.operation.insertAfter(newNode, softbreak);
@@ -121,7 +149,7 @@ export default class Interaction {
             return;
         }
 
-        let child = node.firstChild, i = 0, next: VNode, len = dom.childNodes.length ;
+        let child = node.firstChild, i = 0, next: VNode, len = dom.childNodes.length;
         for (; i < len && child; i++, child = next) {
             next = child.next;
             this.updateNode(<HTMLElement>dom.childNodes[i], child);
@@ -165,6 +193,7 @@ export default class Interaction {
                 case "html_block":
                     this.html_block(node, pos.rowNode as HTMLElement);
                     break;
+                case "def_link":
                 case "paragraph":
                 case "heading":
                     this.paragraph(node, pos.rowNode as HTMLElement);
@@ -279,15 +308,36 @@ export default class Interaction {
                         break;
                     }
                 }
-     
+
                 newNode = new VNode("paragraph");
                 newNode.appendChild(new VNode("linebreak"));
                 this.operation.replace(newNode, selectNode.parent);
                 this.operation.update();
                 Cursor.setCursor(newNode.dom, 0);
                 return false;
+            } else if ((["paragraph", "heading"].includes(node.type) || Tool.hasClass(dom, "art-md-DefLink")) && node.prev) {
+                if (node.prev.type === "thematic_break") {
+                    this.operation.remove(node.prev);
+                    this.operation.update();
+                    this.cursor.pos.rowAnchorOffset--;
+                    this.cursor.pos.rowFocusOffset--;
+                    return false;
+                } else if (["paragraph", "heading"].includes(node.prev.type) ||
+                    Tool.hasClass(dom.previousSibling as HTMLElement, "art-md-DefLink")) {
+                    let md = node.getMd()
+                    if (md.length && md.charCodeAt(md.length - 1) === 10)
+                        md = md.substring(0, md.length - 1);
+                    let text = new VNode("text");
+                    text._literal = md;
+                    this.operation.appendChild(node.prev, text);
+                    this.operation.remove(node);
+                    this.operation.update();
+                    Cursor.setCursor(text.dom, 0);
+                    this.cursor.getSelection();
+                    return false;
+                }
             } else {
-                console.log('wu ------------------------- keydown back')
+                console.log('wu ------------------------- keydown back', node)
             }
         }
         return true;
@@ -311,12 +361,45 @@ export default class Interaction {
                 md = md.substring(0, md.length - 1);
 
             let dom = this.artRender.dom.childNodes[pos.rowAnchorOffset] as HTMLElement;
-            if (Tool.hasClass(dom, "art-md-hr")) {
+            if (Tool.hasClass(dom, "art-md-Hr")) {
                 newNode = new VNode("paragraph");
                 newNode.appendChild(new VNode("linebreak"));
                 this.operation.replace(newNode, node);
                 this.operation.update();
                 Cursor.setCursor(newNode.dom, 0);
+                return false;
+            } else if (Tool.hasClass(dom, "art-md-DefLink")) {
+                let _str: string, match, newNode_1;
+                if (pos.inAnchorOffset === md.length) {
+                    newNode = new VNode("paragraph");
+                    newNode.appendChild(new VNode("linebreak"));
+                    this.operation.insertAfter(newNode, node);
+                } else if (pos.inAnchorOffset) {
+                    _str = md.substring(pos.inAnchorOffset);
+                    newNode = this.parser.inlineParse(_str);
+                    this.operation.insertAfter(newNode, node);
+                    let refmap = new Map<string, { destination: string, title: string }>();
+                    _str = md.substring(0, pos.inAnchorOffset);
+                    if (this.parser.parser.inlineParser.parseReference(_str, refmap)) {
+                        newNode_1 = new VNode("def_link");
+                        newNode_1._literal = _str.match(reLinkLabel)[1];
+                        newNode_1._title = refmap.get(newNode_1._literal).title;
+                        newNode_1._destination = refmap.get(newNode_1._literal).destination;
+                        this.artRender.refmap.set(newNode_1._literal, refmap.get(newNode_1._literal));
+                    } else {
+                        this.artRender.refmap.delete(md.match(reLinkLabel)[1]);
+                        newNode_1 = this.parser.inlineParse(_str);
+                    }
+                    this.operation.replace(newNode_1, node);
+                } else {
+                    newNode = new VNode("paragraph");
+                    newNode.appendChild(new VNode("linebreak"));
+                    this.operation.insertBefore(newNode, node);
+                }
+
+                this.operation.update();
+                Cursor.setCursor(newNode.dom, 0);
+                this.cursor.getSelection();
                 return false;
             } else if (dom.nodeName === "P" && reThematicBreak.test(md)) {
                 newNode = new VNode("thematic_break");
@@ -502,7 +585,7 @@ export default class Interaction {
                                 Cursor.setCursor(newNode.dom, 0);
                                 break;
                             default:
-                                throw  "error:" + rowVNode.parent.parent.parent.type;
+                                throw "error:" + rowVNode.parent.parent.parent.type;
                         }
                     }
 
@@ -661,8 +744,11 @@ export default class Interaction {
     }
 
     paragraph(node: VNode, dom: HTMLElement): void {
-        this.updateNode(dom, node);
-        let md = node.getMd(), match: RegExpMatchArray, newNode: VNode;
+        let temp = this.updateNode(dom, node);
+        if (temp) 
+            node = temp;
+        
+        let md = node.getMd(), match: RegExpMatchArray, newNode: VNode, refmap = new Map<string, { destination: string, title: string }>();;
         if (md.length && md.charCodeAt(md.length - 1) === 10)
             md = md.substring(0, md.length - 1);
         if (md == "" || md == "\n" || reCodeFence.test(md) || reThematicBreak.test(md))
@@ -718,6 +804,15 @@ export default class Interaction {
             this.parser.parser.inlineParser.parse(newNode);
             this.parser.interactionParse(newNode);
 
+            this.operation.replace(newNode, node);
+            this.operation.update();
+        } else if (this.parser.parser.inlineParser.parseReference(md, refmap)) {
+            newNode = new VNode("def_link");
+            newNode._literal = md.match(reLinkLabel)[1];
+            let _literal = newNode._literal;
+            newNode._title = refmap.get(_literal)?.title;
+            newNode._destination = refmap.get(_literal)?.destination;
+            this.artRender.refmap.set(_literal, refmap.get(newNode._literal));
             this.operation.replace(newNode, node);
             this.operation.update();
         } else {

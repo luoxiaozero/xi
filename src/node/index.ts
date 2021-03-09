@@ -16,7 +16,7 @@ class NodeWalker {
         this.selfFalg = selfFalg;
     }
 
-    public next(): { entering:boolean, node: VNode } {
+    public next(): { entering: boolean, node: VNode } {
         var cur = this.current;
         var entering = this.entering;
 
@@ -71,8 +71,8 @@ export default class VNode {
     public _literal: string;
     public _listData: { type: string, tight, start: number, delimiter, markerOffset, padding, bulletChar };
     public _info: any;
-    public _destination: any;
-    public _title: any;
+    public _destination: string;
+    public _title: string;
     public _isFenced: boolean;
     public _fenceChar: any;
     public _fenceLength: number;
@@ -239,7 +239,8 @@ export default class VNode {
                 (<HTMLImageElement>this.dom).src = this._destination;
                 if (this._title)
                     this.dom.title = this._title;
-                break;
+                console.log(this.firstChild)
+                return;
             case "code_block":
                 this.dom = document.createElement("div");
                 this.dom.setAttribute("class", "art-md-CodeBlock");
@@ -325,7 +326,7 @@ export default class VNode {
                 div.setAttribute("contenteditable", "false");
                 div.style.textAlign = "center";
                 div.onclick = function () {
-                    
+
                     ((this as HTMLSpanElement).previousSibling as HTMLDivElement).classList.replace("art-display-none", "art-display");
                     Cursor.setCursor(((this as HTMLSpanElement).previousSibling as HTMLDivElement).childNodes[1].firstChild, 0);
                 }
@@ -396,7 +397,29 @@ export default class VNode {
                         fun();
                     child = child.next;
                 }
-                
+
+                return null;
+            case "def_link":
+                this.dom = document.createElement("div");
+                this.dom.setAttribute("class", "art-md-DefLink");
+                let span = document.createElement("span");
+                this.dom.appendChild(span);
+                span.setAttribute("class", "art-md-DefLink-name");
+                span.innerHTML = "<span style=\" margin-right: 8px;color: #c7c7c7\">[</span>" + this._literal +
+                    "<span style=\"margin-left: 8px;color: #c7c7c7\">]: </span>";
+
+                span = document.createElement("span");
+                this.dom.appendChild(span);
+                span.setAttribute("class", "art-md-DefLink-url");
+                span.innerText = this._destination;
+
+                if (this._title) {
+                    span = document.createElement("span");
+                    this.dom.appendChild(span);
+                    span.setAttribute("class", "art-md-DefLink-title");
+                    span.innerHTML = "<span style=\" margin-right: 3px;color: #c7c7c7\"> \"</span>" + this._title +
+                    "<span style=\"margin-left: 3px;color: #c7c7c7\">\"</span>";
+                }
                 return null;
             default:
                 switch (this._type) {
@@ -617,9 +640,9 @@ export default class VNode {
                         cls.forEach(value => _info += value.substring(5));
                         this._info = _info;
                     }
-                        
+
                 }
-        
+
                 md += "```" + this._info + "\n";
                 md += this._literal;
                 md += "```\n"
@@ -728,6 +751,13 @@ export default class VNode {
                     node = node._next;
                 }
                 return md;
+            case "def_link":
+                md = "[" + this._literal + "]: " + this._destination;
+                if (this._title) {
+                    md += " \"" + this._title + "\"";
+                }
+                md += "\n"
+                return md;
             default:
                 if (VNode.isContainer(this)) {
                     while (node) {
@@ -774,14 +804,3 @@ export default class VNode {
         return true;
     }
 }
-
-/* Example of use of walker:
-
- var walker = w.walker();
- var event;
-
- while (event = walker.next()) {
- console.log(event.entering, event.node.type);
- }
-
- */

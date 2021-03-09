@@ -137,7 +137,17 @@ export default class ArtRenderEvent {
         let dom = e.target as HTMLAnchorElement;
         if (e.altKey && dom.nodeName == "A") {
             //window.location.href=node.href;
-            window.open(dom.href)
+            let url;
+            if (dom.getAttribute("href") === "#" ) {
+                let ref = dom.getAttribute("art-data-ref");
+                if (_this.artRender.refmap.has(ref))
+                    url = _this.artRender.refmap.get(ref).destination;
+                else
+                    return;
+            } else {
+                url = dom.href;
+            }
+            window.open(url);
         } else {
             let cursor = _this.artRender.cursor;
             cursor.getSelection();
