@@ -758,6 +758,8 @@ export default class VNode {
                 }
                 md += "\n"
                 return md;
+            case "image":
+                return md;
             default:
                 if (VNode.isContainer(this)) {
                     while (node) {

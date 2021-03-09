@@ -56,7 +56,7 @@ export default class InteractionParser {
 
             span.appendChild(text);
             node.insertBefore(span);
-            node.firstChild.unlink();
+            // node.firstChild.unlink();
 
             node.attrs.set("contenteditable", "false");
         }
