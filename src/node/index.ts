@@ -380,7 +380,7 @@ export default class VNode {
 
                 dom = document.createElement("div");
                 this.dom.appendChild(dom);
-                createTableTool(dom);
+                createTableTool(dom, this);
 
                 dom = document.createElement("table");
 
@@ -399,6 +399,12 @@ export default class VNode {
                 }
 
                 return null;
+            case "th":
+            case "td":
+                this.dom = document.createElement(this._type);
+                if (this._info?.style)
+                    this.dom.style.textAlign = this._info?.style;
+                break;
             case "def_link":
                 this.dom = document.createElement("div");
                 this.dom.setAttribute("class", "art-md-DefLink");
@@ -418,7 +424,7 @@ export default class VNode {
                     this.dom.appendChild(span);
                     span.setAttribute("class", "art-md-DefLink-title");
                     span.innerHTML = "<span style=\" margin-right: 3px;color: #c7c7c7\"> \"</span>" + this._title +
-                    "<span style=\"margin-left: 3px;color: #c7c7c7\">\"</span>";
+                        "<span style=\"margin-left: 3px;color: #c7c7c7\">\"</span>";
                 }
                 return null;
             default:
@@ -653,26 +659,32 @@ export default class VNode {
                 md += "$$\n"
                 return md;
             case "table":
-                let child = this.firstChild.firstChild.firstChild, mat, tableStr = "", child_2: VNode;
+                let child = this.firstChild.firstChild.firstChild, tableStr = "", child_2: VNode;
                 md += '|';
                 tableStr += "|";
                 while (child) {
                     md += child.getMd() + '|';
-                    if (child.attrs.has("style") && (mat = child.attrs.get("style").match(/text-align:\s*?(left|center|right)/))) {
-                        switch (mat[1]) {
-                            case 'center': tableStr += ':---:|'; break;
-                            case 'left': tableStr += ':---|'; break;
-                            case 'right': tableStr += '---:|'; break;
-                            default: tableStr += ':---:'; break;
-                        }
-                    } else {
-                        tableStr += '---|';
+
+                    switch ((child.dom as HTMLElement).style.textAlign) {
+                        case 'center':
+                            tableStr += ':---:|';
+                            break;
+                        case 'left':
+                            tableStr += ':---|';
+                            break;
+                        case 'right':
+                            tableStr += '---:|';
+                            break;
+                        default:
+                            tableStr += '---|';
+                            break;
                     }
+
                     child = child.next;
                 }
                 md += "\n" + tableStr + "\n";
 
-                child = this.lastChild.firstChild, mat;
+                child = this.lastChild.firstChild;
                 while (child) {
                     child_2 = child.firstChild;
                     md += '|';

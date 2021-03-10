@@ -60,7 +60,7 @@ const reSetextHeadingLine = /^(?:=+|-+)[ \t]*$/;
 const reLineEnding = /\r\n|\n|\r/;
 
 // Returns true if string contains only space characters.
-/**如果字符串只包含空格字符则返回true。 */ 
+/**如果字符串只包含空格字符则返回true。 */
 function isBlank(s: string): boolean {
     return !reNonSpace.test(s);
 }
@@ -463,9 +463,10 @@ const blocks = {
                 tbody.appendChild(tr);
                 let str: string[] = match.input.split("|");
                 for (let i = 1; i < str.length - 1; i++) {
-                    let th = new VNode("td", container.sourcepos);
-                    th._string_content = str[i];
-                    tr.appendChild(th);
+                    let td = new VNode("td", container.sourcepos);
+                    td._info = { style: tbody.parent._info.styles[i - 1] }
+                    td._string_content = str[i];
+                    tr.appendChild(td);
                 }
                 return 2;
             }
@@ -490,7 +491,7 @@ const blocks = {
             return parser.blank ? 1 : 0;
         },
         finalize(parser: Parser, block: VNode) {
-            let pos: number, 
+            let pos: number,
                 hasReferenceDefs = false,
                 _string_content: string;
 
@@ -688,13 +689,30 @@ const blockStarts = [
                 parser.closeUnmatchedBlocks();
 
                 let table = new VNode("table", container.sourcepos);
+                let str: string[] = parser.currentLine.split("|");
+                let styles: string[] = [];
+                for (let i = 1; i < str.length - 1; i++) {
+                    let md = str[i].trim();
+                    if (md[0] === ":" && md[md.length - 1] === ':') {
+                        styles.push("center");
+                    } else if (md[0] === ":") {
+                        styles.push("left");
+                    } else if (md[md.length - 1] === ":") {
+                        styles.push("right");
+                    } else {
+                        styles.push(null);
+                    }
+                }
+                table._info = { styles }
+
                 let thead = new VNode("thead", container.sourcepos);
                 table.appendChild(thead);
                 let tr = new VNode("tr", container.sourcepos);
                 thead.appendChild(tr);
-                let str: string[] = match.input.split("|");
+                str = match.input.split("|");
                 for (let i = 1; i < str.length - 1; i++) {
                     let th = new VNode("th", container.sourcepos);
+                    th._info = { style: table._info.styles[i - 1] }
                     th._string_content = str[i];
                     tr.appendChild(th);
                 }
@@ -834,7 +852,7 @@ class Parser {
     partiallyConsumedTab: boolean;
     allClosed: boolean;
     lastMatchedContainer: VNode;
-    refmap: Map<string, { destination: string, title: string}>;
+    refmap: Map<string, { destination: string, title: string }>;
     lastLineLength: number;
     inlineParser: InlineParser;
     options: any;

@@ -1,10 +1,15 @@
+import VNode from '@/node';
+import ArtRender from '@/renders/artRender';
 import Cursor from '../../../cursor';
 
 export class TableMoreTool {
     moreDom: HTMLUListElement;
     tableDom: HTMLTableElement;
+    tableNode: VNode;
     thtdDom: Node;
-
+    thtdNode: VNode;
+    pos: { column: number, row: number };
+    artRender: ArtRender;
     constructor() {
         this.moreDom = null;
     }
@@ -51,218 +56,259 @@ export class TableMoreTool {
 
     private insertUpLine(_this: TableMoreTool) {
         let refTr = _this.thtdDom.parentNode;
-        let cell = -1;
-        let selected;
-        for (let j = 0; j < refTr.childNodes.length; j++) {
-            if (refTr.childNodes[j] == _this.thtdDom) {
-                cell = j;
-                break;
-            }
-        }
+        let selected: VNode;
 
-        let tr = document.createElement('tr');
+        let tr = new VNode("tr");
         if (_this.tableDom.rows[0] == refTr) {
-            let tr2 = document.createElement('tr');
-            for (let j = 0; j < refTr.childNodes.length; j++) {
-                let th = document.createElement('th');
-                if (j == cell) {
+            let tr2 = new VNode("tr"), child_th = _this.thtdNode.parent.firstChild;
+            for (let j = 0; j < refTr.childNodes.length && child_th; j++, child_th = child_th.next) {
+                let th = new VNode("th");
+                if (j == _this.pos.column)
                     selected = th;
-                }
+
                 tr.appendChild(th);
 
-                let td = document.createElement('td');
-                for (let i = 0; i < refTr.childNodes[j].childNodes.length; i++) {
-                    td.appendChild(refTr.childNodes[j].childNodes[i]);
-                }
+                let td = new VNode("td");
+                let md = child_th.getMd();
+                if (md.length && md.charCodeAt(md.length - 1) === 10)
+                    md = md.substring(0, md.length - 1);
+                td._string_content = md;
+                _this.artRender.interaction.parser.inlineParse(td);
                 tr2.appendChild(td);
 
                 let style = (<HTMLElement>refTr.childNodes[j]).getAttribute('style');
                 if (style) {
-                    th.setAttribute('style', style);
-                    td.setAttribute('style', style);
+                    th._info.style = style;
+                    td._info.style = style;
                 }
             }
-            refTr.parentNode.insertBefore(tr, refTr);
-            refTr.parentNode.removeChild(refTr);
-            _this.tableDom.rows[1].parentNode.insertBefore(tr2, _this.tableDom.rows[1]);
+            _this.artRender.operation.replace(tr, _this.tableNode.firstChild.firstChild)
+            _this.artRender.operation.insertBefore(tr2, _this.tableNode.lastChild.firstChild)
         } else {
             for (let j = 0; j < refTr.childNodes.length; j++) {
-                let td = document.createElement('td');
-                if (j == cell) {
+                let td = new VNode("td");
+                if (j == _this.pos.column)
                     selected = td;
-                }
-                tr.appendChild(td);
+
                 let style = (<HTMLElement>refTr.childNodes[j]).getAttribute('style');
                 if (style) {
-                    td.setAttribute('style', style);
+                    td._info.style = style;
                 }
+                tr.appendChild(td);
             }
-            refTr.parentNode.insertBefore(tr, refTr);
+            _this.artRender.operation.insertBefore(tr, _this.thtdNode.parent)
         }
-        Cursor.setCursor(selected, 0);
+        _this.artRender.operation.update();
+        Cursor.setCursor(selected.dom, 0);
     }
 
     private insertDownLine(_this: TableMoreTool) {
         let refTr = _this.thtdDom.parentNode;
-        let cell = -1;
-        let selected;
-        for (let j = 0; j < refTr.childNodes.length; j++) {
-            if (refTr.childNodes[j] == _this.thtdDom) {
-                cell = j;
-                break;
-            }
-        }
+        let selected: VNode;
 
-        let tr = document.createElement('tr');
-        for (let j = 0; j < refTr.childNodes.length; j++) {
-            let td = document.createElement('td');
-            if (j == cell) {
+        let tr = new VNode("tr");
+        for (let i = 0; i < refTr.childNodes.length; i++) {
+            let td = new VNode("td");
+            if (i == _this.pos.column)
                 selected = td;
-            }
+
             tr.appendChild(td);
-            let style = (<HTMLElement>refTr.childNodes[j]).getAttribute('style');
-            if (style) {
-                td.setAttribute('style', style);
-            }
+            let style = (<HTMLElement>refTr.childNodes[i]).getAttribute('style');
+            if (style)
+                td._info.style = style;
         }
 
         if (_this.tableDom.rows[_this.tableDom.rows.length - 1] == refTr) {
-            _this.tableDom.childNodes[1].appendChild(tr);
+            _this.artRender.operation.appendChild(tr, _this.thtdNode.parent);
         } else if (_this.tableDom.rows[0] == refTr) {
-            _this.tableDom.rows[1].parentNode.insertBefore(tr, _this.tableDom.rows[1]);
+            _this.artRender.operation.insertBefore(tr, _this.tableNode.lastChild.firstChild)
         } else {
-            refTr.parentNode.insertBefore(tr, refTr.nextSibling);
+            _this.artRender.operation.insertAfter(tr, _this.thtdNode.parent)
         }
-        Cursor.setCursor(selected, 0);
+        _this.artRender.operation.update();
+        Cursor.setCursor(selected.dom, 0);
     }
 
     private insertLeftColumn(_this: TableMoreTool) {
-        let refTr = _this.thtdDom.parentNode;
-        let cell = -1;
-        let selected;
-        for (let j = 0; j < refTr.childNodes.length; j++) {
-            if (refTr.childNodes[j] == _this.thtdDom) {
-                cell = j;
-                break;
+        let selected: VNode, newNode: VNode;
+
+        let th = _this.tableNode.firstChild.firstChild.firstChild;
+        for (let i = 0; i < _this.pos.column; i++) {
+            th = th.next;
+        }
+        newNode = new VNode("th");
+        if (_this.pos.row === 0)
+            selected = newNode;
+        _this.artRender.operation.insertBefore(newNode, th);
+        let tr = _this.tableNode.lastChild.firstChild, td: VNode;
+        for (let j = 1; j < _this.tableDom.rows.length; j++, tr = tr.next) {
+            td = tr.firstChild;
+            for (let i = 0; i < _this.pos.column; i++) {
+                td = td.next;
             }
+            newNode = new VNode("td");
+            if (_this.pos.row === j)
+                selected = newNode;
+            _this.artRender.operation.insertBefore(newNode, td);
         }
 
-        for (let j = 0; j < _this.tableDom.rows.length; j++) {
-            let thtd;
-            if (j == 0) {
-                thtd = document.createElement('th');
-            } else {
-                thtd = document.createElement('td');
-            }
-            if (_this.tableDom.rows[j] == refTr) {
-                selected = thtd;
-            }
-            _this.tableDom.rows[j].cells[cell].parentNode.insertBefore(thtd, _this.tableDom.rows[j].cells[cell]);
-
-        }
-        Cursor.setCursor(selected, 0);
+        _this.artRender.operation.update();
+        Cursor.setCursor(selected.dom, 0);
     }
 
     private insertRightColumn(_this: TableMoreTool) {
-        let refTr = _this.thtdDom.parentNode;
-        let cell = -1;
-        let selected;
-        for (let j = 0; j < refTr.childNodes.length; j++) {
-            if (refTr.childNodes[j] == _this.thtdDom) {
-                cell = j;
-                break;
+        let selected: VNode, newNode: VNode;
+
+        let th = _this.tableNode.firstChild.firstChild.firstChild;
+        for (let i = 0; i < _this.pos.column; i++) {
+            th = th.next;
+        }
+        newNode = new VNode("th");
+        if (_this.pos.row === 0)
+            selected = newNode;
+
+        _this.artRender.operation.insertAfter(newNode, th);
+        let tr = _this.tableNode.lastChild.firstChild, td: VNode;
+        for (let j = 1; j < _this.tableDom.rows.length; j++, tr = tr.next) {
+            td = tr.firstChild;
+            for (let i = 0; i < _this.pos.column; i++) {
+                td = td.next;
             }
+            newNode = new VNode("td");
+            if (_this.pos.row === j)
+                selected = newNode;
+            _this.artRender.operation.insertAfter(newNode, td);
         }
 
-        for (let j = 0; j < _this.tableDom.rows.length; j++) {
-            let thtd;
-            if (j == 0) {
-                thtd = document.createElement('th');
-            } else {
-                thtd = document.createElement('td');
-            }
-            if (_this.tableDom.rows[j] == refTr) {
-                selected = thtd;
-            }
-            if(_this.tableDom.rows[j].cells[cell].nextSibling)
-                _this.tableDom.rows[j].cells[cell].parentNode.insertBefore(thtd, _this.tableDom.rows[j].cells[cell].nextSibling);
-            else
-                _this.tableDom.rows[j].cells[cell].parentNode.appendChild(thtd);
-        }
-        Cursor.setCursor(selected, 0);
+        _this.artRender.operation.update();
+        Cursor.setCursor(selected.dom, 0);
     }
 
     private deleteLine(_this: TableMoreTool) {
-        let refTr = _this.thtdDom.parentNode;
-        let cell = -1, row = -1;
-        /**查找所在列 */
-        for (let j = 0; j < refTr.childNodes.length; j++) {
-            if (refTr.childNodes[j] == _this.thtdDom) {
-                cell = j;
-                break;
+        let selected: VNode, newNode: VNode;
+        if (_this.pos.row) {
+            let tr = _this.tableNode.lastChild.firstChild;
+            for (let i = 1; i < _this.pos.row; i++) {
+                tr = tr.next;
             }
-        }
-        /**查找所在行 */
-        for (let j = 0; j < _this.tableDom.rows.length; j++) {
-            if(_this.tableDom.rows[j] == refTr){
-                row = j;
-                break;
-            }   
-        }
-        refTr.parentNode.removeChild(refTr);
-        if (row == 0) {
-            console.log('删除th行')
-            let thTr = document.createElement('tr');
-            for (let j = 0; j < _this.tableDom.rows[0].cells.length; j++) {
-                let th = document.createElement('th');
-                let style = _this.tableDom.rows[0].cells[j].getAttribute('style');
-                if (style) {
-                    th.setAttribute('style', style);
-                }
-                th.innerHTML = _this.tableDom.rows[0].cells[j].innerHTML;
-                thTr.appendChild(th);   
+            newNode = tr.next;
+            for (let i = 0; i < _this.pos.column; i++) {
+                newNode = newNode.next;
             }
-
-            _this.tableDom.tHead.appendChild(thTr);
-
-            _this.tableDom.rows[1].parentNode.removeChild(_this.tableDom.rows[1]);
+            selected = newNode;
+            _this.artRender.operation.remove(tr);
+        } else {
+            let tr = new VNode("tr");
+            let td = _this.tableNode.lastChild.firstChild.firstChild;
+            while (td) {
+                let th = new VNode("th");
+                let style = (td.dom as HTMLElement).getAttribute('style');
+                if (style)
+                    th._info.style = style;
+                let md = td.getMd();
+                if (md.length && md.charCodeAt(md.length - 1) === 10)
+                    md = md.substring(0, md.length - 1);
+                th._string_content = md;
+                _this.artRender.interaction.parser.inlineParse(th);
+                tr.appendChild(th);
+                td = td.next;
+            }
+            _this.artRender.operation.replace(tr, _this.tableNode.firstChild.firstChild);
+            _this.artRender.operation.remove(_this.tableNode.lastChild.firstChild);
+            newNode = tr.firstChild;
+            for (let i = 0; i < _this.pos.column; i++) {
+                newNode = newNode.next;
+            }
+            selected = newNode;
         }
-        
-        Cursor.setCursor(_this.tableDom.rows[row].cells[cell], 0);
+        _this.artRender.operation.update();
+        Cursor.setCursor(selected.dom, 0);
     }
 
     private deleteColumn(_this: TableMoreTool) {
-        let refTr = _this.thtdDom.parentNode;
-        let cell = -1, row = -1;
-        for (let j = 0; j < refTr.childNodes.length; j++) {
-            if (refTr.childNodes[j] == _this.thtdDom) {
-                cell = j;
-                break;
-            }
-        }
+        let selected: VNode, newNode: VNode;
 
-        for (let j = 0; j < _this.tableDom.rows.length; j++) {
-            if(_this.tableDom.rows[j] == refTr){
-                row = j;
-            }   
-            _this.tableDom.rows[j].cells[cell].parentNode.removeChild(_this.tableDom.rows[j].cells[cell]);
+        let th = _this.tableNode.firstChild.firstChild.firstChild;
+        for (let i = 0; i < _this.pos.column; i++) {
+            th = th.next;
         }
-        Cursor.setCursor(_this.tableDom.rows[row].cells[cell], 0);
+        if (_this.pos.row === 0) {
+            if (th.next)
+                selected = th.next;
+            else
+                selected = th.prev;
+        }
+        _this.artRender.operation.remove(th);
+
+        let tr = _this.tableNode.lastChild.firstChild, td: VNode;
+        for (let j = 1; j < _this.tableDom.rows.length; j++, tr = tr.next) {
+            td = tr.firstChild;
+            for (let i = 0; i < _this.pos.column; i++) {
+                td = td.next;
+            }
+            if (_this.pos.row === j) {
+                if (td.next)
+                    selected = td.next;
+                else
+                    selected = td.prev;
+            }
+
+            _this.artRender.operation.remove(td);
+        }
+        _this.artRender.operation.update();
+        Cursor.setCursor(selected.dom, 0);
     }
 
-    public open(xy: [number, number], table: HTMLTableElement): void {
+    public open(artRender: ArtRender, detail: { xy: [number, number], table: HTMLTableElement }): void {
+        this.artRender = artRender;
         let { anchorNode, anchorOffset } = Cursor.sel;
         Cursor.setCursor(anchorNode, anchorOffset);
-        let node = anchorNode;
-        while (node.parentNode.nodeName != 'TR' && node.parentNode != document.body) {
-            node = node.parentNode;
+        let dom = anchorNode;
+        while (dom.parentNode.nodeName != 'TR' && dom.parentNode != document.body) {
+            dom = dom.parentNode;
         }
-        if (node.parentNode.nodeName == 'TR') {
-            this.thtdDom = node;
+        if (dom.parentNode.nodeName == 'TR') {
+            this.thtdDom = dom;
             this.moreDom.style.display = 'inherit';
-            this.tableDom = table;
-            this.moreDom.style.top = xy[1].toString() + 'px';
-            this.moreDom.style.left = xy[0].toString() + 'px';
+            this.moreDom.style.top = detail.xy[1].toString() + 'px';
+            this.moreDom.style.left = detail.xy[0].toString() + 'px';
+
+            let vnode = artRender.doc.firstChild, i = artRender.cursor.pos.rowAnchorOffset;
+            while (--i != -1) {
+                vnode = vnode.next;
+            }
+            this.tableNode = vnode;
+            this.tableDom = this.tableNode.dom.childNodes[1] as HTMLTableElement;
+            this.pos = { column: 0, row: 0 };
+            let th = this.tableNode.firstChild.firstChild.firstChild;
+            while (th) {
+                if (th.dom === artRender.cursor.pos.rowNode) {
+                    this.thtdNode = th;
+                    break;
+                }
+                this.pos.column++;
+                th = th.next;
+            }
+            if (!th) {
+                let tr = this.tableNode.lastChild.firstChild, td: VNode;
+                while (tr) {
+                    td = tr.firstChild;
+                    this.pos.row++;
+                    this.pos.column = 0;
+                    while (td) {
+                        if (td.dom === artRender.cursor.pos.rowNode) {
+                            this.thtdNode = td;
+                            break;
+                        }
+                        this.pos.column++;
+                        td = td.next;
+                    }
+                    if (td) {
+                        break;
+                    }
+                    tr = tr.next;
+                }
+            }
         }
     }
 

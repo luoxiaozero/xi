@@ -17,6 +17,7 @@ import { flowchartExport } from './plugins/flowchart';
 import { hljsExport } from './plugins/highlight';
 import { mermaidExport } from './plugins/mermaid';
 import { katexExport } from './plugins/katex';
+import { TableTool } from './tool/tableTool';
 
 export class RefMap {
     refmap: Map<string, { destination: string, title: string }>;
@@ -121,7 +122,6 @@ export default class ArtRender implements Render {
     public createDom(): HTMLDivElement {
         this.artText.get<Tool>('$tool').add({ dom: this.tableMoreTool.createDom() });
         this.artText.get<Tool>('$tool').add({ dom: this.floatAuxiliaryTool.createDom() });
-
 
         return this.dom;
     }

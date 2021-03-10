@@ -5,6 +5,7 @@ import Editor from '@/editor';
 import Message from '@/plugins/message';
 import { installShortcutKey } from './shortcutKey';
 import { win } from '@/config';
+import { installTableTool } from '../tool/tableTool';
 
 /**
  * 渲染器的事件类
@@ -30,8 +31,9 @@ export default class ArtRenderEvent {
 
         const artRenderEvent = this;
         installShortcutKey(this);
+        installTableTool(this);
         this.addCustomizeEvent('MoreTableTool.open', detail => {
-            artRenderEvent.artRender.tableMoreTool.open(detail['xy'], detail['table']);
+            artRenderEvent.artRender.tableMoreTool.open(artRenderEvent.artRender, detail);
             return false;
         })
         this.addCustomizeEvent('DOM.click', () => { artRenderEvent.artRender.floatAuxiliaryTool.close(); artRenderEvent.artRender.tableMoreTool.close() })
@@ -41,9 +43,9 @@ export default class ArtRenderEvent {
         this.addDOMEvent('keyup', this.keyup);
 
         // 连续输开始
-        this.addDOMEvent('compositionstart', (e: CompositionEvent, _this: ArtRenderEvent) => {_this.isComposition = true; });
+        this.addDOMEvent('compositionstart', (e: CompositionEvent, _this: ArtRenderEvent) => { _this.isComposition = true; });
         // 连续输结束
-        this.addDOMEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) => {_this.isComposition = false; });
+        this.addDOMEvent('compositionend', (e: CompositionEvent, _this: ArtRenderEvent) => { _this.isComposition = false; });
 
         this.addDOMEvent('click', this.click);
         this.addDOMEvent('contextmenu', this.contextmenu);
@@ -101,7 +103,7 @@ export default class ArtRenderEvent {
         } else if (/^Arrow(Right|Left|Up|Down)$/.test(key) && _this.artRender.cursor.moveCursor(key)) {
             e.preventDefault();
             return false;
-        } else if (!_this.isComposition && !_this.artRender.interaction.render(key, "keydown")){
+        } else if (!_this.isComposition && !_this.artRender.interaction.render(key, "keydown")) {
             e.preventDefault();
             return false;
         }
@@ -138,7 +140,7 @@ export default class ArtRenderEvent {
         if (e.altKey && dom.nodeName == "A") {
             //window.location.href=node.href;
             let url;
-            if (dom.getAttribute("href") === "#" ) {
+            if (dom.getAttribute("href") === "#") {
                 let ref = dom.getAttribute("art-data-ref");
                 if (_this.artRender.refmap.has(ref))
                     url = _this.artRender.refmap.get(ref).destination;
@@ -195,7 +197,7 @@ export default class ArtRenderEvent {
             let body = html.childNodes[1];
 
             let pos = _this.cursor.pos;
-            
+
             let md = ""//domToMd(body as HTMLElement);
             console.log(md);
             md = md.replace(/(^\s*)|(\s*$)/g, "");
@@ -238,7 +240,7 @@ export default class ArtRenderEvent {
             } else if (/^image\/(png|jpe?g)$/.test(f0.type)) {
                 console.log(f0, fr)
                 const closure = function (url: string, name: string) {
- 
+
 
                     let img = new Image();
                     img.src = url;

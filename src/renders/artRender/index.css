@@ -65,6 +65,36 @@
     display: flex;
 }
 
+.art-floatTool {
+    width: 180px;
+    list-style: none;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+    background: #fff;
+    padding: 8px 0 6px
+}
+
+.art-floatTool-li {
+    padding: 6px 25px;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.art-floatTool li:hover {
+    background-color: #f4f4f4;
+    color: #1abc9c;
+    font-weight: 600;
+}
+
+/**浮动工具 分割线 */
+.art-divider {
+    margin: 4px 0;
+    background: #e5e5e5;
+    padding: 1px 0 0;
+}
+
 .art-toc {
     padding: 6px 15px;
     margin: 0 0 15px;
@@ -214,8 +244,7 @@
     font-weight: 700;
 }
 
-.art-md-DefLink-title,
-.art-md-DefLink-url {
+.art-md-DefLink-title, .art-md-DefLink-url {
     color: #c7c7cc;
 }
 

@@ -1,12 +1,19 @@
+import { Art } from '@/core';
+import VNode from '@/node';
+import Operation from '@/node/operation';
+import ArtRender from '../..';
+import ArtRenderEvent from '../../artRenderEvent';
 import Cursor from '../../cursor';
 
-export default function createTableTool(root: HTMLElement): TableTool {
-    return new TableTool(root);
+export default function createTableTool(root: HTMLElement, tableNode: VNode): TableTool {
+    return new TableTool(root, tableNode);
 }
 
 export class TableTool {
     rootDom: HTMLElement;
-    constructor(root: HTMLElement) {
+    tableNode: VNode;
+    constructor(root: HTMLElement, tableNode: VNode) {
+        this.tableNode = tableNode;
         this.rootDom = root;
         root.innerHTML = '';
         root.setAttribute("class", "art-shield art-tableTool");
@@ -102,8 +109,9 @@ export class TableTool {
         e.target.dispatchEvent(myEvent);
         return false;
     }
+
     private align(way: string) {
-        function closure() {
+        function closure(e: MouseEvent) {
             let { anchorNode, focusNode } = Cursor.sel;
             if (anchorNode && focusNode) {
                 let node = anchorNode;
@@ -138,50 +146,54 @@ export class TableTool {
         return [rows, cells];
     }
 
-    static setTableSize(table: HTMLTableElement, newValues: [number, number]): void {
-        if (newValues[0] == -1 || newValues[1] == -1) {
-            return null;
-        }
-        let values = TableTool.getTableSize(table);
+    static setTableSize(operation: Operation, tableNode: VNode, newValues: [number, number]): void {
+        if (newValues[0] <= 2 || newValues[1] <= 1)
+            return;
+        let dom = tableNode.dom.childNodes[1] as HTMLTableElement;
+        let values = TableTool.getTableSize(dom as HTMLTableElement);
         // 调整行
         if (newValues[0] != values[0]) {
             // 删除还是新增
             if (newValues[0] < values[0]) {
                 for (let i = values[0] - 1; i > newValues[0] - 1; i--) {
-                    table.rows[i].parentNode.removeChild(table.rows[i]);
+                    operation.remove(tableNode.lastChild.lastChild);
                 }
             } else {
                 for (let i = newValues[0] - values[0]; i > 0; i--) {
-                    let tr = document.createElement('tr');
+                    let tr = new VNode("tr");
                     for (let j = 0; j < values[1]; j++) {
-                        let td = document.createElement('td');
+                        let td = new VNode("td");
                         tr.appendChild(td);
                     }
-                    table.childNodes[1].appendChild(tr);
+                    operation.appendChild(tableNode.lastChild, tr);
                 }
             }
         }
+        let tr: VNode;
         // 调整列
         if (newValues[1] != values[1]) {
             // 删除还是新增
             if (newValues[1] < values[1]) {
                 for (let i = values[1] - 1; i > newValues[1] - 1; i--) {
-                    for (let j = 0; j < table.rows.length; j++) {
-                        table.rows[j].cells[i].parentNode.removeChild(table.rows[j].cells[i]);
+                    operation.remove(tableNode.firstChild.firstChild.lastChild);
+                    tr = tableNode.lastChild.firstChild;
+                    while (tr) {
+                        operation.remove(tr.lastChild)
+                        tr = tr.next;
                     }
                 }
             } else {
                 for (let i = newValues[1] - values[1]; i > 0; i--) {
-                    for (let j = 0; j < table.rows.length; j++) {
-                        if (j == 0) {
-                            table.rows[j].appendChild(document.createElement('th'));
-                        } else {
-                            table.rows[j].appendChild(document.createElement('td'));
-                        }
+                    operation.appendChild(tableNode.firstChild.firstChild, new VNode("th"));
+                    tr = tableNode.lastChild.firstChild;
+                    while (tr) {
+                        operation.appendChild(tr, new VNode("td"));
+                        tr = tr.next;
                     }
                 }
             }
         }
+        operation.update();
     }
 
     sizeBoxAdjust(e: MouseEvent): void {
@@ -194,8 +206,16 @@ export class TableTool {
                 (<HTMLInputElement>sizeBox.childNodes[0]).value = values[0].toString();
                 (<HTMLInputElement>sizeBox.childNodes[1]).value = values[1].toString();
             } else {
-                TableTool.setTableSize(div.nextSibling as HTMLTableElement,
-                    [parseInt((<HTMLInputElement>sizeBox.childNodes[0]).value), parseInt((<HTMLInputElement>sizeBox.childNodes[1]).value)]);
+                let myEvent = new CustomEvent("art-event", {
+                    detail: {
+                        type: "TableTool-adjustTable",
+                        table: div.parentElement as HTMLTableElement,
+                        size: [parseInt((<HTMLInputElement>sizeBox.childNodes[0]).value), parseInt((<HTMLInputElement>sizeBox.childNodes[1]).value)]
+                    },
+                    bubbles: true,    //是否冒泡
+                    cancelable: false //是否取消默认事件
+                });
+                e.target.dispatchEvent(myEvent);
                 sizeBox.style.display = 'none';
             }
         }
@@ -203,10 +223,38 @@ export class TableTool {
     }
 
     delTable(e: MouseEvent): void {
-        let div = (<HTMLSpanElement>e.target).parentNode.parentNode;
-        if (div.nextSibling && div.nextSibling.nodeName == 'TABLE') {
-            div.parentNode.removeChild(div.nextSibling);
-            div.parentNode.removeChild(div);
-        }
+        let myEvent = new CustomEvent("art-event", {
+            detail: {
+                type: "TableTool-deleteTable",
+            },
+            bubbles: true,    //是否冒泡
+            cancelable: false //是否取消默认事件
+        });
+        e.target.dispatchEvent(myEvent);
     }
+}
+
+export function installTableTool(artRenderEvent: ArtRenderEvent) {
+    artRenderEvent.addCustomizeEvent("TableTool-deleteTable", () => {
+        let vnode = artRenderEvent.artRender.doc.firstChild, i = artRenderEvent.artRender.cursor.pos.rowAnchorOffset;
+        while (--i != -1) {
+            vnode = vnode.next;
+        }
+        if (vnode.next)
+            Cursor.setCursor(vnode.next.dom, 0);
+        artRenderEvent.artRender.operation.remove(vnode);
+        artRenderEvent.artRender.operation.update();
+    });
+
+    artRenderEvent.addCustomizeEvent("TableTool-adjustTable", (detail: { size: [number, number], table: HTMLTableElement }) => {
+        let vnode = artRenderEvent.artRender.doc.firstChild;
+        while (vnode) {
+            if (vnode.dom === detail.table) {
+                break;
+            }
+            vnode = vnode.next;
+        }
+        console.log(vnode)
+        TableTool.setTableSize(artRenderEvent.artRender.operation, vnode, detail.size);
+    })
 }
