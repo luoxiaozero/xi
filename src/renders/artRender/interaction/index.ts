@@ -817,7 +817,7 @@ export default class Interaction {
                 this.artRender.refmap.set(_literal, refmap.get(newNode._literal));
                 this.operation.replace(newNode, node);
                 this.operation.update();
-            } 
+            }
         } else {
             let newNode = this.parser.inlineParse(md);
             if (md.charCodeAt(md.length - 1) === 10) {
@@ -932,8 +932,9 @@ export default class Interaction {
         let newNode = new VNode("code_block");
         newNode._literal = code.innerText;
         newNode._info = "";
-        let cls = code.className.match(/lang-(.*?)(\s|$)/g);;
-        cls.forEach(value => newNode._info += value.substring(5));
+        let cls = code.className.match(/lang-(.*?)(\s|$)/g);
+        if (cls)
+            cls.forEach(value => newNode._info += value.substring(5));
         this.operation.replace(newNode, node);
         this.operation.update();
     }
@@ -950,6 +951,8 @@ export default class Interaction {
         newNode._literal = dom.innerText;
         this.operation.replace(newNode, node);
         this.operation.update();
+        (newNode.dom.lastChild as HTMLDivElement).style.display = "none";
+        (newNode.dom.firstChild as HTMLPreElement).classList.replace("art-display-none", "art-display");
     }
 
     diff(newNode: VNode, oldNode: VNode) {

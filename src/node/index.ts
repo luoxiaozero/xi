@@ -244,7 +244,6 @@ export default class VNode {
             case "code_block":
                 this.dom = document.createElement("div");
                 this.dom.setAttribute("class", "art-md-CodeBlock");
-                this.dom.setAttribute("contenteditable", "false");
 
                 let info_words = this._info ? this._info.split(/\s+/) : [], lang = '', dom: HTMLElement, code = document.createElement("code");
                 if (info_words.length > 0 && info_words[0].length > 0) {
@@ -258,7 +257,6 @@ export default class VNode {
                 this.dom.appendChild(dom);
 
                 dom = document.createElement("pre");
-                dom.setAttribute("contenteditable", "true");
                 dom.style.outline = "none";
                 dom.appendChild(code);
                 this.dom.appendChild(dom);
@@ -272,6 +270,7 @@ export default class VNode {
                 switch (lang) {
                     case "flow":
                         dom = document.createElement("div");
+                        dom.setAttribute("contenteditable", "false");
                         dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
                         this.dom.appendChild(dom);
 
@@ -282,6 +281,7 @@ export default class VNode {
                         break;
                     case "mermaid":
                         dom = document.createElement("div");
+                        dom.setAttribute("contenteditable", "false");
                         dom.setAttribute("class", "art-meta art-shield art-codeBlockBottomTool");
                         this.dom.appendChild(dom);
 
@@ -365,6 +365,7 @@ export default class VNode {
 
                 div = document.createElement("div");
                 div.setAttribute("contenteditable", "false");
+                div.style.padding = "15px 0 10px";
                 div.onclick = function () {
                     (this as HTMLSpanElement).style.display = "none";
                     ((this as HTMLSpanElement).previousSibling as HTMLDivElement).classList.replace("art-display-none", "art-display");
@@ -741,7 +742,7 @@ export default class VNode {
                 }
                 return md;
             case "item_checkbox":
-                if (this.attrs.has("checked")) {
+                if ((this.dom as HTMLInputElement).checked) {
                     md += "[x] ";
                 } else {
                     md += "[ ] ";

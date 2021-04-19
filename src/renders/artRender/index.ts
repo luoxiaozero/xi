@@ -1,7 +1,7 @@
 import ArtText from '@/artText';
 import Render from '../';
 import Cursor from './cursor';
-import FloatAuxiliaryTool from "./tool/floatAuxiliaryTool";
+import FloatAuxiliaryTool, { floatAuxiliaryToolExport } from "./tool/floatAuxiliaryTool";
 import ArtRenderEvent from "./artRenderEvent";
 import { TableMoreTool } from "./tool/tableTool/tableMoreTool";
 import Tool from '../../tool';
@@ -30,7 +30,7 @@ export class RefMap {
     }
 
     set(key: string, value: { destination: string, title: string }): Map<string, { destination: string, title: string }> {
-        let all = document.querySelectorAll("*[art-data-ref=\"" +  key +"\"]");
+        let all = document.querySelectorAll("*[art-data-ref=\"" + key + "\"]");
         all.forEach(dom => {
             if (dom.tagName === "IMG") {
                 dom.previousElementSibling.setAttribute("class", "art-meta art-hide");
@@ -50,7 +50,7 @@ export class RefMap {
     }
 
     delete(key: string): boolean {
-        let all = document.querySelectorAll("*[art-data-ref=\"" +  key +"\"]");
+        let all = document.querySelectorAll("*[art-data-ref=\"" + key + "\"]");
         all.forEach(dom => {
             if (dom.tagName === "IMG") {
                 dom.previousElementSibling.setAttribute("class", "art-meta");
@@ -83,7 +83,6 @@ export default class ArtRender implements Render {
 
     cursor: Cursor;
     tableMoreTool: TableMoreTool;
-    floatAuxiliaryTool: FloatAuxiliaryTool;
     renderEvent: ArtRenderEvent;
 
     doc: VNode;
@@ -105,7 +104,6 @@ export default class ArtRender implements Render {
         this.cursor = new Cursor(this.dom);
 
         this.tableMoreTool = new TableMoreTool();
-        this.floatAuxiliaryTool = new FloatAuxiliaryTool();
 
         this.renderEvent = new ArtRenderEvent(this);
 
@@ -121,7 +119,6 @@ export default class ArtRender implements Render {
 
     public createDom(): HTMLDivElement {
         this.artText.get<Tool>('$tool').add({ dom: this.tableMoreTool.createDom() });
-        this.artText.get<Tool>('$tool').add({ dom: this.floatAuxiliaryTool.createDom() });
 
         return this.dom;
     }
@@ -174,6 +171,77 @@ export default class ArtRender implements Render {
     public detachAllEvent(): void {
         console.log('sdad', this)
         this.renderEvent.detachAllEvent();
+    }
+
+    /**删除选中的元素 */
+    public deleteSelectNode(): boolean {
+        this.cursor.getSelection()
+        let pos = this.cursor.pos;
+        if (pos.selection.isCollapsed)
+            return false;
+
+        let row_before = pos.rowAnchorOffset, row_after = pos.rowFocusOffset;
+        let in_before = pos.inAnchorOffset, in_after = pos.inFocusOffset;
+        if (row_before > row_after) {
+            [row_before, row_after] = [row_after, row_before];
+            [in_before, in_after] = [in_after, in_before];
+        }
+
+        let node = this.doc.firstChild;
+        let i = 0, md = "";
+        while (node) {
+            if (i > row_after) {
+                break;
+            } else if (row_after === row_before) {
+                md += node.getMd().substring(in_before, in_after);
+                break;
+            } else if (i == row_before) {
+                md += node.getMd().substring(in_before) + "\n";
+            } else if (i === row_after) {
+                md += node.getMd().substring(0, in_after) + "\n";
+            } else if (i > row_before) {
+                md += node.getMd() + "\n";
+            }
+            i++;
+            node = node.next;
+        }
+
+        return false;
+        return true;
+    }
+
+    /**获取选中的元素的 markdown 文本 */
+    public getSelectNodeMd(): string {
+        this.cursor.getSelection()
+
+        let pos = this.cursor.pos;
+        let row_before = pos.rowAnchorOffset, row_after = pos.rowFocusOffset;
+        let in_before = pos.inAnchorOffset, in_after = pos.inFocusOffset;
+        if (row_before > row_after) {
+            [row_before, row_after] = [row_after, row_before];
+            [in_before, in_after] = [in_after, in_before];
+        }
+
+        let node = this.doc.firstChild;
+        let i = 0, md = "";
+        while (node) {
+            if (i > row_after) {
+                break;
+            } else if (row_after === row_before) {
+                md += node.getMd().substring(in_before, in_after);
+                break;
+            } else if (i == row_before) {
+                md += node.getMd().substring(in_before) + "\n";
+            } else if (i === row_after) {
+                md += node.getMd().substring(0, in_after) + "\n";
+            } else if (i > row_before) {
+                md += node.getMd() + "\n";
+            }
+            i++;
+            node = node.next;
+        }
+
+        return md;
     }
 }
 

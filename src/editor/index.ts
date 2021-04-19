@@ -1,6 +1,6 @@
 import { Art } from '@/core';
 import EventCenter from '@/eventCenter';
-import { SwitchRenderButton } from '@/plugins/toolbar/default';
+import { SwitchRenderButton } from '@/../plugins/toolbar/default';
 import Render from '@/renders';
 import ArtText from '../artText'
 import './index.css'

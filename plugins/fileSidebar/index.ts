@@ -1,6 +1,6 @@
 import Editor from '@/editor';
 import { Art } from '../../src/core';
-import Sidebar from '../../src/plugins/sidebar';
+import Sidebar from '../sidebar';
 import ArtRequest from '../artRequest';
 
 class FileSidebar {

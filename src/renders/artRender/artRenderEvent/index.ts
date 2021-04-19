@@ -2,10 +2,12 @@ import ArtText from '@/artText';
 import ArtRender from '..';
 import EventCenter from '@/eventCenter';
 import Editor from '@/editor';
-import Message from '@/plugins/message';
+import Message from '@/../plugins/message';
 import { installShortcutKey } from './shortcutKey';
 import { win } from '@/config';
 import { installTableTool } from '../tool/tableTool';
+import Cursor, { Position } from '../cursor';
+import { externalDomToMd } from '../interaction/conversion';
 
 /**
  * 渲染器的事件类
@@ -29,15 +31,21 @@ export default class ArtRenderEvent {
         }
         this.artRender.dom.setAttribute('contenteditable', 'true');
 
-        const artRenderEvent = this;
+        const artRender = this.artRender;
         installShortcutKey(this);
         installTableTool(this);
         this.addCustomizeEvent('MoreTableTool.open', detail => {
-            artRenderEvent.artRender.tableMoreTool.open(artRenderEvent.artRender, detail);
+            artRender.tableMoreTool.open(artRender, detail);
             return false;
         })
-        this.addCustomizeEvent('DOM.click', () => { artRenderEvent.artRender.floatAuxiliaryTool.close(); artRenderEvent.artRender.tableMoreTool.close() })
-        this.addCustomizeEvent('DOM.mousewheel', () => { artRenderEvent.artRender.floatAuxiliaryTool.close(); artRenderEvent.artRender.tableMoreTool.close() });
+        this.addCustomizeEvent('DOM.click', () => {
+            artRender.artText.get<EventCenter>("$eventCenter").emit("floatAuxiliaryTool.close");
+            artRender.tableMoreTool.close();
+        });
+        this.addCustomizeEvent('DOM.mousewheel', () => {
+            artRender.artText.get<EventCenter>("$eventCenter").emit("floatAuxiliaryTool.close");
+            artRender.tableMoreTool.close();
+        });
 
         this.addDOMEvent('keydown', this.keydown);
         this.addDOMEvent('keyup', this.keyup);
@@ -54,6 +62,7 @@ export default class ArtRenderEvent {
         this.artRender.artText.get<EventCenter>('$eventCenter').attachDOMEvent(document.body, 'mousewheel', e => eventCenter.emit('DOM.' + e.type));
 
         this.addDOMEvent('paste', this.paste);
+        this.addDOMEvent("copy", this.copy);
 
         this.addDOMEvent('drop', this.drop);
         // this.ondrag
@@ -160,7 +169,13 @@ export default class ArtRenderEvent {
     /**右点击 */
     private contextmenu(e: MouseEvent, _this: ArtRenderEvent) {
         e.preventDefault();
-        _this.artRender.floatAuxiliaryTool.open(e.clientY, e.clientX);
+        _this.artRender.artText.get<EventCenter>("$eventCenter").emit("floatAuxiliaryTool.open", e.clientX, e.clientY);
+    }
+
+    /**复制 */
+    private copy(e: ClipboardEvent, _this: ArtRenderEvent) {
+        let md = _this.artRender.getSelectNodeMd();
+        e.clipboardData.setData("text/markdown", md);
     }
 
     /**贴贴行为 */
@@ -168,56 +183,74 @@ export default class ArtRenderEvent {
         if (!(e.clipboardData && e.clipboardData.items)) {
             return;
         }
-        let clipboard = null;
-        for (let i = 0, len = e.clipboardData.items.length; i < len; i++) {
-            let item = e.clipboardData.items[i];
-            if (item.kind === "string") {
-                if (item.type == "text/plain") {
-                    clipboard = ["text/plain", item];
-                } else if (item.type == "text/html") {
-                    clipboard = ["text/html", item];
-                    break;
-                }
-            }
+        _this.artRender.cursor.getSelection();
+        let pos = _this.artRender.cursor.pos;
+        let node = _this.artRender.doc.firstChild, i = pos.rowAnchorOffset;
+        while (--i > -1) {
+            node = node.next;
         }
-        if (clipboard) {
-            if (clipboard[0] == "text/html") {
-                let fun: Function = _this.getAsString(_this.artRender);
-                clipboard[1].getAsString(fun);
+        let text: string;
+        console.log(e.clipboardData)
+        if (text = e.clipboardData.getData("text/markdown2")) {
+            console.log(text, node);
+            let pos = _this.artRender.cursor.pos;
+            if (pos.selection.isCollapsed) {
+                if (pos.rowNode.nodeName === "PRE")
+                    return true;
+
+                console.log(text);
+                let doc = _this.artRender.interaction.parser.parse(text);
+                _this.artRender.interaction.parser.parser.refmap.forEach((value, key) => {
+                    _this.artRender.refmap.set(key, value);
+                });
+
+                let child = doc.lastChild, prev;
+                while (child) {
+                    prev = child.prev;
+                    _this.artRender.operation.insertAfter(child, node);
+                    child = prev;
+                }
+
+                _this.artRender.operation.update();
+                return false;
+            } else {
                 return false;
             }
+
+        } else if (text = e.clipboardData.getData("text/html")) {
+        
+            let html: HTMLHtmlElement = document.createElement('html');
+            html.innerHTML = text;
+            let body = html.childNodes[1] as HTMLElement;
+            let md = externalDomToMd(body);
+            console.log(text, body, md);
+            let doc = _this.artRender.interaction.parser.parse(md);
+            _this.artRender.interaction.parser.parser.refmap.forEach((value, key) => {
+                _this.artRender.refmap.set(key, value);
+            });
+
+            let child = doc.lastChild, prev;
+            while (child) {
+                prev = child.prev;
+                _this.artRender.operation.insertAfter(child, node);
+                child = prev;
+            }
+
+            _this.artRender.operation.update();
+            e.preventDefault();
+            return false;
+        } else if (text = e.clipboardData.getData("text/plain")) {
+            console.log(text);
+            return false;
         }
     }
 
-    private getAsString(_this: ArtRender): Function {
-        // 剪贴事件回调
-        function closure(str: string) {
-            let html: HTMLHtmlElement = document.createElement('html');
-            html.innerHTML = str;
-            let body = html.childNodes[1];
-
-            let pos = _this.cursor.pos;
-
-            let md = ""//domToMd(body as HTMLElement);
-            console.log(md);
-            md = md.replace(/(^\s*)|(\s*$)/g, "");
-            let mdRows = md.split('\n');
-            let sub = location[2];
-            for (let i = 0; i < mdRows.length; i++) {
-                if (i == 0) {
-                    console.log(sub);
-                    _this.dom.childNodes[sub].appendChild(document.createTextNode(mdRows[i]));
-                    sub++;
-                    //window.artText.event.rootDom.childNodes[location[2]].innerHTML = body.childNodes[i].innerHTML;
-                } else {
-                    console.log(sub);
-                    _this.dom.insertBefore(document.createTextNode(mdRows[i]), _this.dom.childNodes[sub]);
-                    sub++;
-                }
-            }
-        }
-        return closure;
-
+    /**剪贴 */
+    private cut(e: ClipboardEvent, _this: ArtRenderEvent) {
+        _this.copy(e, _this);
+        _this.artRender.deleteSelectNode();
+        e.preventDefault();
+        return false;
     }
 
     /**

@@ -2,7 +2,7 @@ import { Art } from '../../src/core';
 import EventCenter from '../../src/eventCenter';
 import Editor from '../../src/editor';
 import ArtRequest from 'plugins/artRequest';
-import Message from '@/plugins/message';
+import Message from '@/../plugins/message';
 
 class ArtLocal {
     art: Art

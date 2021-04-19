@@ -371,6 +371,8 @@ export default class Cursor {
                 } else if (art_text_double && Tool.hasClass(art_text_double, "art-text-parent")) {
                     art_text_double = art_text_double.parentElement;
                 }
+            } else if (art_text_double && Tool.hasClass(art_text_double, "art-text-parent")) {
+                art_text_double = art_text_double.parentElement;
             }
 
             if (art_text_double && Tool.hasClass(art_text_double, "art-text-double")) {

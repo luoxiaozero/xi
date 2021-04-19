@@ -1,6 +1,166 @@
 import VNode from "@/node";
 import Tool from "@/tool";
 
+function enterExternalDomToMd(dom: HTMLElement): string {
+    switch (dom.nodeName) {
+        case "H1":
+        case "H2":
+        case "H3":
+        case "H4":
+        case "H5":
+        case "H6":
+            return "#".repeat(parseInt(dom.nodeName.charAt(1))) + " ";
+        case "A":
+            if (dom.childNodes.length)
+                return "[";
+            break;
+        case "EM":
+            return "*";
+        case "STRONG":
+            return "**";
+        case "DEL":
+            return "~~";
+        case "PRE":
+            let code = dom.firstChild as HTMLElement, lang = "";
+            if (code?.nodeName === "CODE") {
+                let match;
+                code.getAttribute("class")?.split(/\s/).forEach((value: string) => {
+                    if (match = value.match(/^lang-(.*?)$/)) {
+                        lang += match[1] + " ";
+                    }
+                });
+            }
+            return "```" + lang + "\n";
+    }
+    return "";
+}
+
+function leaveExternalDomToMd(dom: HTMLElement) {
+    switch (dom.nodeName) {
+        case "UL":
+        case "OL":
+        case "BLOCKQUOTE":
+        case "P":
+        case "H1":
+        case "H2":
+        case "H3":
+        case "H4":
+        case "H5":
+        case "H6":
+            return '\n\n';
+        case "A":
+            if (dom.childNodes.length)
+                return "](" + (dom as HTMLAnchorElement).href + ")";
+            break;
+        case "EM":
+            return "*";
+        case "STRONG":
+            return "**";
+        case "DEL":
+            return "~~";
+        case "PRE":
+            return "```\n\n";
+    }
+    return "";
+}
+
+export function externalDomToMd(dom: HTMLElement): string {
+    let md = "";
+    if (dom.nodeName === "#text")
+        return dom.nodeValue;
+    else if (dom.nodeName === "BR")
+        return "<br\\>";
+    else if (dom.nodeName == "INPUT" && dom instanceof HTMLInputElement && dom.type === "checkbox") {
+        if (dom.checked) {
+            return "[x] "
+        } else {
+            return "[ ] "
+        }
+    } else if (dom.nodeName === "LI") {
+        let str: string, spaceNumbar = "", flag = true;
+        let parent = dom.parentElement;
+        while (parent) {
+            if (parent.nodeName === "OL") {
+                spaceNumbar += "   ";
+            } else if (parent.nodeName === "UL") {
+                spaceNumbar += "  ";
+            } else if (parent.nodeName !== "item") {
+                break;
+            }
+            parent = parent.parentElement;
+        }
+
+        parent = dom.parentElement;
+        if (parent.nodeName === "OL") {
+            for (let i = 0; i < parent.childNodes.length; i++) {
+                if (parent.childNodes[i] === dom) {
+                    md += (i + 1) + ". ";
+                    break;
+                }
+            }
+        } else {
+            md += "* ";
+        }
+
+        for (let i = 0; i < dom.childNodes.length; i++) {
+            switch (dom.childNodes[i].nodeName) {
+                case "UL":
+                case "OL":
+                case "BLOCKQUOTE":
+                case "P":
+                    let md_2 = externalDomToMd(dom.childNodes[i] as HTMLElement);
+                    let strs = md_2.substring(0, md_2.length - 1).split("\n");
+                    console.log(strs, md_2);
+                    for (let i = 0; i < strs.length; i++) {
+                        if (strs[i]) {
+                            if (flag) {
+                                md += strs[i] + "\n";
+                                flag = false;
+                            } else {
+                                md += spaceNumbar + strs[i] + "\n"
+                            }
+                        }
+
+                    }
+                    break;
+                default:
+                    md += externalDomToMd(dom.childNodes[i] as HTMLElement);
+            }
+        }
+        return md;
+    } else if (dom.nodeName === "BLOCKQUOTE") {
+        for (let i = 0; i < dom.childNodes.length; i++) {
+            switch (dom.childNodes[i].nodeName) {
+                case "UL":
+                case "OL":
+                case "BLOCKQUOTE":
+                case "P":
+                    let md_2 = externalDomToMd(dom.childNodes[i] as HTMLElement);
+                    let strs = md_2.substring(0, md_2.length - 1).split("\n");
+                    strs.forEach(value => md += "> " + value + "\n");
+                    break;
+                default:
+                    md += "> " + externalDomToMd(dom.childNodes[i] as HTMLElement);
+            }
+        }
+        return md;
+    }
+
+    md += enterExternalDomToMd(dom);
+
+    for (let i = 0; i < dom.childNodes.length; i++) {
+        md += externalDomToMd(dom.childNodes[i] as HTMLElement);
+    }
+    if (dom.nodeName === "PRE") {
+        if (md && md[md.length - 1] !== '\n')
+            md += '\n';
+    }
+
+    md += leaveExternalDomToMd(dom);
+
+    return md;
+}
+
 /**
  * dom转虚拟节点 
  * @param dom 节点

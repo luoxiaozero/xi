@@ -1,6 +1,6 @@
 import { Art } from "@/core";
 import EventCenter from "@/eventCenter";
-import Sidebar from "@/plugins/sidebar";
+import Sidebar from "@/../plugins/sidebar";
 import ArtRender from "@/renders/artRender";
 import VNode from "@/node";
 
