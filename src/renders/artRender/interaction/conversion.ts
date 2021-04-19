@@ -1,4 +1,4 @@
-import VNode from "@/node";
+import VNode from "@/renders/artRender/node";
 import Tool from "@/tool";
 
 function enterExternalDomToMd(dom: HTMLElement): string {

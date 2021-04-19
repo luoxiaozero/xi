@@ -1,4 +1,4 @@
-import VNode from '@/node';
+import VNode from '@/renders/artRender/node';
 import ArtRender from '@/renders/artRender';
 import Cursor from '../../../cursor';
 

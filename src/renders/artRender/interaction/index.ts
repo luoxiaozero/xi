@@ -1,12 +1,12 @@
 import EventCenter from "@/eventCenter";
 import ArtRender from "..";
-import VNode from "@/node";
+import VNode from "@/renders/artRender/node";
 import { domToNode } from "./conversion";
 import Cursor from "../cursor";
-import Operation from "@/node/operation";
+import Operation from "@/renders/artRender/node/operation";
 import InteractionParser from "./interactionParser";
 import Tool from "@/tool";
-import { normalizeReference } from "@/parser/inlines";
+import { normalizeReference } from "../parser/inlines";
 
 const reCodeFence = /^`{3,}(?!.*`)|^~{3,}/;
 const reBulletListMarker = /^[*+-]/;

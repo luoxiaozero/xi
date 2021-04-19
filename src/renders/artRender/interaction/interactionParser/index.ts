@@ -1,6 +1,6 @@
-import Parser from "@/parser";
-import VNode from "@/node";
-import { OPENTAG, CLOSETAG, TAGNAME, ATTRIBUTE } from "@/parser/common"
+import Parser from "../../parser";
+import VNode from "@/renders/artRender/node";
+import { OPENTAG, CLOSETAG, TAGNAME, ATTRIBUTE } from "../../parser/common"
 
 export default class InteractionParser {
     public parser: Parser;
