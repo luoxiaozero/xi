@@ -3,16 +3,9 @@ import { Core } from '@/core'
 import { ToolExport } from '@/tool';
 import { EditorExport } from '@/editor';
 import { EventCenterExport } from '@/eventCenter';
-import { ToolbarExport } from '../plugins/toolbar';
-import { MessageExport } from '../plugins/message';
-import { VersionHistoryExport } from '../plugins/versionHistory';
-import { SidebarExport } from '../plugins/sidebar';
 import { ArtRenderExport } from './renders/artRender';
 import { TextareaRenderExport } from './renders/textareaRender';
-import { OutlineSidebarExport } from '../plugins/outlineSidebar';
-import { FileSidebarExport } from '../plugins/fileSidebar';
-import { ArtRequestExport } from '../plugins/artRequest';
-import { ArtLocalExport } from '../plugins/artLocal';
+import { ArtLocalExport, ArtRequestExport, FileSidebarExport, MessageExport, OutlineSidebarExport, SidebarExport, ToolbarExport, VersionHistoryExport } from '../plugins';
 
 export default ArtText;
 

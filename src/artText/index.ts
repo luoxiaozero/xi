@@ -14,7 +14,7 @@ export default class ArtText extends Art {
     nameId: string;
     /**artText的初始选项 */
     options: ArtOptions;
-    constructor(options = {}) {
+    constructor(options: ArtOptions = Object()) {
         super();
         this.dom = document.createElement('div');
         this.dom.setAttribute('class', 'art-main');

@@ -2,7 +2,7 @@ import { Art } from "@/core";
 import EventCenter from "@/eventCenter";
 import Sidebar from "@/../plugins/sidebar";
 import ArtRender from "@/renders/artRender";
-import VNode from "@/node";
+import VNode from "@/renders/artRender/node";
 
 class OutlineSidebar {
     dom: HTMLDivElement;
@@ -40,7 +40,7 @@ class OutlineSidebar {
 export let OutlineSidebarExport = {
     install: (Art, options) => {
         options['container'].bind('outlineSidebar', OutlineSidebar, [{ 'get': 'art' }], true);
-        options['Tool'].addCss('.art-outlineSidebar{height: 100%;overflow: auto;}\
+        options['Tool'].addCss('.art-outlineSidebar{height: 100%;overflow: hidden;}.art-outlineSidebar:hover {overflow: auto}\
         .art-outlineSidebar-h1{padding-left: 0.6em;}.art-outlineSidebar-h2{padding-left: 1em;}.art-outlineSidebar-h3{padding-left: 2em;}\
         .art-outlineSidebar-h4{padding-left: 3em;;}.art-outlineSidebar-h5{padding-left: 4em;;}.art-outlineSidebar-h6{padding-left: 5em;}\
             .art-outlineSidebar p{margin:0; font-size: 12px;padding-right:5px;}.art-outlineSidebar p:hover{background-color: #eee;}\

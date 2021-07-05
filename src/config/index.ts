@@ -16,11 +16,11 @@ export enum SecurityLevel {
 }
 
 export interface ArtOptions {
-    defaultMd: string,
-    markdown: string,
-    fileInfo: {},
-    runModel: RunModel,
-    securityLevel: SecurityLevel,
+    defaultMd?: string,
+    markdown?: string,
+    fileInfo?: {},
+    runModel?: RunModel,
+    securityLevel?: SecurityLevel,
 }
 
 export const ART_DEFAULT_OPTIONS: ArtOptions = {
