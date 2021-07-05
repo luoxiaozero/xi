@@ -1,7 +1,7 @@
 {
-  "name": "arttext",
+  "name": "@luoxiaozero/arttext",
   "version": "0.1.1",
-  "description": "web的markdown编辑器",
+  "description": "web 的 markdown 编辑器",
   "main": "./src/index.ts",
   "scripts": {
     "dev": "webpack-dev-server --config ./example/webpack.config.js",
@@ -13,7 +13,7 @@
     "markdown",
     "ArtText"
   ],
-  "author": "liziqiang9",
+  "author": "luoxiao",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^26.0.15",
