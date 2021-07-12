@@ -1,8 +1,8 @@
-import ArtRender from "@/renders/artRender";
-import Cursor from "@/renders/artRender/cursor";
-import createCodeBlockTool from "@/renders/artRender/tool/codeBlockTool";
-import createMathBlockTool from "@/renders/artRender/tool/mathBlockTool";
-import createTableTool from "@/renders/artRender/tool/tableTool";
+import ArtRender from "../../../renders/artRender";
+import Cursor from "../../../renders/artRender/cursor";
+import createCodeBlockTool from "../../../renders/artRender/tool/codeBlockTool";
+import createMathBlockTool from "../../../renders/artRender/tool/mathBlockTool";
+import createTableTool from "../../../renders/artRender/tool/tableTool";
 
 class NodeWalker {
     current: VNode;

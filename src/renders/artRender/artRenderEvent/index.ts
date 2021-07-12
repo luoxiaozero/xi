@@ -2,7 +2,7 @@ import ArtText from '@/artText';
 import ArtRender from '..';
 import EventCenter from '@/eventCenter';
 import Editor from '@/editor';
-import Message from '@/../plugins/message';
+import Message from '@/plugins/message';
 import { installShortcutKey } from './shortcutKey';
 import { win } from '@/config';
 import { installTableTool } from '../tool/tableTool';

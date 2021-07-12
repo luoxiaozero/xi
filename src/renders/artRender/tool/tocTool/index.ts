@@ -1,4 +1,4 @@
-import Tool from '@/tool'
+import Tool from '../../../../tool'
 export default function initTocTool(root: HTMLElement): void{
     root.innerHTML = '';
     root.style.visibility = 'hidden';

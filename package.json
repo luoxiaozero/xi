@@ -2,11 +2,12 @@
   "name": "@luoxiaozero/arttext",
   "version": "0.1.1",
   "description": "web 的 markdown 编辑器",
-  "main": "./src/index.ts",
+  "main": "./lib/arttext.min.js",
   "scripts": {
     "dev": "webpack-dev-server --config ./example/webpack.config.js",
     "build": "webpack --config ./scripts/webpack.config.js",
     "build-demo": "webpack --config ./scripts/webpack.demo.js",
+    "build:lib": "webpack --config ./build/webpack.config.js",
     "test": "jest"
   },
   "keywords": [
@@ -15,6 +16,9 @@
   ],
   "author": "luoxiao",
   "license": "MIT",
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "file-loader": "^6.2.0",

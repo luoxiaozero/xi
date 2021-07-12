@@ -1,4 +1,4 @@
-import { win } from "@/config";
+import { win } from "../../../config";
 import ArtRender from "..";
 import Cursor from "../cursor";
 

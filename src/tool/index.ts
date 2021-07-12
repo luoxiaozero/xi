@@ -1,5 +1,5 @@
-import Editor from '@/editor';
-import ArtText from '@/artText';
+import Editor from '../editor';
+import ArtText from '../artText';
 import './index.css'
 
 /**工具类, 存放基本库 */

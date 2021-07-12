@@ -3,8 +3,8 @@
         "module": "es6",
         "target": "es5",
         "sourceMap": true,
-        "declaration": false,
-        // "declarationDir": "./dist/typing",
+        "declaration": true,
+        "declarationDir": "./lib",
         "moduleResolution": "node",
         "lib": [
             "webworker",
@@ -13,9 +13,9 @@
             "dom"
         ],
         "baseUrl": ".",
-        "paths": {
-            "@/*": ["src/*"]
-        }
+        // "paths": {
+        //     "@/*": ["src/*"]
+        // }
     },
     "include": [
         "src/**/*.ts"

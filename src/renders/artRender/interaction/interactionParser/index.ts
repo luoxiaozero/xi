@@ -1,5 +1,5 @@
 import Parser from "../../parser";
-import VNode from "@/renders/artRender/node";
+import VNode from "../../../../renders/artRender/node";
 import { OPENTAG, CLOSETAG, TAGNAME, ATTRIBUTE } from "../../parser/common"
 
 export default class InteractionParser {

@@ -1,6 +1,6 @@
-import { Art } from "@/core";
-import EventCenter from "@/eventCenter";
-import Tool from "@/tool";
+import { Art } from "../../../../core";
+import EventCenter from "../../../../eventCenter";
+import Tool from "../../../../tool";
 import ArtRender from "../..";
 import createCodeBlockTool from "../codeBlockTool";
 

@@ -1,6 +1,6 @@
-import ArtText from '@/artText'
-import { Art } from '@/core';
-import EventCenter from '@/eventCenter';
+import ArtText from '../../../artText'
+import { Art } from '../../../core';
+import EventCenter from '../../../eventCenter';
 import ArtRenderEvent from '.';
 
 export function installShortcutKey(artRenderEvent: ArtRenderEvent) {

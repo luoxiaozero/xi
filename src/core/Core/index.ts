@@ -1,4 +1,4 @@
-import Tool from "@/tool";
+import Tool from "../../tool";
 import Art from "../Art";
 import Container from "../Container";
 

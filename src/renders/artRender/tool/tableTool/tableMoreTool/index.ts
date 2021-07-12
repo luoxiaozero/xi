@@ -1,5 +1,5 @@
-import VNode from '@/renders/artRender/node';
-import ArtRender from '@/renders/artRender';
+import VNode from '../../../../../renders/artRender/node';
+import ArtRender from '../../../../../renders/artRender';
 import Cursor from '../../../cursor';
 
 export class TableMoreTool {

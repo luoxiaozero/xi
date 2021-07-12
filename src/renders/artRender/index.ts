@@ -1,4 +1,4 @@
-import ArtText from '@/artText';
+import ArtText from '../../artText';
 import Render from '../';
 import Cursor from './cursor';
 import FloatAuxiliaryTool, { floatAuxiliaryToolExport } from "./tool/floatAuxiliaryTool";
@@ -6,13 +6,13 @@ import ArtRenderEvent from "./artRenderEvent";
 import { TableMoreTool } from "./tool/tableTool/tableMoreTool";
 import Tool from '../../tool';
 import './index.css'
-import Editor from '@/editor';
-import { Art, Core } from '@/core';
-import EventCenter from '@/eventCenter';
+import Editor from '../../editor';
+import { Art, Core } from '../../core';
+import EventCenter from '../../eventCenter';
 import InteractionParser from './interaction/interactionParser';
-import VNode from '@/renders/artRender/node';
+import VNode from '../../renders/artRender/node';
 import Interaction from './interaction';
-import Operation from '@/renders/artRender/node/operation';
+import Operation from '../../renders/artRender/node/operation';
 import { flowchartExport } from './plugins/flowchart';
 import { hljsExport } from './plugins/highlight';
 import { mermaidExport } from './plugins/mermaid';
@@ -247,10 +247,10 @@ export default class ArtRender implements Render {
 
 export let ArtRenderExport = {
     install: function (Art, options) {
-        //Core.use(flowchartExport);
-        // Core.use(hljsExport);
-        //Core.use(mermaidExport);
-        //Core.use(katexExport);
+        Core.use(flowchartExport);
+        Core.use(hljsExport);
+        Core.use(mermaidExport);
+        Core.use(katexExport);
         options['container'].bind('$artRender', ArtRender, [{ 'get': 'art' }], true);
     },
     created: function (art: Art, options) {

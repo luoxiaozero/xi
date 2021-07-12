@@ -1,5 +1,5 @@
-import ArtRender from "@/renders/artRender";
-import { Position } from "@/renders/artRender/cursor";
+import ArtRender from "../../../renders/artRender";
+import { Position } from "../../../renders/artRender/cursor";
 import VNode from ".";
 class OperationVNodeHead {
     prev: OperationVNodeHead;

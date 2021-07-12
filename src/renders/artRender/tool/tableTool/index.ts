@@ -1,6 +1,6 @@
-import { Art } from '@/core';
-import VNode from '@/renders/artRender/node';
-import Operation from '@/renders/artRender/node/operation';
+import { Art } from '../../../../core';
+import VNode from '../../../../renders/artRender/node';
+import Operation from '../../../../renders/artRender/node/operation';
 import ArtRender from '../..';
 import ArtRenderEvent from '../../artRenderEvent';
 import Cursor from '../../cursor';

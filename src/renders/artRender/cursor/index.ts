@@ -1,4 +1,4 @@
-import Tool from '@/tool';
+import Tool from '../../../tool';
 import ArtRender from '..';
 
 export class Position {

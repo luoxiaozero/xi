@@ -1,5 +1,5 @@
-import VNode from "@/renders/artRender/node";
-import Tool from "@/tool";
+import VNode from "../../../renders/artRender/node";
+import Tool from "../../../tool";
 
 function enterExternalDomToMd(dom: HTMLElement): string {
     switch (dom.nodeName) {

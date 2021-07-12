@@ -1,5 +1,5 @@
-import { ArtOptions, ART_DEFAULT_OPTIONS } from '@/config'
-import { Art, Core } from '@/core'
+import { ArtOptions, ART_DEFAULT_OPTIONS } from '../config'
+import { Art, Core } from '../core'
 
 /** 入口类 */
 export default class ArtText extends Art {
