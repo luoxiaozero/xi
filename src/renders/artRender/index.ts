@@ -124,7 +124,7 @@ export default class ArtRender implements Render {
     }
 
     public open(): void {
-        this.dom.style.display = 'inherit';
+        this.dom.style.display = 'block';
         this.renderEvent.attachAllEvent();
     }
 

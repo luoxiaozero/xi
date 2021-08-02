@@ -1,0 +1,13 @@
+.art-editor {
+    display: flex;
+    height: calc(100% - 40px);
+    
+    
+}
+.art-render {
+    flex: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px 28px;
+    overflow: auto;
+}

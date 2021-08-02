@@ -1,6 +1,7 @@
 import { Art, Core } from "../../core";
 import Tool from "../../tool";
 import Toolbar from "../toolbar";
+import "./styles/index.css";
 
 /**侧边栏 */
 export default class Sidebar {
@@ -32,7 +33,7 @@ export default class Sidebar {
         this.selectMenuDom = null;
         this.info = new Map();
 
-        this.art.get<Tool>('$tool').add([{ dom: this.dom, place: 'Editor.before' }]);
+        this.art.get<Tool>('$tool').add([{ dom: this.dom, place: 'Editor.start' }]);
     }
 
     public add(menuText: string, mainDom: HTMLElement) {
@@ -83,10 +84,6 @@ export let SidebarExport = {
     install: function (Art, options) {
         Core.use(openSidebar);
         options['container'].bind('sidebar', Sidebar, [{'get': 'art'}], true);
-        options['Tool'].addCss('.art-sidebar{width:300px;margin-left: -333px;top: 20px;bottom: 20px;position: fixed;font-size:13.5px;background-color: #fff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 3px;color: #666;} \
-                                .art-sidebar-menu{height: 28px;display: flex;border-bottom: 1px #eee solid;font-weight: 600;padding: 10px 20px 6px;text-align:center;font-size: 14px}.art-sidebar-menu-span{padding: 0 15px 5px;cursor: pointer;}\
-                                .art-sidebar-menu-select{border-bottom: 4px #666 solid;}\
-                                .art-sidebar-main{height: calc(100% - 50px);padding: 3px 0 4px}')
     },
     created: (art: Art , options) => art.get<Sidebar>('sidebar')
 }

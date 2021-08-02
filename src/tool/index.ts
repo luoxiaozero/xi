@@ -96,6 +96,17 @@ export default class Tool {
             case 'Editor.after':
                 Tool.insertAfter(this.artText.dom, dom, this.artText.get<Editor>('$editor').dom);
                 break;
+            case 'Editor.start':
+                const editorDom = this.artText.get<Editor>('$editor').dom;
+                if (editorDom.childNodes.length === 0) {
+                    this.artText.get<Editor>('$editor').dom.appendChild(dom);
+                } else {
+                    this.artText.get<Editor>('$editor').dom.insertBefore(dom, this.artText.get<Editor>('$editor').dom.childNodes[0]);
+                }
+                break;
+            case 'Editor.in':
+                this.artText.get<Editor>('$editor').dom.appendChild(dom);
+                break;
             default:
                 this.artText.dom.appendChild(dom);
                 break;

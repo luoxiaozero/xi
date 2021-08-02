@@ -1,0 +1,20 @@
+.art-toolbar-min {
+  height: 40px;
+  box-sizing: border-box;
+  font-weight: 800;
+  font-size: 13.5px;
+  text-align: center;
+  border-radius: 3px;
+  padding: 3px 0;
+  color: #666;
+  border-bottom: 1px solid #eee;
+}
+.art-toolbar-min-div {
+  display: inline-block;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+.art-toolbar-min-div:hover {
+  background-color: #f2f2f2;
+  color: #1abc9c;
+}

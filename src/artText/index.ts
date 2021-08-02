@@ -1,5 +1,6 @@
 import { ArtOptions, ART_DEFAULT_OPTIONS } from '../config'
 import { Art, Core } from '../core'
+import "./styles/index.css"
 
 /** 入口类 */
 export default class ArtText extends Art {

@@ -3,7 +3,7 @@ import EventCenter from '../eventCenter';
 import { SwitchRenderButton } from '../plugins/toolbar/default';
 import Render from '../renders';
 import ArtText from '../artText'
-import './index.css'
+import './styles/index.css'
 
 /**
  * 编辑器
@@ -42,8 +42,9 @@ export default class Editor {
      */
     public addRender(name:string, render: Render) {
         this.renders[name] = render;
-
-        this.dom.appendChild(render.createDom());
+        const dom = render.createDom();
+        dom.classList.add("art-render")
+        this.dom.appendChild(dom);
         this.artText.get<EventCenter>('$eventCenter').waitOnceEmit('@switchRenderButton-addRender', this.renders[name].abbrName, name)
     }
 

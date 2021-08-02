@@ -2,6 +2,7 @@ import ArtText from "../../artText";
 import { Art, Core } from "../../core";
 import Tool from "../../tool";
 import { exportMdFile, GithubExport, importMdFile, newMdFileExport, switchRenderButtonExport } from "./default";
+import "./styles/index.css";
 
 /**
  * 任务栏
@@ -13,17 +14,6 @@ export default class Toolbar {
         this.artText = artText;
         this.dom = document.createElement('div');
         this.dom.setAttribute('class', 'art-toolbar-min');
-        const dom = this.dom;
-        this.dom.onmouseover = function(){
-            for (let i = 1; i < dom.childNodes.length; i++) {
-                (<HTMLDivElement>dom.childNodes[i]).style.display = 'inherit';
-            }
-        }
-        this.dom.onmouseout = function(){
-            for (let i = 1; i < dom.childNodes.length; i++) {
-                (<HTMLDivElement>dom.childNodes[i]).style.display = 'none';
-            }
-        }
 
         this.artText.get<Tool>('$tool').add([{ dom: this.dom, place: 'Editor.before' }]);
     }
@@ -48,8 +38,6 @@ export default class Toolbar {
     private addBotton(title: string, event: Function, level: number = 0): HTMLSpanElement {
         let span = document.createElement('div');
         span.setAttribute('class', 'art-toolbar-min-div')
-        if (this.dom.childNodes.length != 0)
-            span.style.display = 'none';
         span.innerHTML = title;
         span.addEventListener('click', <EventListenerOrEventListenerObject>event);
         this.dom.appendChild(span);
@@ -67,7 +55,7 @@ export let ToolbarExport = {
         Core.use(GithubExport);
         
         options['container'].bind('toolbar', Toolbar, [{'get': 'art'}], true);
-        options['Tool'].addCss('.art-toolbar-min{width:80px;position: fixed;margin-left: 815px;font-weight:800;font-size:13.5px;text-align: center;background-color: #fff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 3px;padding: 3px 0;color: #666;}.art-toolbar-min-div{padding:7px 16px;cursor:pointer;} .art-toolbar-min-div:hover{background-color: #f2f2f2;color: #1abc9c;}')
+        // options['Tool'].addCss('.art-toolbar-min{width:80px;position: fixed;margin-left: 815px;font-weight:800;font-size:13.5px;text-align: center;background-color: #fff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 3px;padding: 3px 0;color: #666;}.art-toolbar-min-div{padding:7px 16px;cursor:pointer;} .art-toolbar-min-div:hover{background-color: #f2f2f2;color: #1abc9c;}')
     },
     created: function (art: Art , options) {
         art.get<Toolbar>('toolbar');

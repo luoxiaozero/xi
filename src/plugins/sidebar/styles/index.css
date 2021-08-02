@@ -1,0 +1,27 @@
+.art-sidebar {
+  width: 280px;
+
+  font-size: 13.5px;
+  color: #666;
+  background-color: #f7f7f7;
+}
+.art-sidebar-menu {
+  height: 28px;
+  display: flex;
+  border-bottom: 1px #eee solid;
+  font-weight: 600;
+  padding: 10px 20px 6px;
+  text-align: center;
+  font-size: 14px;
+}
+.art-sidebar-menu-span {
+  padding: 0 15px 5px;
+  cursor: pointer;
+}
+.art-sidebar-menu-select {
+  border-bottom: 4px #666 solid;
+}
+.art-sidebar-main {
+  height: calc(100% - 50px);
+  padding: 3px 0 4px;
+}
