@@ -21,7 +21,7 @@ export default class Editor {
 
         this.dom = document.createElement('div');
         this.dom.setAttribute('class', 'art-editor markdown-body');
-        this.artText.dom.appendChild(this.dom);
+        this.artText.domContent.appendChild(this.dom);
 
         this.fileInfo = {};
         this.renders = {};

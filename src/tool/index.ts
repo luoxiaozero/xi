@@ -90,22 +90,26 @@ export default class Tool {
      */
     private insertDom(dom: HTMLElement, place: string) {
         switch (place) {
+            case 'Content.before':
             case 'Editor.before':
-                this.artText.dom.insertBefore(dom, this.artText.get<Editor>('$editor').dom);
+                this.artText.dom.insertBefore(dom, this.artText.domContent);
+                // this.artText.dom.insertBefore(dom, this.artText.get<Editor>('$editor').dom);
                 break;
+            case 'Content.after':
             case 'Editor.after':
-                Tool.insertAfter(this.artText.dom, dom, this.artText.get<Editor>('$editor').dom);
+                Tool.insertAfter(this.artText.dom, dom, this.artText.domContent);
+                // Tool.insertAfter(this.artText.dom, dom, this.artText.get<Editor>('$editor').dom);
                 break;
-            case 'Editor.start':
-                const editorDom = this.artText.get<Editor>('$editor').dom;
-                if (editorDom.childNodes.length === 0) {
-                    this.artText.get<Editor>('$editor').dom.appendChild(dom);
+            case 'Content.start':
+                const domContent = this.artText.domContent;
+                if (domContent.childNodes.length === 0) {
+                    domContent.appendChild(dom);
                 } else {
-                    this.artText.get<Editor>('$editor').dom.insertBefore(dom, this.artText.get<Editor>('$editor').dom.childNodes[0]);
+                    domContent.insertBefore(dom, domContent.childNodes[0]);
                 }
                 break;
-            case 'Editor.in':
-                this.artText.get<Editor>('$editor').dom.appendChild(dom);
+            case 'Content.in':
+                this.artText.domContent.appendChild(dom);
                 break;
             default:
                 this.artText.dom.appendChild(dom);

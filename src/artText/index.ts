@@ -11,6 +11,7 @@ export default class ArtText extends Art {
     rootContainer: HTMLElement;
     /**artText的根节点 */
     dom: HTMLDivElement;
+    domContent: HTMLDivElement;
     /**artText的名字 */
     nameId: string;
     /**artText的初始选项 */
@@ -19,6 +20,9 @@ export default class ArtText extends Art {
         super();
         this.dom = document.createElement('div');
         this.dom.setAttribute('class', 'art-main');
+        this.domContent = document.createElement('div');
+        this.domContent.setAttribute('class', 'art-main__content');
+        this.dom.appendChild(this.domContent);
         this.options = Object.assign({}, ART_DEFAULT_OPTIONS, options);
 
         Core.createdArt(this);

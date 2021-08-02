@@ -33,7 +33,7 @@ export default class Sidebar {
         this.selectMenuDom = null;
         this.info = new Map();
 
-        this.art.get<Tool>('$tool').add([{ dom: this.dom, place: 'Editor.start' }]);
+        this.art.get<Tool>('$tool').add([{ dom: this.dom, place: 'Content.start' }]);
     }
 
     public add(menuText: string, mainDom: HTMLElement) {
