@@ -15,4 +15,8 @@ window.onload = function () {
     console.log("初始化时间: " ,  time_end.getTime() - time.getTime())
     window['art'] = art;
     art.mount('#art');
+
+    setTimeout(
+       () =>  art["openFile"]({defaultMd: "123"})
+    , 4000)
 }

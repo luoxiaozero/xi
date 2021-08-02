@@ -1,3 +1,4 @@
+import Editor from 'src/editor';
 import { ArtOptions, ART_DEFAULT_OPTIONS } from '../config'
 import { Art, Core } from '../core'
 import "./styles/index.css"
@@ -38,6 +39,16 @@ export default class ArtText extends Art {
 
         Core.mountArt(this);
         return this;
+    }
+    
+    /**设置文件信息 */
+    public setFile(fileInfo: { defaultMd: string }) {
+        this.get<Editor>("$editor").openFile(fileInfo);
+    }
+
+    /**获取文件信息 */
+    public getFile(): { defaultMd: string, markdown: string } {
+        return this.get<Editor>("$editor").getFile();
     }
 
     /**

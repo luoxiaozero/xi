@@ -26,7 +26,6 @@ export default class Editor {
         this.fileInfo = {};
         this.renders = {};
         
-        this.artText.exportAPI('openFile', this.getFile);
     }
 
     public init(): void {
