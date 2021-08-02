@@ -74,7 +74,7 @@ export default class Sidebar {
         if (this.openOrCloseFlag) {
             this.dom.style.display = 'none';
         } else {
-            this.dom.style.display = 'inherit';
+            this.dom.style.display = 'block';
         }
         this.openOrCloseFlag = !this.openOrCloseFlag;
     }
