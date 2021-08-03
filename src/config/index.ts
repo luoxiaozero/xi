@@ -15,12 +15,18 @@ export enum SecurityLevel {
     loose = 'loose', // 宽松
 }
 
+export interface ToolbarItem {
+    title: string;
+    click?: (event: Event) => void;
+}
+
 export interface ArtOptions {
     defaultMd?: string,
     markdown?: string,
     fileInfo?: {},
     runModel?: RunModel,
     securityLevel?: SecurityLevel,
+    toolbar?: ToolbarItem[]
 }
 
 export const ART_DEFAULT_OPTIONS: ArtOptions = {
@@ -29,6 +35,7 @@ export const ART_DEFAULT_OPTIONS: ArtOptions = {
     fileInfo: {},
     runModel: RunModel.editor,
     securityLevel: SecurityLevel.strict,
+    toolbar: []
 }
 export const ART_THEME = {
     backgroundColor: '#fff',

@@ -10,13 +10,13 @@ let defaultMd = sample as string;
 
 window.onload = function () {
     let time = new Date();
-    const art: ArtText = new ArtText({ defaultMd: defaultMd })
+    const art: ArtText = new ArtText({ defaultMd: defaultMd, toolbar: [{title: "Test"}] });
+    art.mount('#art');
     let time_end = new Date();
     console.log("初始化时间: " ,  time_end.getTime() - time.getTime())
     window['art'] = art;
-    art.mount('#art');
 
     setTimeout(
-       () =>  art["openFile"]({defaultMd: "123"})
+       () =>  art["setFile"]({defaultMd: "Hello"})
     , 4000)
 }

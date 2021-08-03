@@ -16,6 +16,9 @@ export default class Toolbar {
         this.dom.setAttribute('class', 'art-toolbar-min');
 
         this.artText.get<Tool>('$tool').add([{ dom: this.dom, place: 'Editor.before' }]);
+        for (let t of this.artText.options.toolbar) {
+            this.add(t);
+        }
     }
 
     /**
