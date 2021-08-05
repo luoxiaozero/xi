@@ -92,7 +92,7 @@ export class SwitchRenderButton {
 
         const _this = this;
         this.artText.get<EventCenter>('$eventCenter').on('@switchRenderButton-addRender',
-            (abbrNames, renderName) => { 
+            (abbrNames: any, renderName: any) => { 
                 _this.addRender(abbrNames, renderName);
             })
     }

@@ -4,7 +4,7 @@ import Container from "../Container";
 
 /**核心 */
 export default class Core {
-    private static plugins = [];
+    private static plugins: any[] = [];
     public static container: Container = new Container();
     public static options = {'container': Core.container, 'Tool': Tool};
 

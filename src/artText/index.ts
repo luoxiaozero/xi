@@ -1,11 +1,12 @@
-import Editor from 'src/editor';
+import Editor from '../editor';
 import { ArtOptions, ART_DEFAULT_OPTIONS } from '../config'
 import { Art, Core } from '../core'
 import "./styles/index.css"
+import { ART_VERSION } from '../version';
 
 /** 入口类 */
 export default class ArtText extends Art {
-    static readonly version: string = typeof process.env.ART_VERSION === 'undefined' ? 'dev' : process.env.ART_VERSION;
+    static readonly version: string = ART_VERSION;
     static use = Core.use;
 
     /**绑定的根节点 */
@@ -67,7 +68,7 @@ export default class ArtText extends Art {
 }
 
 export let ArtTextExport = {
-    install: function (Art, options) {
+    install: function (Art: any, options: any) {
         window['ArtText'] = ArtText;
     }
 }

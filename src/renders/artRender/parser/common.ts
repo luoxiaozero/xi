@@ -53,7 +53,7 @@ var XMLSPECIAL = '[&<>"]';
 
 var reXmlSpecial = new RegExp(XMLSPECIAL, "g");
 
-var unescapeChar = function(s) {
+var unescapeChar = function(s: string) {
     if (s.charCodeAt(0) === C_BACKSLASH) {
         return s.charAt(1);
     } else {

@@ -14,7 +14,7 @@ export default class EventCenter {
         this.listeners = {};
         this.domID = 0;
         const eventCenter = this;
-        this.attachDOMEvent(this.artText.dom, 'art-event', e => eventCenter.artEvent(e));
+        this.attachDOMEvent(this.artText.dom, 'art-event', (e: any) => eventCenter.artEvent(e));
     }
 
     /**
@@ -138,10 +138,10 @@ export default class EventCenter {
 }
 
 export let EventCenterExport = {
-    install: function (Art, options) {
+    install: function (Art: any, options: any) {
         options['container'].bind('$eventCenter', EventCenter, [{'get': 'art'}], true);
     },
-    created: function (art , options) {
+    created: function (art: any , options: any) {
         art.get('$eventCenter');
     }
 }

@@ -99,13 +99,13 @@ export default class Editor {
 }
 
 export let EditorExport = {
-    install: function (Art, options) {
+    install: function (Art: any, options: any) {
         options['container'].bind('$editor', Editor, [{'get': 'art'}], true);
     },
-    created: function (art , options) {
+    created: function (art: Art , options: any) {
         art.get('$editor');
     },
-    mount: function(art: Art, options) {
+    mount: function(art: Art, options: any) {
         art.get<Editor>('$editor').init();
     }
 }

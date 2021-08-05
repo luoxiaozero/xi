@@ -43,7 +43,7 @@ export default class TextareaRender implements Render{
     public attachAllEvent(): void {
         const dom = this.dom;
         let id = this.artText.get<EventCenter>('$eventCenter').attachDOMEvent(this.dom, 'input', 
-            e => (<HTMLHtmlElement>e.target).style.height = dom.scrollHeight + 'px');
+            (e: any) => (<HTMLHtmlElement>e.target).style.height = dom.scrollHeight + 'px');
         this.DOMEvents.push(id);
     }
 

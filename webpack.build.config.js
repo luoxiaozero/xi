@@ -1,29 +1,24 @@
 const path = require("path");
+const pkg = require('./package.json');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-  mode: "development",
-  devtool: 'cheap-module-source-map',
-  entry: "./example/index.ts",
+  mode: 'production',
+  entry: "./src/index.ts",
   output: {
-    path: path.resolve(__dirname, "dist"),
-  },
-  resolve: {
-    extensions: [".ts", ".js"],
+    path: path.resolve(__dirname, "./package/bundles"),
+    filename: 'arttext.min.js',
+    libraryTarget: 'umd',
+    library: 'arttext',
+    umdNamedDefine: true
   },
   plugins: [
     new webpack.DefinePlugin({
-        "process.env.ART_VERSION": "'dev'"
-    }),
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "index.html"), //模板路径
+        "process.env.ART_VERSION": "'" + JSON.stringify(pkg.version) + "'"
     }),
   ],
-  devServer: {
-    hot: true,
-    open: true,
-    contentBase: path.resolve(__dirname, "dist"),
+  resolve: {
+    extensions: [".ts", ".js"],
   },
   module: {
     rules: [

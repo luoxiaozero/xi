@@ -16,7 +16,7 @@ export let openVersionHistory = {
 
 /**保存md文本*/
 export let saveMdFile = {
-    created: function (art: Art, options) {
+    created: function (art: Art, options: any) {
         art.get<Toolbar>('toolbar').add({
             title: '保存', click: () =>
                 art.get<EventCenter>('$eventCenter').emit('art-save')

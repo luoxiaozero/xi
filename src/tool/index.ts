@@ -1,6 +1,7 @@
 import Editor from '../editor';
 import ArtText from '../artText';
 import './index.css'
+import { Art } from '../core';
 
 /**工具类, 存放基本库 */
 export default class Tool {
@@ -119,10 +120,10 @@ export default class Tool {
 }
 
 export let ToolExport = {
-    install: function (Art, options) {
+    install: function (Art: any, options: any) {
         options['container'].bind('$tool', Tool, [{'get': 'art'}], true);
     },
-    created: function (art , options) {
+    created: function (art: Art , options: any) {
         art.get('$tool');
     }
 }

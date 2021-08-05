@@ -81,15 +81,15 @@ export default class Sidebar {
 }
 
 export let SidebarExport = {
-    install: function (Art, options) {
+    install: function (Art: any, options: any) {
         Core.use(openSidebar);
         options['container'].bind('sidebar', Sidebar, [{'get': 'art'}], true);
     },
-    created: (art: Art , options) => art.get<Sidebar>('sidebar')
+    created: (art: Art , options: any) => art.get<Sidebar>('sidebar')
 }
 
 export let openSidebar = {
-    created:  (art: Art , options) => 
+    created:  (art: Art , options: any) => 
         art.get<Toolbar>('toolbar').add({
             title: '侧边栏', click: () => art.get<Sidebar>('sidebar').openOrClose()
         })

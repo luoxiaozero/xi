@@ -109,10 +109,10 @@ export default class FloatAuxiliaryTool {
 }
 
 export let floatAuxiliaryToolExport = {
-    install(Art, options) {
+    install(Art: any, options: any) {
         options['container'].bind('floatAuxiliaryTool', FloatAuxiliaryTool, [{ 'get': '$artRender' }], true);
     },
-    created(art: Art, options) {
+    created(art: Art, options: any) {
         let floatAuxiliaryTool = art.get<FloatAuxiliaryTool>("floatAuxiliaryTool");
         art.get<EventCenter>("$eventCenter").on("floatAuxiliaryTool.open", (x: number, y: number) => { floatAuxiliaryTool.open(x, y) });
         art.get<EventCenter>("$eventCenter").on("floatAuxiliaryTool.close", () => { floatAuxiliaryTool.close() });
