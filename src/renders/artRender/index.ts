@@ -152,6 +152,11 @@ export default class ArtRender implements Render {
         this.doc.dom.innerHTML = "";
 
         let child = this.doc.firstChild, fun: Function;
+        if (child === null) {
+            child = new VNode("paragraph");
+            child.appendChild(new VNode("linebreak"));
+            this.doc.appendChild(child);
+        }
         while (child) {
             fun = child.newDom();
             this.doc.dom.appendChild(child.dom);
