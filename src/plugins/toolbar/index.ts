@@ -14,6 +14,10 @@ export default class Toolbar {
         this.artText = artText;
         this.dom = document.createElement('div');
         this.dom.setAttribute('class', 'art-toolbar-min');
+        const logo = document.createElement("span");
+        logo.setAttribute('class', 'art-toolbar__logo');
+        logo.innerText = "ArtText";
+        this.dom.appendChild(logo);
 
         this.artText.get<Tool>('$tool').add([{ dom: this.dom, place: 'Editor.before' }]);
         for (let t of this.artText.options.toolbar) {
