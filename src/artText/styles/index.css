@@ -1,4 +1,4 @@
-.art-main {
+.art-body {
   box-sizing: border-box;
   height: 100%;
   background-color: #fff;
@@ -6,7 +6,12 @@
   border: 1px solid #dbdbdb;
   box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
 }
-.art-main__content {
+.art-body__main {
   display: flex;
   height: calc(100% - 40px);
+}
+.art-main__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }

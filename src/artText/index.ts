@@ -13,6 +13,7 @@ export default class ArtText extends Art {
     rootContainer: HTMLElement;
     /**artText的根节点 */
     dom: HTMLDivElement;
+    domMain: HTMLDivElement;
     domContent: HTMLDivElement;
     /**artText的名字 */
     nameId: string;
@@ -21,10 +22,13 @@ export default class ArtText extends Art {
     constructor(options: ArtOptions = Object()) {
         super();
         this.dom = document.createElement('div');
-        this.dom.setAttribute('class', 'art-main');
+        this.dom.setAttribute('class', 'art-body');
+        this.domMain = document.createElement('div');
+        this.domMain.setAttribute('class', 'art-body__main');
+        this.dom.appendChild(this.domMain);
         this.domContent = document.createElement('div');
         this.domContent.setAttribute('class', 'art-main__content');
-        this.dom.appendChild(this.domContent);
+        this.domMain.appendChild(this.domContent);
         this.options = Object.assign({}, ART_DEFAULT_OPTIONS, options);
 
         Core.createdArt(this);

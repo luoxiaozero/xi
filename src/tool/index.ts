@@ -91,26 +91,26 @@ export default class Tool {
      */
     private insertDom(dom: HTMLElement, place: string) {
         switch (place) {
-            case 'Content.before':
+            case 'Main.before':
             case 'Editor.before':
-                this.artText.dom.insertBefore(dom, this.artText.domContent);
+                this.artText.dom.insertBefore(dom, this.artText.domMain);
                 // this.artText.dom.insertBefore(dom, this.artText.get<Editor>('$editor').dom);
                 break;
-            case 'Content.after':
+            case 'Main.after':
             case 'Editor.after':
-                Tool.insertAfter(this.artText.dom, dom, this.artText.domContent);
+                Tool.insertAfter(this.artText.dom, dom, this.artText.domMain);
                 // Tool.insertAfter(this.artText.dom, dom, this.artText.get<Editor>('$editor').dom);
                 break;
-            case 'Content.start':
-                const domContent = this.artText.domContent;
+            case 'Main.start':
+                const domContent = this.artText.domMain;
                 if (domContent.childNodes.length === 0) {
                     domContent.appendChild(dom);
                 } else {
                     domContent.insertBefore(dom, domContent.childNodes[0]);
                 }
                 break;
-            case 'Content.in':
-                this.artText.domContent.appendChild(dom);
+            case 'Main.in':
+                this.artText.domMain.appendChild(dom);
                 break;
             default:
                 this.artText.dom.appendChild(dom);

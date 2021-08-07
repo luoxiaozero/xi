@@ -1,5 +1,6 @@
 import { Art, Core } from "../../core";
 import Tool from "../../tool";
+import StatusBar from "../statusBar";
 import Toolbar from "../toolbar";
 import "./styles/index.css";
 
@@ -33,7 +34,7 @@ export default class Sidebar {
         this.selectMenuDom = null;
         this.info = new Map();
 
-        this.art.get<Tool>('$tool').add([{ dom: this.dom, place: 'Content.start' }]);
+        this.art.get<Tool>('$tool').add([{ dom: this.dom, place: 'Main.start' }]);
     }
 
     public add(menuText: string, mainDom: HTMLElement) {
@@ -70,27 +71,39 @@ export default class Sidebar {
         this.info.get(this.selectMenuDom.innerHTML).style.display = 'inherit';
     }
 
-    public openOrClose(): void {
+    /**
+     * 改变侧边栏状态
+     * @returns true 打开 false 关闭
+     */
+    public openOrClose(): boolean {
         if (this.openOrCloseFlag) {
             this.dom.style.display = 'none';
         } else {
             this.dom.style.display = 'block';
         }
         this.openOrCloseFlag = !this.openOrCloseFlag;
+        return this.openOrCloseFlag;
     }
 }
 
 export let SidebarExport = {
     install: function (Art: any, options: any) {
-        Core.use(openSidebar);
         options['container'].bind('sidebar', Sidebar, [{'get': 'art'}], true);
     },
-    created: (art: Art , options: any) => art.get<Sidebar>('sidebar')
-}
-
-export let openSidebar = {
-    created:  (art: Art , options: any) => 
-        art.get<Toolbar>('toolbar').add({
-            title: '侧边栏', click: () => art.get<Sidebar>('sidebar').openOrClose()
+    created: (art: Art , options: any) => {
+        const chevronBackOutlineSvg = '<svg style="width:18px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M328 112L184 256l144 144"></path></svg>';
+        art.get<Sidebar>('sidebar');
+        const dom = document.createElement("span");
+        dom.title = "关闭侧边栏";
+        dom.style.display = "flex";
+        dom.innerHTML = chevronBackOutlineSvg;
+        art.get<StatusBar>("statusBar").addButton({"dom": dom,
+            float: "left",
+            onClick: () => {
+                const status = art.get<Sidebar>('sidebar').openOrClose();
+                dom.style.transform = status ? "none": "rotate(180deg)"
+                dom.title = status ? "关闭侧边栏" : "打开侧边栏";
+            }
         })
+    }
 }
