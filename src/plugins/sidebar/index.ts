@@ -20,12 +20,8 @@ export default class Sidebar {
         this.openOrCloseFlag = true;
 
         this.menuDom = document.createElement('div');
-        this.menuDom.setAttribute('class', 'art-sidebar-menu');
+        this.menuDom.setAttribute('class', 'art-sidebar__menu');
         this.dom.appendChild(this.menuDom);
-
-        let menuDomChild = document.createElement('span');
-        menuDomChild.setAttribute('style', 'flex: 1');
-        this.menuDom.appendChild(menuDomChild);
 
         this.mainDom = document.createElement('div');
         this.mainDom.setAttribute('class', 'art-sidebar-main');
@@ -43,10 +39,6 @@ export default class Sidebar {
         span.setAttribute('class', 'art-sidebar-menu-span')
         span.innerHTML = menuText;
         this.menuDom.appendChild(span);
-
-        let menuDomChild = document.createElement('span');
-        menuDomChild.setAttribute('style', 'flex: 1');
-        this.menuDom.appendChild(menuDomChild);
 
         mainDom.style.display = 'none';
         this.mainDom.appendChild(mainDom);
@@ -77,9 +69,9 @@ export default class Sidebar {
      */
     public openOrClose(): boolean {
         if (this.openOrCloseFlag) {
-            this.dom.style.display = 'none';
+            this.dom.style.maxWidth = "0";
         } else {
-            this.dom.style.display = 'block';
+            this.dom.style.maxWidth = "280px";
         }
         this.openOrCloseFlag = !this.openOrCloseFlag;
         return this.openOrCloseFlag;
