@@ -8,7 +8,6 @@ window.onload = function () {
 
   const art = createEditor({
     defaultMd: defaultMd,
-    toolbar: [{ title: "Test" }],
   });
   art.mount("#art");
 

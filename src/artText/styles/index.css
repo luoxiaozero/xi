@@ -8,7 +8,7 @@
 }
 .art-body__main {
   display: flex;
-  height: calc(100% - 40px);
+  height: calc(100% - 36px);
 }
 .art-main__content {
   flex: 1;

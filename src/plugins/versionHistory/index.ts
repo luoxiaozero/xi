@@ -14,16 +14,6 @@ export let openVersionHistory = {
     }
 }
 
-/**保存md文本*/
-export let saveMdFile = {
-    created: function (art: Art, options: any) {
-        art.get<Toolbar>('toolbar').add({
-            title: '保存', click: () =>
-                art.get<EventCenter>('$eventCenter').emit('art-save')
-        });
-    }
-}
-
 export default class VersionHistory {
 
     art: Art;
@@ -255,7 +245,6 @@ export default class VersionHistory {
 export let VersionHistoryExport = {
     install: function (Art, options) {
         Core.use(openVersionHistory);
-        Core.use(saveMdFile);
         options['container'].bind('versionHistory', VersionHistory, [{ 'get': 'art' }], true);
         options['Tool'].addCss('.art-VersionHistoryTool{position: fixed;z-index:10;width:60vw;right:20vw;height:92vh;top:4vh;background-color:#fff;box-shadow:0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);border-radius: 2px}\n\
         .art-VersionHistoryTool-MaskLayer{position:fixed;top:0;right:0;bottom:0;left:0;background: rgba(26,26,26,.65);z-index:1}\n\

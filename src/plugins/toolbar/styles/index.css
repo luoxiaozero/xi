@@ -1,11 +1,11 @@
-.art-toolbar-min {
-  height: 40px;
+.art-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 36px;
   box-sizing: border-box;
   font-weight: 800;
   font-size: 13.5px;
-  text-align: center;
-  border-radius: 3px;
-  padding: 3px 0;
   color: #666;
   border-bottom: 1px solid #eee;
 }
@@ -13,11 +13,11 @@
   padding: 7px 16px;
   color: #1abc9c;
 }
-.art-toolbar-min-div {
-  display: inline-block;
-  padding: 7px 16px;
+.art-toolbar-item {
+  display: flex;
+  padding: 0 8px;
   cursor: pointer;
 }
-.art-toolbar-min-div:hover {
+.art-toolbar-item:hover {
   color: #1abc9c;
 }

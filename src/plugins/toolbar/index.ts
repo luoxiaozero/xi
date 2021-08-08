@@ -1,7 +1,7 @@
 import ArtText from "../../artText";
 import { Art, Core } from "../../core";
 import Tool from "../../tool";
-import { exportMdFile, GithubExport, importMdFile, newMdFileExport, switchRenderButtonExport } from "./default";
+import { exportMdFile, GithubExport, importMdFile, newMdFileExport, saveMdFile, switchRenderButtonExport } from "./default";
 import "./styles/index.css";
 
 /**
@@ -13,7 +13,7 @@ export default class Toolbar {
     constructor(artText: ArtText) {
         this.artText = artText;
         this.dom = document.createElement('div');
-        this.dom.setAttribute('class', 'art-toolbar-min');
+        this.dom.setAttribute('class', 'art-toolbar');
         const logo = document.createElement("span");
         logo.setAttribute('class', 'art-toolbar__logo');
         logo.innerText = "ArtText";
@@ -28,6 +28,7 @@ export default class Toolbar {
     /**
      * 添加按钮
      * @param child 按钮  
+     * @deprecated 使用 addButton 方法
      */
     public add(child: any): HTMLSpanElement {
         if (child.level == undefined) {
@@ -38,13 +39,34 @@ export default class Toolbar {
 
     /**
      * 添加按钮
+     * @param dom 添加的 DOM
+     * @param onClick 点击事件
+     * @returns 生成的 DOM
+     */
+    public addButton(dom: HTMLElement | string, onClick: Function, tip?: string): HTMLSpanElement {
+        let span = document.createElement('span');
+        span.setAttribute('class', 'art-toolbar-item')
+        span.title = tip;
+        if (typeof dom === "string") {
+            span.innerHTML =  dom;
+        } else {
+            span.appendChild(dom);
+        }
+        span.addEventListener('click', <EventListenerOrEventListenerObject>onClick);
+        this.dom.appendChild(span);
+
+        return span;
+    }
+
+    /**
+     * 添加按钮
      * @param title 按钮标题
      * @param event 按钮事件
      * @param level 按钮级别
      */
     private addBotton(title: string, event: Function, level: number = 0): HTMLSpanElement {
         let span = document.createElement('div');
-        span.setAttribute('class', 'art-toolbar-min-div')
+        span.setAttribute('class', 'art-toolbar-item')
         span.innerHTML = title;
         span.addEventListener('click', <EventListenerOrEventListenerObject>event);
         this.dom.appendChild(span);
@@ -57,12 +79,13 @@ export let ToolbarExport = {
     install: function (Art, options) {
         Core.use(switchRenderButtonExport);
         Core.use(newMdFileExport);
+        Core.use(saveMdFile);
+        Core.use(GithubExport);
         Core.use(importMdFile);
         Core.use(exportMdFile);
-        Core.use(GithubExport);
+        
         
         options['container'].bind('toolbar', Toolbar, [{'get': 'art'}], true);
-        // options['Tool'].addCss('.art-toolbar-min{width:80px;position: fixed;margin-left: 815px;font-weight:800;font-size:13.5px;text-align: center;background-color: #fff;box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);border-radius: 3px;padding: 3px 0;color: #666;}.art-toolbar-min-div{padding:7px 16px;cursor:pointer;} .art-toolbar-min-div:hover{background-color: #f2f2f2;color: #1abc9c;}')
     },
     created: function (art: Art , options) {
         art.get<Toolbar>('toolbar');
