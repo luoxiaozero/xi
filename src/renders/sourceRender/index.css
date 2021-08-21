@@ -1,0 +1,13 @@
+.art-editor-source > * {
+  outline: none;
+}
+
+.art-editor-source > h1,
+.art-editor-source > h2,
+.art-editor-source > h3,
+.art-editor-source > h4,
+.art-editor-source > h5,
+.art-editor-source > h6 {
+  color: #12aa9c;
+  border: none !important;
+}

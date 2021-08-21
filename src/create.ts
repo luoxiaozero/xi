@@ -8,6 +8,7 @@ import { TextareaRenderExport } from './renders/textareaRender';
 import { ArtLocalExport, ArtRequestExport, FileSidebarExport, MessageExport, OutlineSidebarExport, SidebarExport, ToolbarExport, VersionHistoryExport } from './plugins';
 import { ArtOptions } from './config';
 import { StatusBarExport } from './plugins/statusBar';
+import { sourceRenderRenderExport } from './renders/sourceRender';
 export default ArtText;
 
 /**核心插件 */
@@ -25,6 +26,7 @@ Core.use(OutlineSidebarExport)
 Core.use(MessageExport)
 Core.use(VersionHistoryExport)
 Core.use(TextareaRenderExport)
+Core.use(sourceRenderRenderExport)
 
 /**用户自定义插件 */
 Core.use(FileSidebarExport)
