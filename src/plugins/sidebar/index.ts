@@ -89,13 +89,15 @@ export let SidebarExport = {
         dom.title = "关闭侧边栏";
         dom.style.display = "flex";
         dom.innerHTML = chevronBackOutlineSvg;
+        function changeSidebar() {
+            const status = art.get<Sidebar>('sidebar').openOrClose();
+            dom.style.transform = status ? "none": "rotate(180deg)"
+            dom.title = status ? "关闭侧边栏" : "打开侧边栏";
+        }
+        changeSidebar();
         art.get<StatusBar>("statusBar").addButton({"dom": dom,
             float: "left",
-            onClick: () => {
-                const status = art.get<Sidebar>('sidebar').openOrClose();
-                dom.style.transform = status ? "none": "rotate(180deg)"
-                dom.title = status ? "关闭侧边栏" : "打开侧边栏";
-            }
+            onClick: changeSidebar
         })
     }
 }

@@ -1,7 +1,7 @@
 import ArtText from "../../artText";
 import { Art, Core } from "../../core";
 import Tool from "../../tool";
-import { exportMdFile, GithubExport, importMdFile, newMdFileExport, saveMdFile, switchRenderButtonExport } from "./default";
+import { exportMdFile, GithubExport, importMdFile, newMdFileExport, saveMdFile } from "./default";
 import "./styles/index.css";
 
 /**
@@ -77,7 +77,6 @@ export default class Toolbar {
 
 export let ToolbarExport = {
     install: function (Art, options) {
-        Core.use(switchRenderButtonExport);
         Core.use(newMdFileExport);
         Core.use(saveMdFile);
         Core.use(GithubExport);

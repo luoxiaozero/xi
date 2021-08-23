@@ -1,5 +1,6 @@
 import ArtText from "../../artText";
 import { Art } from "../../core";
+import { fullScreenExport, switchRenderButtonExport } from "./default";
 import "./styles/index.css";
 
 /**
@@ -32,6 +33,8 @@ export default class StatusBar {
 
 export let StatusBarExport = {
     install: function (Art, options) {
+        ArtText.use(switchRenderButtonExport);
+        ArtText.use(fullScreenExport);
         options['container'].bind('statusBar', StatusBar, [{'get': 'art'}], true);
     },
     created: function (art: Art , options) {

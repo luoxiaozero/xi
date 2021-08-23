@@ -2,10 +2,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 36px;
+  height: 32px;
   box-sizing: border-box;
   font-weight: 800;
-  font-size: 13.5px;
+  font-size: 13px;
   color: #666;
   border-bottom: 1px solid #eee;
 }

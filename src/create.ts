@@ -20,8 +20,8 @@ Core.use(ArtRenderExport);
 
 /**默认插件 */
 Core.use(ToolbarExport)
-Core.use(StatusBarExport)
 Core.use(SidebarExport)
+Core.use(StatusBarExport)
 Core.use(OutlineSidebarExport)
 Core.use(MessageExport)
 Core.use(VersionHistoryExport)
