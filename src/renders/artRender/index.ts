@@ -96,7 +96,7 @@ export default class ArtRender implements Render {
         this.abbrName = ' MD ';
 
         this.dom = document.createElement("div");
-        this.dom.setAttribute("class", "art-render-art");
+        this.dom.setAttribute("class", "art-render-art markdown-body");
         let p = document.createElement("p");
         p.appendChild(document.createElement("br"));
         this.dom.appendChild(p);
