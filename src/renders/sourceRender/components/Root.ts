@@ -1,6 +1,7 @@
 import VNode from "../../artRender/node";
 import { Heading, Paragraph } from "./block";
 import { ContainerComponent } from "./block/Component";
+import CodeBlock from "./block/leaf/CodeBlock";
 import Component from "./Component";
 
 export default class Root extends ContainerComponent {
@@ -11,6 +12,7 @@ export default class Root extends ContainerComponent {
     this.el = dom;
     this.children = [];
     this.created(node);
+    this.beforeMount();
     this.mounted();
   }
   created(node: VNode) {
@@ -26,12 +28,20 @@ export default class Root extends ContainerComponent {
       child = child.next;
     }
   }
-  nodeToComponent(node: VNode): Component {
+  nodeToComponent(node: VNode): Component | null {
     switch (node.type) {
       case "paragraph":
         return new Paragraph(node, this);
       case "heading":
         return new Heading(node, this);
+      case "code_block":
+        return new CodeBlock(node, this);
+    }
+    return null;
+  }
+  beforeMount() {
+    for (let c of this.children) {
+      c.beforeMount();
     }
   }
   mounted() {
