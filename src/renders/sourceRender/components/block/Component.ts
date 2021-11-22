@@ -31,7 +31,7 @@ export class LeafComponent extends Component {
   nodeToComponent(node: VNode): InlineComponent {
     switch (node.type) {
       case "text":
-        return new TextComponent(node);
+        return new TextComponent(node, this);
     }
   }
   mounted(el: HTMLElement) {
