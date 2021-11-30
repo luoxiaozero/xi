@@ -1,0 +1,30 @@
+.art-selection {
+  position: absolute;
+  width: 2px;
+}
+.art-selection-wrap {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  /* overflow: hidden; */
+}
+.art-selection-input {
+    width: 2000px;
+    /* opacity: 0; */
+}
+.art-selection-cursor {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  box-shadow: 0 0 3px hsl(0deg 0% 100% / 30%);
+  animation: art-cursor-flicker 1s infinite steps(1, start);
+}
+@keyframes art-cursor-flicker {
+    from, to {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}

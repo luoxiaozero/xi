@@ -1,4 +1,4 @@
-import VNode from "../../../artRender/node";
+import VNode from "../../../../artRender/node";
 import Component from "../Component";
 import EmphComponent from "./Emph";
 import TextComponent from "./Text";

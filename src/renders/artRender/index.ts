@@ -260,6 +260,6 @@ export let ArtRenderExport = {
     },
     created: function (art: Art, options) {
         art.get<Editor>('$editor').addRender('artRender', art.get('$artRender'));
-        art.get<Editor>('$editor').defaultRender = art.get('$artRender');
+        
     }
 }

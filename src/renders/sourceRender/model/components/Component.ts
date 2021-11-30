@@ -1,4 +1,4 @@
-import VNode from "../../artRender/node";
+import VNode from "../../../artRender/node";
 
 export default class Component {
   constructor() {}

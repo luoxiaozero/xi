@@ -1,7 +1,8 @@
 .art-render-art {
+    display: none;
     outline: none;
     white-space: pre-wrap;
-    word-break: break-all
+    word-break: break-all;
 }
 
 .art-hide {

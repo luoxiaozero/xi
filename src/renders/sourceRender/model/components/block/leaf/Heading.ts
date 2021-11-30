@@ -1,4 +1,4 @@
-import VNode from "../../../../artRender/node";
+import VNode from "../../../../../artRender/node";
 import { ContainerComponent, LeafComponent } from "../Component";
 import Paragraph from "./Paragraph";
 const reATXHeadingMarker = /^#{1,6}/;
@@ -15,7 +15,7 @@ export default class Heading extends LeafComponent {
   }
   mounted(el: HTMLElement) {
     this.el = document.createElement("h" + this.level) as HTMLHeadingElement;
-    this.el.contentEditable = "true";
+    // this.el.contentEditable = "true";
     el.appendChild(this.el);
     super.mounted(this.el);
     this.el.addEventListener("keyup", (e) => {

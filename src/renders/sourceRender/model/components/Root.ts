@@ -1,4 +1,4 @@
-import VNode from "../../artRender/node";
+import VNode from "../../../artRender/node";
 import { Heading, Paragraph } from "./block";
 import { ContainerComponent } from "./block/Component";
 import CodeBlock from "./block/leaf/CodeBlock";

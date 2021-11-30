@@ -1,4 +1,4 @@
-import VNode from "../../../../artRender/node";
+import VNode from "../../../../../artRender/node";
 import { ContainerComponent, LeafComponent } from "../Component";
 
 export default class CodeBlock extends LeafComponent {
@@ -20,7 +20,7 @@ export default class CodeBlock extends LeafComponent {
 
   beforeMount() {
     this.el = document.createElement("div");
-    this.el.contentEditable = "true";
+    // this.el.contentEditable = "true";
     let beforeEl = document.createElement("p");
     beforeEl.innerText = this.matchText + this.langText;
     let afterEl = document.createElement("p");

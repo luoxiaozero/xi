@@ -1,13 +1,28 @@
-.art-editor-source > * {
+.art-source {
+  display: none;
+}
+.art-source-container {
+  position: relative;
+}
+.art-source-iframe {
+  width: 100%;
+  padding: 0;
+  border: none;
+}
+
+.art-source body {
+  margin: 0;
+}
+.art-source > * {
   outline: none;
 }
 
-.art-editor-source > h1,
-.art-editor-source > h2,
-.art-editor-source > h3,
-.art-editor-source > h4,
-.art-editor-source > h5,
-.art-editor-source > h6 {
+.art-source > h1,
+.art-source > h2,
+.art-source > h3,
+.art-source > h4,
+.art-source > h5,
+.art-source > h6 {
   color: #12aa9c;
   border: none !important;
 }

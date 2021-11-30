@@ -1,4 +1,4 @@
-import VNode from "../../../../artRender/node";
+import VNode from "../../../../../artRender/node";
 import Component from "../../Component";
 import { ContainerComponent, LeafComponent } from "../Component";
 
@@ -14,7 +14,7 @@ export default class Paragraph extends LeafComponent {
   
   mounted(el: HTMLElement) {
     this.el = document.createElement("p");
-    this.el.contentEditable = "true";
+    // this.el.contentEditable = "true";
     el.appendChild(this.el);
     super.mounted(this.el);
     this.el.addEventListener("keyup", () => {

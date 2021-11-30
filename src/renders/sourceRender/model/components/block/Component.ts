@@ -1,5 +1,5 @@
 import Component from "../Component";
-import VNode from "../../../artRender/node";
+import VNode from "../../../../artRender/node";
 import { TextComponent } from "../inline";
 import { InlineComponent } from "../inline/Component";
 

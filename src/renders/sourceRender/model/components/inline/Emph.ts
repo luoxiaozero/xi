@@ -1,5 +1,5 @@
 import { InlineComponent } from "./Component";
-import VNode from "../../../artRender/node";
+import VNode from "../../../../artRender/node";
 import Component from "../Component";
 
 export default class EmphComponent extends InlineComponent {
