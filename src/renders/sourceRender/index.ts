@@ -3,12 +3,14 @@ import { Art } from "@/core";
 import Editor from "@/editor";
 import EventCenter from "@/eventCenter";
 import Render from "..";
-import VNode from "../artRender/node";
-import Parser from "../artRender/parser";
-import Root from "./model/components/Root";
+import Root from "./components/Root";
 import { ArtSelection } from "./controller/selection";
-import "./index.css";
+import "./styles/index.css";
 import { ArtInput } from "./controller/input";
+import "./parser";
+import { mdToComponent } from "./parser";
+import { fromEvent, Observable } from "rxjs";
+import mdCSS from "./styles/md";
 
 export default class SourceRender implements Render {
   abbrName: string = "Source";
@@ -19,6 +21,8 @@ export default class SourceRender implements Render {
   doc: Root;
   selection: ArtSelection;
   input: ArtInput;
+  onload: Observable<any>;
+
   constructor(public artText: ArtText) {}
 
   public createDom(): HTMLDivElement {
@@ -28,15 +32,23 @@ export default class SourceRender implements Render {
     this.editorIFrameEl.src = `javascript:void(
             (function () {
               document.open();
-              document.write('<!DOCTYPE html><html lang="zh"><head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"> <meta http-equiv="X-UA-Compatible" content="ie=edge"> <style> body { margin: 0; }</style></head><body>1111111111111111111111111111111111111111111</body></html>');
+              document.write('<!DOCTYPE html><html lang="zh"><head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"> <meta http-equiv="X-UA-Compatible" content="ie=edge"> <style> body { margin: 0; }</style></head><body></body></html>');
               document.close();
             })()
             )`;
-    this.editorIFrameEl.onload = () => {
+    this.onload = fromEvent(this.editorIFrameEl, "load");
+    this.onload.subscribe(() => {
       this.contentDocument = this.editorIFrameEl.contentDocument;
       this.selection = new ArtSelection(this.contentDocument);
       this.input = new ArtInput(this, this.selection);
-    };
+      this.doc = new Root(this.contentDocument.body);
+      
+      const head = this.contentDocument.head;
+      const style = document.createElement("style");
+      style.appendChild(document.createTextNode(mdCSS));
+      head.appendChild(style);
+    });
+
     this.editorContainerEl.appendChild(this.editorIFrameEl);
     this.rootEl.appendChild(this.editorContainerEl);
     return this.rootEl;
@@ -51,13 +63,26 @@ export default class SourceRender implements Render {
   }
 
   public getMd(): string {
-    return this.doc.toMd();
+    return "";
   }
 
   public setMd(md: string): void {
-    const parser = new Parser({});
-    // this.dom.innerHTML = "";
-    // this.doc = new Root(parser.parse(md), this.dom);
+    // const perform = () => {
+    //   const children = mdToComponent(md);
+    //   children.forEach((child) => {
+    //     this.doc.appendChild(child);
+    //   });
+    //   this.doc.beforeMount();
+    //   this.doc.mounted();
+    //   console.log(this.doc);
+    // };
+    // if (this.doc) {
+    //   perform();
+    // } else {
+    //   this.onload.subscribe(() => {
+    //     perform();
+    //   });
+    // }
   }
 
   public attachAllEvent(): void {}

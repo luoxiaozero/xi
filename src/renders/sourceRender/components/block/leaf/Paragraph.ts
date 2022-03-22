@@ -1,11 +1,8 @@
-import VNode from "../../../../../artRender/node";
-import Component from "../../Component";
-import { ContainerComponent, LeafComponent } from "../Component";
+import { LeafComponent } from "../../Component";
 
 export default class Paragraph extends LeafComponent {
-  constructor(node: VNode | Component[], parent: ContainerComponent) {
-    super(parent);
-    this.created(node);
+  constructor() {
+    super();
   }
   beforeMount() {
     this.el = document.createElement("p");

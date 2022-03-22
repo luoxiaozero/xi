@@ -1,22 +1,14 @@
-import VNode from "../../../../../artRender/node";
-import { ContainerComponent, LeafComponent } from "../Component";
+import { LeafComponent } from "../../Component";
 
 export default class CodeBlock extends LeafComponent {
   children: undefined;
   matchText: string;
   langText: string;
   codeText: string;
-  constructor(node: VNode, parent: ContainerComponent) {
-    super(parent);
-    this.created(node);
+  constructor() {
+    super();
   }
 
-  created(node: VNode) {
-    if (!node) return;
-    this.codeText = node._literal;
-    this.matchText = (node._fenceChar as string).repeat(node._fenceLength);
-    this.langText = node._info;
-  }
 
   beforeMount() {
     this.el = document.createElement("div");

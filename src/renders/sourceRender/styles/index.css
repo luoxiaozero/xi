@@ -1,11 +1,15 @@
 .art-source {
   display: none;
+  height: 100%;
+  box-sizing: border-box;
 }
 .art-source-container {
   position: relative;
+  height: 100%;
 }
 .art-source-iframe {
   width: 100%;
+  height: 100%;
   padding: 0;
   border: none;
 }
@@ -17,12 +21,4 @@
   outline: none;
 }
 
-.art-source > h1,
-.art-source > h2,
-.art-source > h3,
-.art-source > h4,
-.art-source > h5,
-.art-source > h6 {
-  color: #12aa9c;
-  border: none !important;
-}
+
