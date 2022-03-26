@@ -1,1 +1,0 @@
-export const ART_VERSION = "0.1.5-alpha.2";
